@@ -69,6 +69,9 @@
 .toolbarContent {
   display: flex;
   align-items: center;
+  // Wrap the search, filter and buttons on narrow screens instead of pushing the page wider
+  flex-wrap: wrap;
+  height: auto;
 }
 
 .filterContainer {
@@ -101,4 +104,10 @@
 .tableHeader {
   @include type.type-style('body-02');
   margin: layout.$spacing-05 0;
+}
+
+// The table has many columns: scroll it inside the page rather than widening the page. Only the
+// table scrolls, so the toolbar's filter dropdown is not clipped.
+.tableScroll {
+  overflow-x: auto;
 }

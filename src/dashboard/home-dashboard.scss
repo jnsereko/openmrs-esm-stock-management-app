@@ -12,6 +12,9 @@
   margin: 0;
   margin-left: 16rem;
   background-color: colors.$gray-10;
+
+  // As on tablet: a wide table must not widen the page past the viewport
+  min-width: 0;
 }
 
 .dashboardContainerTablet {

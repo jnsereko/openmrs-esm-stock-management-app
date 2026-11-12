@@ -172,12 +172,7 @@ const StockItemsTableComponent: React.FC<StockItemsTableProps> = () => {
               }}
             >
               <TableBatchActions {...getBatchActionProps()} />
-              <TableToolbarContent
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                }}
-              >
+              <TableToolbarContent className={styles.toolbarContent}>
                 <TableToolbarSearch
                   onChange={(e) =>
                     handleSearch(typeof e === 'string' ? e : (e as React.ChangeEvent<HTMLInputElement>).target.value)
@@ -196,54 +191,56 @@ const StockItemsTableComponent: React.FC<StockItemsTableProps> = () => {
                 <AddStockItemActionButton />
               </TableToolbarContent>
             </TableToolbar>
-            <Table {...getTableProps()}>
-              <TableHead>
-                <TableRow>
-                  {headers.map(
-                    (header) =>
-                      header.key !== 'details' && (
-                        <TableHeader
-                          {...getHeaderProps({
-                            header,
-                            isSortable: (header as CustomTableHeader).isSortable,
-                          })}
-                          className={isDesktop ? styles.desktopHeader : styles.tabletHeader}
-                          key={`${header.key}`}
-                          isSortable={header.key !== 'name'}
+            <div className={styles.tableScroll}>
+              <Table {...getTableProps()}>
+                <TableHead>
+                  <TableRow>
+                    {headers.map(
+                      (header) =>
+                        header.key !== 'details' && (
+                          <TableHeader
+                            {...getHeaderProps({
+                              header,
+                              isSortable: (header as CustomTableHeader).isSortable,
+                            })}
+                            className={isDesktop ? styles.desktopHeader : styles.tabletHeader}
+                            key={`${header.key}`}
+                            isSortable={header.key !== 'name'}
+                          >
+                            {(() => {
+                              const customHeader = header as CustomTableHeader;
+                              return typeof customHeader.header === 'object' &&
+                                customHeader.header !== null &&
+                                'content' in customHeader.header
+                                ? (customHeader.header.content as React.ReactNode)
+                                : (customHeader.header as React.ReactNode);
+                            })()}
+                          </TableHeader>
+                        ),
+                    )}
+                    <TableHeader />
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {rows.map((row) => {
+                    return (
+                      <React.Fragment key={row.id}>
+                        <TableRow
+                          {...getRowProps({ row })}
+                          className={isDesktop ? styles.desktopRow : styles.tabletRow}
+                          key={row.id}
                         >
-                          {(() => {
-                            const customHeader = header as CustomTableHeader;
-                            return typeof customHeader.header === 'object' &&
-                              customHeader.header !== null &&
-                              'content' in customHeader.header
-                              ? (customHeader.header.content as React.ReactNode)
-                              : (customHeader.header as React.ReactNode);
-                          })()}
-                        </TableHeader>
-                      ),
-                  )}
-                  <TableHeader />
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {rows.map((row) => {
-                  return (
-                    <React.Fragment key={row.id}>
-                      <TableRow
-                        {...getRowProps({ row })}
-                        className={isDesktop ? styles.desktopRow : styles.tabletRow}
-                        key={row.id}
-                      >
-                        {row.cells.map(
-                          (cell) =>
-                            cell?.info?.header !== 'details' && <TableCell key={cell.id}>{cell.value}</TableCell>,
-                        )}
-                      </TableRow>
-                    </React.Fragment>
-                  );
-                })}
-              </TableBody>
-            </Table>
+                          {row.cells.map(
+                            (cell) =>
+                              cell?.info?.header !== 'details' && <TableCell key={cell.id}>{cell.value}</TableCell>,
+                          )}
+                        </TableRow>
+                      </React.Fragment>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
             {rows.length === 0 ? (
               <div className={styles.tileContainer}>
                 <Tile className={styles.tile}>
