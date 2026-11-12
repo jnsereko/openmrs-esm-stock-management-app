@@ -8,12 +8,13 @@ vi.mock('../../../stock-lookups/stock-lookups.resource', () => ({ useUsers: vi.f
 
 const users = [
   { uuid: 'admin', display: 'admin', roles: [{ display: 'System Developer' }] },
-  { uuid: 'eip', display: 'eip', roles: [{ display: 'EIP Integration' }] },
+  { uuid: 'eip', display: 'eip', roles: [{ display: 'System developer' }] },
+  { uuid: 'integration', display: 'integration', roles: [{ display: 'EIP Integration' }] },
   { uuid: 'pharmacist', display: 'pharmacist', roles: [{ display: 'Pharmacist' }] },
 ];
 
 describe('useSearchUser', () => {
-  it('leaves out users holding a configured excluded role', () => {
+  it('leaves out users holding a configured excluded role, whatever its case', () => {
     vi.mocked(useUsers).mockReturnValue({ items: { results: users }, isLoading: false, error: null } as any);
     vi.mocked(useConfig).mockReturnValue({ responsiblePersonExcludedRoles: ['System Developer', 'EIP Integration'] });
 
@@ -28,6 +29,6 @@ describe('useSearchUser', () => {
 
     const { result } = renderHook(() => useSearchUser());
 
-    expect(result.current.userList).toHaveLength(3);
+    expect(result.current.userList).toHaveLength(4);
   });
 });

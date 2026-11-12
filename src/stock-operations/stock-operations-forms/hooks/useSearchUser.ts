@@ -25,10 +25,14 @@ const useSearchUser = (filter?: ConceptFilterCriteria) => {
 
   // Leave out system and integration accounts, recognised by their roles
   const userList = useMemo(() => {
-    const excluded = new Set(responsiblePersonExcludedRoles ?? []);
+    // Role names are compared without regard to case: OpenMRS has both "System Developer" and "System developer"
+    const excluded = new Set((responsiblePersonExcludedRoles ?? []).map((role) => role.trim().toLowerCase()));
     if (!excluded.size) return results;
     return results?.filter(
-      (user) => !user.roles?.some((role) => excluded.has(role.display) || excluded.has(role.role)),
+      (user) =>
+        !user.roles?.some(
+          (role) => excluded.has(role.display?.trim().toLowerCase()) || excluded.has(role.role?.trim().toLowerCase()),
+        ),
     );
   }, [results, responsiblePersonExcludedRoles]);
 
