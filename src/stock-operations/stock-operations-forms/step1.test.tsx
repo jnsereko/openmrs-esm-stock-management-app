@@ -1,7 +1,7 @@
 import React from 'react';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { useConfig, useSession } from '@openmrs/esm-framework';
+import { showSnackbar, useConfig, useSession } from '@openmrs/esm-framework';
 import {
   adjustmentOpeationTypeMock,
   mockWorkspace2Props,
@@ -445,5 +445,24 @@ describe('Stock Operation step 1 (baseoperation details)', () => {
     render(<StockOperationForm {...mockWorkspace2Props({ stockOperationType: stockTakeOperationTypeMock as any })} />);
 
     expect(screen.getByRole('combobox', { name: /reason/i })).toBeInTheDocument();
+  });
+
+  it('should not report an error when a stock issue is opened without a requisition', async () => {
+    mockUseParties.mockReturnValue({
+      destinationParties: [],
+      sourceParties: [],
+      isLoading: false,
+      error: undefined,
+      sourceTags: [],
+      destinationTags: [],
+      parties: [],
+      mutate: vi.fn(),
+      sourcePartiesFilter: () => true,
+      destinationPartiesFilter: () => true,
+    });
+
+    render(<StockOperationForm {...mockWorkspace2Props({ stockOperationType: stockIssueOperationtypeMock as any })} />);
+
+    expect(vi.mocked(showSnackbar)).not.toHaveBeenCalledWith(expect.objectContaining({ kind: 'error' }));
   });
 });

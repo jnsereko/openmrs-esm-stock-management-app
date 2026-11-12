@@ -16,7 +16,7 @@ import { today } from '../../constants';
 import { type StockOperationDTO } from '../../core/api/types/stockOperation/StockOperationDTO';
 import {
   operationFromString,
-  OperationType,
+  type OperationType,
   type StockOperationType,
   StockOperationTypeIsStockIssue,
 } from '../../core/api/types/stockOperation/StockOperationType';
@@ -248,14 +248,9 @@ const StockOperationForm: React.FC<Workspace2DefinitionProps<StockOperationFormP
     }
   }, [form.formState.errors]);
 
-  // Stock issue errors (while fetching related requisitio or if no supplied requisition)
+  // Stock issue errors while fetching the related requisition. A stock issue without a requisition is valid
+  // (requisitionStockOperationUuid is optional), and so is opening a saved one, so neither is reported.
   useEffect(() => {
-    if (operationType === OperationType.STOCK_ISSUE_OPERATION_TYPE && !stockRequisitionUuid)
-      showSnackbar({
-        kind: 'error',
-        title: t('stockIssueError', 'StockIssue error'),
-        subtitle: t('relatedStockRequisitionRequired', 'Related stock requisition Required'),
-      });
     if (error) {
       showSnackbar({
         kind: 'error',
@@ -263,7 +258,7 @@ const StockOperationForm: React.FC<Workspace2DefinitionProps<StockOperationFormP
         subtitle: error?.message,
       });
     }
-  }, [stockRequisitionUuid, error, t, operationType]);
+  }, [error, t]);
 
   return (
     <Workspace2

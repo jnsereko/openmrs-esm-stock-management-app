@@ -287,7 +287,6 @@
   "refresh": "Refresh",
   "reject": "Reject",
   "rejected": "Rejected",
-  "relatedStockRequisitionRequired": "Related stock requisition Required",
   "remarks": "Remarks",
   "removePackagingUnit": "Remove Packaging Unit",
   "removePackagingUnitConfirmation": "Would you really like to remove the packaging unit {{name}} from the stock item?",
