@@ -25,6 +25,18 @@ const StockOperationsModal: React.FC<StockOperationsModalProps> = ({ title, requ
   const handleMutate = useHandleMutate();
   const [notes, setNotes] = useState('');
   const [isApproving, setIsApproving] = useState(false);
+  // `title` is the English action name and selects the action below; show its translation
+  const actionLabels: Record<string, string> = {
+    submit: t('submitAction', 'Submit'),
+    dispatch: t('dispatchAction', 'Dispatch'),
+    complete: t('completeAction', 'Complete'),
+    'complete dispatch': t('completeDispatchAction', 'Complete dispatch'),
+    cancel: t('cancelAction', 'Cancel'),
+    reject: t('rejectAction', 'Reject'),
+    return: t('returnAction', 'Return'),
+    approve: t('approveAction', 'Approve'),
+  };
+  const actionLabel = actionLabels[confirmType] ?? title;
 
   const handleClick = async (event) => {
     event.preventDefault();
@@ -78,9 +90,9 @@ const StockOperationsModal: React.FC<StockOperationsModalProps> = ({ title, requ
       () => {
         setIsApproving(false);
         showSnackbar({
-          title: t('operationSuccessTitle', '{{title}} Operation', { title }),
+          title: t('operationSuccessTitle', '{{title}} Operation', { title: actionLabel }),
           subtitle: t('operationSuccessful', 'You have successfully {{title}} operation', {
-            title,
+            title: actionLabel,
           }),
           kind: 'success',
         });
@@ -106,12 +118,15 @@ const StockOperationsModal: React.FC<StockOperationsModalProps> = ({ title, requ
   return (
     <div>
       <Form onSubmit={handleClick}>
-        <ModalHeader closeModal={closeModal} title={t('operationModalTitle', '{{title}} Operation', { title })} />
+        <ModalHeader
+          closeModal={closeModal}
+          title={t('operationModalTitle', '{{title}} Operation', { title: actionLabel })}
+        />
         <ModalBody>
           <div className={styles.modalBody}>
             <section className={styles.section}>
               <h5 className={styles.section}>
-                {t('confirmOperation', 'Would you really like to {{title}} the operation?', { title })}
+                {t('confirmOperation', 'Would you really like to {{title}} the operation?', { title: actionLabel })}
               </h5>
             </section>
             <br />

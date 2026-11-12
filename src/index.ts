@@ -85,21 +85,24 @@ export const stockNavMenu = getSyncLifecycle(SideMenu, options);
 // t("overview","Overview")
 export const stockOverview = getSyncLifecycle(StockHomeLandingPage, options);
 export const stockOverviewLink = getSyncLifecycle(
-  createDashboardLink({ title: 'Overview', name: 'stock-management' }),
+  createDashboardLink({ title: 'Overview', titleKey: 'overview', name: 'stock-management' }),
   options,
 );
 
 // t("operations","Operations")
 export const stockOperations = getSyncLifecycle(StockOperationsComponent, options);
 export const stockOperationsLink = getSyncLifecycle(
-  createDashboardLink({ title: 'Operations', name: 'operations' }),
+  createDashboardLink({ title: 'Operations', titleKey: 'operations', name: 'operations' }),
   options,
 );
 
 // t("items","Items")
 export const stockItems = getSyncLifecycle(StockItems, options);
 
-export const stockItemsLink = getSyncLifecycle(createDashboardLink({ title: 'Items', name: 'items' }), options);
+export const stockItemsLink = getSyncLifecycle(
+  createDashboardLink({ title: 'Items', titleKey: 'items', name: 'items' }),
+  options,
+);
 
 // t("useScopes","User role scopes")
 export const stockUserScopes = getSyncLifecycle(StockUserScopes, options);

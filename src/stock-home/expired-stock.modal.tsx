@@ -23,7 +23,7 @@ const ExpiredStockModal = ({ closeModal, expiredStock }: ExpiredStockModalProps)
   const headers = [
     { key: 'drugName', header: 'Drug Name' },
     { key: 'batchNo', header: 'Batch No' },
-    { key: 'quantity', header: 'Quantity' },
+    { key: 'quantity', header: t('quantity', 'Quantity') },
     { key: 'dispensingUnitName', header: 'Unit' },
     { key: 'expiration', header: 'Expiration Date' },
   ];
