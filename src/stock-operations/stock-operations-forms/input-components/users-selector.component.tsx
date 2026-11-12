@@ -7,6 +7,7 @@ import { useDebounce } from '../../../core/hooks/debounce-hook';
 import { otherUser } from '../../../core/utils/utils';
 import { useUser } from '../../../stock-lookups/stock-lookups.resource';
 import useSearchUser from '../hooks/useSearchUser';
+import useTranslatedError from '../hooks/useTranslatedError';
 
 function matchesUser(item: User | string, inputValue: string | null) {
   const query = inputValue?.trim().toLowerCase();
@@ -20,6 +21,7 @@ function matchesUser(item: User | string, inputValue: string | null) {
 const UsersSelector = () => {
   const { isLoading, userList, setSearchString } = useSearchUser();
   const { t } = useTranslation();
+  const translateError = useTranslatedError();
   const debouncedSearch = useDebounce((query: string) => {
     setSearchString(query);
   }, 300);
@@ -77,13 +79,19 @@ const UsersSelector = () => {
                   ? otherUser
                   : ''
               }
-              itemToString={(item) => (typeof item === 'string' ? item : item?.person?.display || '')}
+              itemToString={(item) =>
+                typeof item === 'string'
+                  ? item
+                  : item?.uuid === otherUser.uuid
+                  ? t('otherPerson', 'Other')
+                  : item?.person?.display || ''
+              }
               // Narrow the users already listed at once, while the server search for the typed text runs
               shouldFilterItem={({ item, inputValue }) => matchesUser(item, inputValue)}
               onInputChange={debouncedSearch}
               placeholder={t('filter', 'Filter...')}
               invalid={!!error?.message}
-              invalidText={error?.message}
+              invalidText={translateError(error?.message)}
               ref={field.ref}
             />
           )}
@@ -106,7 +114,7 @@ const UsersSelector = () => {
                 labelText={t('responsiblePerson', 'Responsible Person')}
                 placeholder={t('pleaseSpecify', 'Please specify')}
                 invalid={!!error?.message}
-                invalidText={error?.message}
+                invalidText={translateError(error?.message)}
               />
             )}
           />

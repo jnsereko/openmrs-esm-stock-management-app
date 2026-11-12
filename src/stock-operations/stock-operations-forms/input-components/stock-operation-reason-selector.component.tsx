@@ -7,6 +7,7 @@ import { type ConfigObject } from '../../../config-schema';
 import { type Concept } from '../../../core/api/types/concept/Concept';
 import { useConcept } from '../../../stock-lookups/stock-lookups.resource';
 import { OperationType } from '../../../core/api/types/stockOperation/StockOperationType';
+import useTranslatedError from '../hooks/useTranslatedError';
 
 type StockOperationReasonSelectorProps = {
   stockOperationType: string;
@@ -24,6 +25,7 @@ const StockOperationReasonSelector: React.FC<StockOperationReasonSelectorProps> 
     items: { answers: reasons },
   } = useConcept(operationReason);
   const { t } = useTranslation();
+  const translateError = useTranslatedError();
   if (isLoading) return <SelectSkeleton role="progressbar" />;
 
   if (error)
@@ -57,7 +59,7 @@ const StockOperationReasonSelector: React.FC<StockOperationReasonSelectorProps> 
           }}
           ref={field.ref}
           invalid={!!error?.message}
-          invalidText={error?.message}
+          invalidText={translateError(error?.message)}
         />
       )}
     />

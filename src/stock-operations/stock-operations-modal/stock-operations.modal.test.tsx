@@ -25,7 +25,8 @@ describe('StockOperationsModal', () => {
       />,
     );
 
-    await userEvent.click(screen.getByRole('button', { name: /submit/i }));
+    // The confirm button carries the action's own verb
+    await userEvent.click(screen.getByRole('button', { name: /^complete$/i }));
 
     await waitFor(() => expect(mockHandleMutate).toHaveBeenCalledWith(`${restBaseUrl}/stockmanagement/stockoperation`));
     expect(executeStockOperationAction).toHaveBeenCalledWith(expect.objectContaining({ name: 'COMPLETE' }));

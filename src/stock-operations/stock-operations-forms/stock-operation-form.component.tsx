@@ -159,7 +159,7 @@ const StockOperationForm: React.FC<Workspace2DefinitionProps<StockOperationFormP
   const steps: TabItem[] = useMemo(() => {
     return [
       {
-        name: stockOperation ? `${stockOperationType?.name} Details` : `${stockOperationType?.name} Details`,
+        name: t('operationTypeDetails', '{{operationType}} Details', { operationType: stockOperationType?.name }),
         component: (
           <BaseOperationDetailsFormStep
             stockOperation={stockOperation}
@@ -183,7 +183,9 @@ const StockOperationForm: React.FC<Workspace2DefinitionProps<StockOperationFormP
         disabled: !stockOperation,
       },
       {
-        name: operationTypePermision?.requiresDispatchAcknowledgement ? 'Submit/Dispatch' : 'Submit/Complete',
+        name: operationTypePermision?.requiresDispatchAcknowledgement
+          ? t('submitAndDispatch', 'Submit/Dispatch')
+          : t('submitAndComplete', 'Submit/Complete'),
         component: (
           <StockOperationSubmissionFormStep
             stockOperation={stockOperation}

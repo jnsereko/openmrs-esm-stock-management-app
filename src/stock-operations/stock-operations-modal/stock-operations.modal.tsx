@@ -149,7 +149,7 @@ const StockOperationsModal: React.FC<StockOperationsModalProps> = ({ title, requ
           <Button kind="secondary" onClick={closeModal}>
             {getCoreTranslation('cancel')}
           </Button>
-          {isApproving ? <InlineLoading /> : <Button type="submit">{t('submit', 'Submit')}</Button>}
+          {isApproving ? <InlineLoading /> : <Button type="submit">{actionLabel}</Button>}
         </ModalFooter>
       </Form>
     </div>

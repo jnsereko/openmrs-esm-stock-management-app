@@ -24,6 +24,7 @@ import useParties from '../hooks/useParties';
 import StockOperationReasonSelector from '../input-components/stock-operation-reason-selector.component';
 import UsersSelector from '../input-components/users-selector.component';
 import styles from '../stock-operation-form.scss';
+import useTranslatedError from '../hooks/useTranslatedError';
 
 type BaseOperationDetailsFormStepProps = {
   stockOperation?: StockOperationDTO;
@@ -37,6 +38,7 @@ const BaseOperationDetailsFormStep: FC<BaseOperationDetailsFormStepProps> = ({
   onNext,
 }) => {
   const { t } = useTranslation();
+  const translateError = useTranslatedError();
   const operationTypePermision = useOperationTypePermisions(stockOperationType);
   const {
     destinationParties,
@@ -106,7 +108,7 @@ const BaseOperationDetailsFormStep: FC<BaseOperationDetailsFormStepProps> = ({
   return (
     <Stack gap={4} className={styles.grid}>
       <div className={styles.heading}>
-        <h4>{`${stockOperationType.name} ${t('details', 'Details')}`}</h4>
+        <h4>{t('operationTypeDetails', '{{operationType}} Details', { operationType: stockOperationType.name })}</h4>
       </div>
       <Column>
         <Controller
@@ -130,7 +132,7 @@ const BaseOperationDetailsFormStep: FC<BaseOperationDetailsFormStepProps> = ({
                 placeholder={DATE_PICKER_FORMAT}
                 labelText={t('operationDate', 'Operation Date')}
                 invalid={!!error?.message}
-                invalidText={error?.message}
+                invalidText={translateError(error?.message)}
                 size="lg"
               />
             </DatePicker>
@@ -176,7 +178,7 @@ const BaseOperationDetailsFormStep: FC<BaseOperationDetailsFormStepProps> = ({
               }
               ref={field.ref}
               invalid={!!error?.message}
-              invalidText={error?.message}
+              invalidText={translateError(error?.message)}
             />
           )}
         />
@@ -213,7 +215,7 @@ const BaseOperationDetailsFormStep: FC<BaseOperationDetailsFormStepProps> = ({
                 }
                 ref={field.ref}
                 invalid={!!error?.message}
-                invalidText={error?.message}
+                invalidText={translateError(error?.message)}
               />
             )}
           />
@@ -242,7 +244,7 @@ const BaseOperationDetailsFormStep: FC<BaseOperationDetailsFormStepProps> = ({
               id={'remarks'}
               labelText={t('remarks', 'Remarks')}
               invalid={!!error?.message}
-              invalidText={error?.message}
+              invalidText={translateError(error?.message)}
             />
           )}
         />
