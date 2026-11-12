@@ -72,7 +72,21 @@ const EditStockOperationActionMenu: React.FC<EditStockOperationActionMenuProps> 
       onClick={handleLaunchWorkspace}
       renderIcon={showIcon ? () => <Edit size={16} /> : undefined}
     >
-      {showprops && <span className={styles.operationNumberText}>{fetchedStockOperation?.operationNumber}</span>}
+      {showprops && (
+        <span className={styles.operationNumberText}>
+          {/* Allow a line break after each « - » (SIS-0054-20261112135338) so a long number wraps in its column */}
+          {fetchedStockOperation?.operationNumber?.split('-').map((part, index, parts) => (
+            <React.Fragment key={index}>
+              {part}
+              {index < parts.length - 1 && (
+                <>
+                  -<wbr />
+                </>
+              )}
+            </React.Fragment>
+          ))}
+        </span>
+      )}
     </Button>
   );
 };

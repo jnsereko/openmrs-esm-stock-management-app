@@ -75,6 +75,7 @@ const StockItemsTable: React.FC<Props> = ({ items }) => {
       <span className={styles.title}>{t('stockItems', 'Stock items')}</span>
       <Search
         labelText={t('search', 'Search')}
+        placeholder={t('search', 'Search')}
         value={searchText}
         onChange={({ target: { value } }) => setSearchText(value as string)}
       />

@@ -19,5 +19,19 @@
   font-size: 0.85rem;
   font-weight: 500;
   color: #4d4d4d;
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-align: start;
+}
+
+// Carbon buttons are max-content wide and do not wrap, so a long operation number (230 px) widened
+// the Operations table past its container. Two classes outrank Carbon's .cds--btn in either load order.
+.editStockButton:global(.cds--btn) {
+  // Carbon sizes buttons to max-content and reserves icon room on the right
+  inline-size: auto;
+  max-inline-size: 100%;
+  padding-inline-end: 0.5rem;
+  block-size: auto;
+  min-block-size: 2rem;
+  white-space: normal;
 }
