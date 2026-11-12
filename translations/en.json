@@ -57,7 +57,10 @@
   "chooseQuantityUnit": "Choose the Unit of Quantity",
   "chooseSourceType": "Choose a source type",
   "chooseVendor": "Choose vendor",
+  "clearAllSelectedItems": "Clear all selected items",
   "clearSearch": "Clear search input",
+  "clearSelectedItem": "Clear selected item",
+  "closeMenu": "Close menu",
   "code": "Code",
   "collapseAllRows": "Collapse all rows",
   "collapseCurrentRow": "Collapse current row",
@@ -250,6 +253,7 @@
   "noViewPrivilegesDescription": "Description: {{description}}",
   "number": "Number",
   "onlyCsvFilesAt2mbOrLess": "Only .csv files at 2MB or less",
+  "openMenu": "Open menu",
   "operationDate": "Operation Date",
   "operationFilter": "Operation",
   "operationLocationRequired": "Location Required",
@@ -450,6 +454,7 @@
   "userRequired": "User is required",
   "userRoleScopes": "User role scopes",
   "viewAll": "View All",
+  "viewOperationTitle": "View {{operationType}}",
   "whoIsThePreferredVendor": "Who is the preferred vendor?",
   "yes": "Yes"
 }

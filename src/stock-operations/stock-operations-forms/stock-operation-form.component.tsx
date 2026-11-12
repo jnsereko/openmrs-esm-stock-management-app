@@ -35,6 +35,7 @@ import StockOperationItemsFormStep from './steps/stock-operation-items-form-step
 import StockOperationSubmissionFormStep from './steps/stock-operation-submission-form-step.component';
 import StockItemForm, { type StockItemFormProps } from './stock-item-form/stock-item-form.workspace';
 import StockOperationStepper from './stock-operation-stepper/stock-operation-stepper.component';
+import { getOperationStockPartyUuid } from './stock-operations-form-utils';
 import { useStockOperationAndItems } from '../stock-operations.resource';
 
 /**
@@ -67,6 +68,15 @@ const StockOperationForm: React.FC<Workspace2DefinitionProps<StockOperationFormP
   const formschema = useMemo(() => {
     return getStockOperationFormSchema(operationType);
   }, [operationType]);
+  // An operation can be changed only while it is new or returned (as the server checks); a submitted,
+  // dispatched or completed one opens to be looked at, not as « Edit » with edit and delete buttons
+  const isEditable = useMemo(
+    () =>
+      !stockOperation ||
+      ((stockOperation.status === 'NEW' || stockOperation.status === 'RETURNED') &&
+        stockOperation.permission?.canEdit !== false),
+    [stockOperation],
+  );
   const showReceivedItems = useMemo(() => {
     return (
       (StockOperationTypeIsStockIssue(stockOperation?.operationType as OperationType) ||
@@ -132,6 +142,11 @@ const StockOperationForm: React.FC<Workspace2DefinitionProps<StockOperationFormP
       setItemFormProps({
         stockOperationType,
         stockOperationItem,
+        stockPartyUuid: getOperationStockPartyUuid(
+          stockOperationType,
+          form.getValues('sourceUuid'),
+          form.getValues('destinationUuid'),
+        ),
         onSave: (data) => {
           const items = (form.getValues('stockOperationItems') ?? []) as BaseStockOperationItemFormData[];
           const index = items.findIndex((i) => i.uuid === data.uuid);
@@ -178,6 +193,7 @@ const StockOperationForm: React.FC<Workspace2DefinitionProps<StockOperationFormP
             onNext={() => setSelectedIndex(2)}
             onPrevious={() => setSelectedIndex(0)}
             onLaunchItemsForm={handleLaunchStockItem}
+            readOnly={!isEditable}
           />
         ),
         disabled: !stockOperation,
@@ -216,6 +232,7 @@ const StockOperationForm: React.FC<Workspace2DefinitionProps<StockOperationFormP
     showReceivedItems,
     handleLaunchStockItem,
     closeWorkspace,
+    isEditable,
   ]);
 
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -266,7 +283,9 @@ const StockOperationForm: React.FC<Workspace2DefinitionProps<StockOperationFormP
     <Workspace2
       title={
         stockOperation
-          ? t('editOperationTitle', 'Edit {{operationType}}', { operationType: stockOperation.operationTypeName })
+          ? isEditable
+            ? t('editOperationTitle', 'Edit {{operationType}}', { operationType: stockOperation.operationTypeName })
+            : t('viewOperationTitle', 'View {{operationType}}', { operationType: stockOperation.operationTypeName })
           : t('newOperationTitle', 'New: {{operationName}}', { operationName: stockOperationType?.name })
       }
     >

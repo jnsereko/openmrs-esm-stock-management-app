@@ -177,7 +177,7 @@ function StockUserRoleScopesItems() {
             >
               <TableToolbarContent className={styles.toolbarContent}>
                 <TableToolbarSearch persistent onChange={onInputChange} />
-                <TableToolbarMenu>
+                <TableToolbarMenu iconDescription={t('settings', 'Settings')}>
                   <TableToolbarAction className={styles.toolbarAction} onClick={handleRefresh}>
                     {t('refresh', 'Refresh')}
                   </TableToolbarAction>

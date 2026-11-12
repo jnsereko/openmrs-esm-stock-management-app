@@ -122,6 +122,13 @@
     padding-inline: layout.$spacing-03;
   }
 
+  // A long name without spaces (« Paidoterin Sirop 1mg/1mg/0.15mg/5mg/1mg/333mg 100ml ») may break
+  // anywhere. With break-word it still set the column's minimum width, and the table overflowed at
+  // 1280 px (#634)
+  td {
+    overflow-wrap: anywhere;
+  }
+
   // The sort button carries the header's padding
   th:global(.cds--table-sort__header) {
     padding-inline: 0;
@@ -157,4 +164,9 @@
 .stockTableContainer :global(.cds--table-toolbar) .toolbarContent {
   block-size: auto;
   min-block-size: layout.$spacing-09;
+}
+
+// Clear the floating help button (bottom right of the window) so it does not cover « Next page » (#634)
+.paginationOverride:global(.cds--pagination) {
+  padding-inline-end: layout.$spacing-10;
 }

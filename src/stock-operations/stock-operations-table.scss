@@ -168,3 +168,8 @@
     padding-inline: 0;
   }
 }
+
+// Clear the floating help button (bottom right of the window) so it does not cover « Next page » (#634)
+.paginationOverride:global(.cds--pagination) {
+  padding-inline-end: layout.$spacing-10;
+}

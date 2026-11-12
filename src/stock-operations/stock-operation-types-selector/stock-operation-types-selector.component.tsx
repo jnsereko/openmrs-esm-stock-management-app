@@ -33,6 +33,9 @@ const StockOperationTypesSelector = () => {
 
   return operationTypes && operationTypes.length ? (
     <OverflowMenu
+      // Carbon labels the button « Options » otherwise
+      aria-label={t('startNew', 'Start New')}
+      iconDescription={t('startNew', 'Start New')}
       renderIcon={() => (
         <>
           {t('startNew', 'Start New')}&nbsp;&nbsp;

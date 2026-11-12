@@ -202,7 +202,7 @@ const StockItemsTableComponent: React.FC<StockItemsTableProps> = () => {
                 />
                 <FilterStockItems filterType={isDrug} changeFilterType={setDrug} />
                 <AddStockItemsBulktImportActionButton />
-                <TableToolbarMenu data-testid="stock-items-menu">
+                <TableToolbarMenu iconDescription={t('settings', 'Settings')} data-testid="stock-items-menu">
                   <TableToolbarAction className={styles.toolbarAction} onClick={handleRefresh}>
                     {t('refresh', 'Refresh')}
                   </TableToolbarAction>

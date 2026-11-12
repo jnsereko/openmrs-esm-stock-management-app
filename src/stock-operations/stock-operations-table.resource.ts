@@ -1,15 +1,30 @@
 import { type StockOperationFilter, useStockOperations } from './stock-operations.resource';
-import { useMemo, useState } from 'react';
-import { usePagination } from '@openmrs/esm-framework';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+/**
+ * One page of operations, paged by the server. The list was fetched once (the server's first 50)
+ * and paged in the browser, so the oldest operations never showed and the last page repeated the
+ * one before it (#634). The server's `startIndex` is a page number, from 0.
+ */
 export function useStockOperationPages(filter: StockOperationFilter) {
-  const { items, isLoading, error } = useStockOperations(filter);
-
   const pageSizes = [10, 20, 30, 40, 50];
   const [currentPageSize, setPageSize] = useState(10);
+  const [currentPage, setCurrentPage] = useState(1);
 
-  const { goTo, results: paginatedItems, currentPage } = usePagination(items.results, currentPageSize);
+  // A new filter starts again from the first page
+  const filterKey = JSON.stringify(filter);
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filterKey, currentPageSize]);
+
+  const { items, isLoading, error } = useStockOperations({
+    ...filter,
+    totalCount: true,
+    startIndex: currentPage - 1,
+    limit: currentPageSize,
+  });
+  const pageItems = useMemo(() => items?.results ?? [], [items]);
 
   const { t } = useTranslation();
 
@@ -58,12 +73,12 @@ export function useStockOperationPages(filter: StockOperationFilter) {
   );
 
   return {
-    items: paginatedItems,
+    items: pageItems,
     totalItems: items?.totalCount,
     currentPage,
     currentPageSize,
-    paginatedItems,
-    goTo,
+    paginatedItems: pageItems,
+    goTo: setCurrentPage,
     pageSizes,
     isLoading,
     error,

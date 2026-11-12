@@ -8,6 +8,7 @@ import { otherUser } from '../../../core/utils/utils';
 import { useUser } from '../../../stock-lookups/stock-lookups.resource';
 import useSearchUser from '../hooks/useSearchUser';
 import useTranslatedError from '../hooks/useTranslatedError';
+import { comboBoxTranslateWithId } from '../../../core/utils/translations';
 
 function matchesUser(item: User | string, inputValue: string | null) {
   const query = inputValue?.trim().toLowerCase();
@@ -61,6 +62,7 @@ const UsersSelector = () => {
           control={form.control}
           render={({ field, fieldState: { error } }) => (
             <ComboBox
+              translateWithId={comboBoxTranslateWithId(t)}
               readOnly={field.disabled}
               titleText={t('responsiblePerson', 'Responsible Person')}
               name={'responsiblePersonUuid'}

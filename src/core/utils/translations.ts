@@ -90,3 +90,21 @@ export function tableHeaderTranslateWithId(t: TFunction) {
     });
   };
 }
+
+/** ComboBox's `translateWithId`: the clear and menu buttons' labels, which default to English. */
+export function comboBoxTranslateWithId(t: TFunction) {
+  return (messageId: string) => {
+    switch (messageId) {
+      case 'clear.selection':
+        return t('clearSelectedItem', 'Clear selected item');
+      case 'clear.all':
+        return t('clearAllSelectedItems', 'Clear all selected items');
+      case 'open.menu':
+        return t('openMenu', 'Open menu');
+      case 'close.menu':
+        return t('closeMenu', 'Close menu');
+      default:
+        return messageId;
+    }
+  };
+}

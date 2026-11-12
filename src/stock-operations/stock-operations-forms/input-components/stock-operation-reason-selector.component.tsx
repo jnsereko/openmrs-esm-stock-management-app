@@ -8,6 +8,7 @@ import { type Concept } from '../../../core/api/types/concept/Concept';
 import { useConcept } from '../../../stock-lookups/stock-lookups.resource';
 import { OperationType } from '../../../core/api/types/stockOperation/StockOperationType';
 import useTranslatedError from '../hooks/useTranslatedError';
+import { comboBoxTranslateWithId } from '../../../core/utils/translations';
 
 type StockOperationReasonSelectorProps = {
   stockOperationType: string;
@@ -44,6 +45,7 @@ const StockOperationReasonSelector: React.FC<StockOperationReasonSelectorProps> 
       name={'reasonUuid'}
       render={({ field, fieldState: { error } }) => (
         <ComboBox
+          translateWithId={comboBoxTranslateWithId(t)}
           readOnly={field.disabled}
           titleText={t('reason', 'Reason')}
           placeholder={t('chooseAReason', 'Choose a reason')}

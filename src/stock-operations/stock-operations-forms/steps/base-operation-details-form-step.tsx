@@ -25,6 +25,7 @@ import StockOperationReasonSelector from '../input-components/stock-operation-re
 import UsersSelector from '../input-components/users-selector.component';
 import styles from '../stock-operation-form.scss';
 import useTranslatedError from '../hooks/useTranslatedError';
+import { comboBoxTranslateWithId } from '../../../core/utils/translations';
 
 type BaseOperationDetailsFormStepProps = {
   stockOperation?: StockOperationDTO;
@@ -153,6 +154,7 @@ const BaseOperationDetailsFormStep: FC<BaseOperationDetailsFormStepProps> = ({
           name="sourceUuid"
           render={({ field, fieldState: { error } }) => (
             <ComboBox
+              translateWithId={comboBoxTranslateWithId(t)}
               titleText={
                 isStockIssueOperation
                   ? t('source', 'Source')
@@ -190,6 +192,7 @@ const BaseOperationDetailsFormStep: FC<BaseOperationDetailsFormStepProps> = ({
             name="destinationUuid"
             render={({ field, fieldState: { error } }) => (
               <ComboBox
+                translateWithId={comboBoxTranslateWithId(t)}
                 readOnly={field.disabled}
                 titleText={
                   isStockIssueOperation

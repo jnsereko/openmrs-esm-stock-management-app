@@ -17,4 +17,6 @@
   inline-size: auto;
   max-inline-size: 100%;
   white-space: normal;
+  // A name without spaces may break anywhere rather than set the column's width (#634)
+  overflow-wrap: anywhere;
 }

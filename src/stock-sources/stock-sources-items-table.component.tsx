@@ -105,7 +105,7 @@ const StockSourcesItems: React.FC = () => {
                 >
                   <StockSourcesFilter onFilterChange={handleFilterChange} />
                 </div>
-                <TableToolbarMenu>
+                <TableToolbarMenu iconDescription={t('settings', 'Settings')}>
                   <TableToolbarAction className={styles.toolbarMenuAction} onClick={handleRefresh}>
                     {t('refresh', 'Refresh')}
                   </TableToolbarAction>

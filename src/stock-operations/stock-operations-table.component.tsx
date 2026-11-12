@@ -220,7 +220,7 @@ const StockOperations: React.FC<StockOperationsTableProps> = () => {
                   <StockOperationsFilters filterName={StockFilters.STATUS} onFilterChange={handleOnFilterChange} />
                   <StockOperationsFilters filterName={StockFilters.OPERATION} onFilterChange={handleOnFilterChange} />
                 </div>
-                <TableToolbarMenu>
+                <TableToolbarMenu iconDescription={t('settings', 'Settings')}>
                   <TableToolbarAction className={styles.toolbarMenuAction} onClick={handleRefresh}>
                     {t('refresh', 'Refresh')}
                   </TableToolbarAction>

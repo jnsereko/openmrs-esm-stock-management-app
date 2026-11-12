@@ -37,7 +37,10 @@ export interface StockItemInventoryFilter extends ResourceFilterCriteria {
 // getStockOperations
 export function useStockOperations(filter: StockOperationFilter) {
   const apiUrl = `${restBaseUrl}/stockmanagement/stockoperation${toQueryParams(filter)}`;
-  const { data, error, isLoading } = useSWR<{ data: PageableResult<StockOperationDTO> }, Error>(apiUrl, openmrsFetch);
+  // The previous page stays on screen while the next one loads
+  const { data, error, isLoading } = useSWR<{ data: PageableResult<StockOperationDTO> }, Error>(apiUrl, openmrsFetch, {
+    keepPreviousData: true,
+  });
 
   return {
     items: data?.data || <PageableResult<StockOperationDTO>>{},

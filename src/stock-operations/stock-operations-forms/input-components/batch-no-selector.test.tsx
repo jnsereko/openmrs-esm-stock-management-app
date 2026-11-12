@@ -2,23 +2,34 @@ import React from 'react';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import userEvent from '@testing-library/user-event';
 import { render, screen } from '@testing-library/react';
-import { type StockBatchDTO } from '../../../core/api/types/stockItem/StockBatchDTO';
 import { type StockItemInventory } from '../../../core/api/types/stockItem/StockItemInventory';
 import { formatForDatePicker } from '../../../constants';
-import { useStockItemBatchInformationHook } from '../../../stock-items/add-stock-item/batch-information/batch-information.resource';
-import { useStockItemBatchNumbers } from '../hooks/useStockItemBatchNumbers';
+import { useStockItemInventory } from '../../../stock-items/stock-items.resource';
 import BatchNoSelector from './batch-no-selector.component';
 
-vi.mock('../hooks/useStockItemBatchNumbers', () => ({
-  useStockItemBatchNumbers: vi.fn(),
+vi.mock('../../../stock-items/stock-items.resource', () => ({
+  useStockItemInventory: vi.fn(),
 }));
 
-vi.mock('../../../stock-items/add-stock-item/batch-information/batch-information.resource', () => ({
-  useStockItemBatchInformationHook: vi.fn(),
-}));
+const mockUseStockItemInventory = vi.mocked(useStockItemInventory);
 
-const mockUseStockItemBatchNumbers = vi.mocked(useStockItemBatchNumbers);
-const mockUseStockItemBatchInformationHook = vi.mocked(useStockItemBatchInformationHook);
+const row = (
+  stockBatchUuid: string,
+  batchNumber: string,
+  quantity: number,
+  expiration: Date | null,
+  partyUuid = 'rx',
+): StockItemInventory =>
+  ({ partyUuid, stockItemUuid: 'item', stockBatchUuid, batchNumber, quantity, expiration } as StockItemInventory);
+
+const mockInventory = (rows: StockItemInventory[], isLoading = false) =>
+  mockUseStockItemInventory.mockReturnValue({
+    items: { results: rows } as ReturnType<typeof useStockItemInventory>['items'],
+    isLoading,
+    error: undefined,
+  });
+
+const optionBatchNumbers = () => screen.getAllByRole('option').map((option) => option.textContent.split(' |')[0]);
 
 describe('BatchNoSelector', () => {
   const mockOnValueChange = vi.fn();
@@ -26,77 +37,12 @@ describe('BatchNoSelector', () => {
   const mockExpiration = new Date();
 
   beforeEach(() => {
-    mockUseStockItemBatchNumbers.mockReturnValue({
-      isLoading: false,
-      stockItemBatchNos: [
-        {
-          uuid: '1',
-          batchNo: 'BATCH-001',
-          quantity: '10',
-          expiration: mockExpiration,
-          stockItemUuid: 'item1',
-          voided: false,
-        },
-        {
-          uuid: '2',
-          batchNo: 'BATCH-002',
-          quantity: '20',
-          expiration: mockExpiration,
-          stockItemUuid: 'item2',
-          voided: false,
-        },
-      ],
-      setLimit: vi.fn(),
-      setRepresentation: vi.fn(),
-      setSearchString: vi.fn(),
-    });
-
-    mockUseStockItemBatchInformationHook.mockReturnValue({
-      items: [
-        { batchNumber: 'BATCH-001', quantity: 10 },
-        { batchNumber: 'BATCH-002', quantity: 20 },
-      ] as StockItemInventory[],
-      totalCount: 2,
-      currentPage: 1,
-      currentPageSize: 10,
-      setCurrentPage: vi.fn(),
-      setStockBatchUuid: vi.fn(),
-      setStockItemUuid: vi.fn(),
-      setPageSize: vi.fn(),
-      pageSizes: [10, 20, 50],
-      isLoading: false,
-      error: null,
-      setLocationUuid: vi.fn(),
-      setPartyUuid: vi.fn(),
-      setSearchString: vi.fn(),
-    });
+    mockOnValueChange.mockReset();
+    mockInventory([row('1', 'BATCH-001', 10, mockExpiration), row('2', 'BATCH-002', 20, mockExpiration)]);
   });
 
   it('should render a loading skeleton when "isLoading" is true', () => {
-    mockUseStockItemBatchNumbers.mockReturnValue({
-      isLoading: true,
-      stockItemBatchNos: [] as StockBatchDTO[],
-      setLimit: vi.fn(),
-      setRepresentation: vi.fn(),
-      setSearchString: vi.fn(),
-    });
-
-    mockUseStockItemBatchInformationHook.mockReturnValue({
-      isLoading: true,
-      items: [],
-      setStockItemUuid: vi.fn(),
-      totalCount: 0,
-      currentPage: 1,
-      currentPageSize: 10,
-      setCurrentPage: vi.fn(),
-      setStockBatchUuid: vi.fn(),
-      setPageSize: vi.fn(),
-      pageSizes: [10, 20, 50],
-      error: null,
-      setLocationUuid: vi.fn(),
-      setPartyUuid: vi.fn(),
-      setSearchString: vi.fn(),
-    });
+    mockInventory([], true);
 
     render(<BatchNoSelector stockItemUuid={mockStockItemUuid} onValueChange={mockOnValueChange} />);
 
@@ -134,94 +80,89 @@ describe('BatchNoSelector', () => {
     expect(screen.getByText(errorMessage)).toBeInTheDocument();
   });
 
-  it('should filter out batches with zero or undefined quantity', async () => {
+  it('should filter out batches with no stock', async () => {
     const user = userEvent.setup();
-
-    mockUseStockItemBatchNumbers.mockReturnValue({
-      isLoading: false,
-      stockItemBatchNos: [
-        {
-          uuid: '1',
-          batchNo: 'BATCH-001',
-          quantity: '10',
-          expiration: mockExpiration,
-          stockItemUuid: 'item1',
-          voided: false,
-        },
-        {
-          uuid: '2',
-          batchNo: 'BATCH-002',
-          quantity: '0',
-          expiration: mockExpiration,
-          stockItemUuid: 'item2',
-          voided: false,
-        },
-        {
-          uuid: '3',
-          batchNo: 'BATCH-003',
-          quantity: undefined,
-          expiration: mockExpiration,
-          stockItemUuid: 'item3',
-          voided: false,
-        },
-      ],
-      setLimit: vi.fn(),
-      setRepresentation: vi.fn(),
-      setSearchString: vi.fn(),
-    });
-
-    render(<BatchNoSelector stockItemUuid={mockStockItemUuid} onValueChange={mockOnValueChange} />);
-
-    const combobox = screen.getByRole('combobox');
-    await user.click(combobox);
-
-    expect(screen.queryByText('BATCH-002')).not.toBeInTheDocument();
-    expect(screen.queryByText('BATCH-003')).not.toBeInTheDocument();
-  });
-
-  it('should list the batch that expires soonest first', async () => {
-    const user = userEvent.setup();
-    mockUseStockItemBatchNumbers.mockReturnValue({
-      isLoading: false,
-      stockItemBatchNos: [
-        {
-          uuid: 'late',
-          batchNo: 'LATE',
-          quantity: '10',
-          expiration: new Date(2027, 5, 30),
-          stockItemUuid: 'i',
-          voided: false,
-        },
-        { uuid: 'none', batchNo: 'NONE', quantity: '10', expiration: null, stockItemUuid: 'i', voided: false },
-        {
-          uuid: 'soon',
-          batchNo: 'SOON',
-          quantity: '10',
-          expiration: new Date(2026, 11, 31),
-          stockItemUuid: 'i',
-          voided: false,
-        },
-      ] as Array<StockBatchDTO>,
-      setLimit: vi.fn(),
-      setRepresentation: vi.fn(),
-      setSearchString: vi.fn(),
-    });
-    mockUseStockItemBatchInformationHook.mockReturnValue({
-      ...mockUseStockItemBatchInformationHook(),
-      items: [
-        { batchNumber: 'LATE', quantity: 10 },
-        { batchNumber: 'NONE', quantity: 10 },
-        { batchNumber: 'SOON', quantity: 10 },
-      ] as StockItemInventory[],
-    });
+    mockInventory([row('1', 'BATCH-001', 10, mockExpiration), row('2', 'BATCH-002', 0, mockExpiration)]);
 
     render(<BatchNoSelector stockItemUuid={mockStockItemUuid} onValueChange={mockOnValueChange} />);
     await user.click(screen.getByRole('combobox'));
 
-    expect(screen.getAllByRole('option').map((option) => option.textContent.split(' |')[0])).toEqual([
-      'SOON',
-      'LATE',
-      'NONE',
+    expect(optionBatchNumbers()).toEqual(['BATCH-001']);
+  });
+
+  it('should keep the batch already on the line even when it has no stock left', async () => {
+    const user = userEvent.setup();
+    mockInventory([row('1', 'BATCH-001', 10, mockExpiration), row('2', 'BATCH-002', 0, mockExpiration)]);
+
+    render(<BatchNoSelector stockItemUuid={mockStockItemUuid} initialValue="2" onValueChange={mockOnValueChange} />);
+    await user.click(screen.getByRole('button', { name: /open/i }));
+
+    expect(optionBatchNumbers()).toEqual(['BATCH-001', 'BATCH-002']);
+  });
+
+  it('should list the batch that expires soonest first', async () => {
+    const user = userEvent.setup();
+    mockInventory([
+      row('late', 'LATE', 10, new Date(2027, 5, 30)),
+      row('none', 'NONE', 10, null),
+      row('soon', 'SOON', 10, new Date(2026, 11, 31)),
     ]);
+
+    render(<BatchNoSelector stockItemUuid={mockStockItemUuid} onValueChange={mockOnValueChange} />);
+    await user.click(screen.getByRole('combobox'));
+
+    expect(optionBatchNumbers()).toEqual(['SOON', 'LATE', 'NONE']);
+  });
+
+  // #634: on a Stock Issue at Pharmacie (Rx), every batch with stock there, with the quantity there
+  it('should ask for the stock at the source location, one row per batch', () => {
+    render(<BatchNoSelector stockItemUuid={mockStockItemUuid} partyUuid="rx" onValueChange={mockOnValueChange} />);
+
+    expect(mockUseStockItemInventory).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        stockItemUuid: mockStockItemUuid,
+        partyUuid: 'rx',
+        groupBy: 'LocationStockItemBatchNo',
+        includeBatchNo: true,
+      }),
+    );
+    expect(mockUseStockItemInventory.mock.lastCall[0]).not.toHaveProperty('limit');
+  });
+
+  it('should list all five batches of the source with their quantities there, soonest expiry first', async () => {
+    const user = userEvent.setup();
+    mockInventory([
+      row('b3', 'UAT-B3-QA', 239, new Date(2027, 11, 30)),
+      row('b5', 'UAT-B5-QA', 16, new Date(2027, 2, 16)),
+      row('m60', 'UAT-M60-QA', 14, new Date(2027, 5, 16)),
+      row('b9', 'UAT-B9-QA', 140, new Date(2028, 2, 30)),
+      row('rcpt', 'E2E-B14-RCPT-0640', 21, new Date(2026, 11, 31)),
+    ]);
+
+    render(<BatchNoSelector stockItemUuid={mockStockItemUuid} partyUuid="rx" onValueChange={mockOnValueChange} />);
+    await user.click(screen.getByRole('combobox'));
+
+    expect(
+      screen.getAllByRole('option').map((option) => option.textContent.split(' | ').slice(0, 2).join(' | ')),
+    ).toEqual([
+      'E2E-B14-RCPT-0640 | Qty: 21',
+      'UAT-B5-QA | Qty: 16',
+      'UAT-M60-QA | Qty: 14',
+      'UAT-B3-QA | Qty: 239',
+      'UAT-B9-QA | Qty: 140',
+    ]);
+  });
+
+  it('should add up a batch across locations when no location is given', async () => {
+    const user = userEvent.setup();
+    mockInventory([
+      row('b3', 'UAT-B3-QA', 132, mockExpiration, 'rx-disp'),
+      row('b3', 'UAT-B3-QA', 239, mockExpiration, 'rx'),
+    ]);
+
+    render(<BatchNoSelector stockItemUuid={mockStockItemUuid} onValueChange={mockOnValueChange} />);
+    await user.click(screen.getByRole('combobox'));
+
+    expect(screen.getAllByRole('option').map((option) => option.textContent.split(' | ')[1])).toEqual(['Qty: 371']);
   });
 });

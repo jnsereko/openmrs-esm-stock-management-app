@@ -3,6 +3,7 @@ import { ComboBox, InlineNotification, SkeletonText } from '@carbon/react';
 import { useTranslation } from 'react-i18next';
 import { type StockItemPackagingUOMDTO } from '../../../core/api/types/stockItem/StockItemPackagingUOM';
 import { useStockItem } from '../../../stock-items/stock-items.resource';
+import { comboBoxTranslateWithId } from '../../../core/utils/translations';
 
 interface QtyUomSelectorProps {
   stockItemUuid: string;
@@ -37,6 +38,7 @@ const QtyUomSelector: React.FC<QtyUomSelectorProps> = ({ stockItemUuid, error, i
 
   return (
     <ComboBox
+      translateWithId={comboBoxTranslateWithId(t)}
       id={'stockItemPackagingUOMUuid'}
       initialSelectedItem={initialSelectedItem}
       invalid={!!error}

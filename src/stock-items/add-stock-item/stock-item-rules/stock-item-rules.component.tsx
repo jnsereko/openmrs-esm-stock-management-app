@@ -102,7 +102,7 @@ const StockItemRules: React.FC<StockItemRulesProps> = ({ stockItemUuid, model, c
                 >
                   <StockRulesFilter stockItemUuid={stockItemUuid} />
                 </div>
-                <TableToolbarMenu>
+                <TableToolbarMenu iconDescription={t('settings', 'Settings')}>
                   <TableToolbarAction className={styles.toolbarMenuAction} onClick={handleRefresh}>
                     {t('refresh', 'Refresh')}
                   </TableToolbarAction>

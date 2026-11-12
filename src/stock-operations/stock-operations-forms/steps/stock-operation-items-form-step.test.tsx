@@ -29,9 +29,10 @@ const items = [
 
 let formRef: UseFormReturn<StockOperationItemDtoSchema>;
 
-const Wrapper: React.FC<{ onLaunchItemsForm: () => void; operationType?: unknown }> = ({
+const Wrapper: React.FC<{ onLaunchItemsForm: () => void; operationType?: unknown; readOnly?: boolean }> = ({
   onLaunchItemsForm,
   operationType = requisitionOperationTypeMock,
+  readOnly,
 }) => {
   const form = useForm<StockOperationItemDtoSchema>({
     defaultValues: {
@@ -46,6 +47,7 @@ const Wrapper: React.FC<{ onLaunchItemsForm: () => void; operationType?: unknown
       <StockOperationItemsFormStep
         stockOperationType={operationType as StockOperationType}
         onLaunchItemsForm={onLaunchItemsForm}
+        readOnly={readOnly}
       />
     </FormProvider>
   );
@@ -92,5 +94,16 @@ describe('StockOperationItemsFormStep', () => {
 
     render(<Wrapper onLaunchItemsForm={vi.fn()} operationType={receiptOperationTypeMock} />);
     expect(screen.getAllByText('availability at destination-party')).toHaveLength(3);
+  });
+
+  // #634: a completed operation opened with edit and delete buttons
+  it('offers no item search, edit or delete when the operation can no longer be changed', () => {
+    render(<Wrapper onLaunchItemsForm={vi.fn()} readOnly />);
+
+    expect(screen.getByText('stock-item-a')).toBeInTheDocument();
+    expect(screen.queryByText('stock item search')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Edit')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Delete')).not.toBeInTheDocument();
+    expect(screen.queryByText('Actions')).not.toBeInTheDocument();
   });
 });

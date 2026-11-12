@@ -1,58 +1,80 @@
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ComboBox, SelectSkeleton } from '@carbon/react';
 import { type StockBatchWithUoM } from '../../../core/api/types/stockItem/StockBatchDTO';
+import { LocationStockItemBatchNo } from '../../../core/api/types/stockItem/StockItem';
+import { ResourceRepresentation } from '../../../core/api/api';
 import { formatForDatePicker } from '../../../constants';
-import { useStockItemBatchInformationHook } from '../../../stock-items/add-stock-item/batch-information/batch-information.resource';
-import { useStockItemBatchNumbers } from '../hooks/useStockItemBatchNumbers';
+import { useStockItemInventory } from '../../../stock-items/stock-items.resource';
+import { comboBoxTranslateWithId } from '../../../core/utils/translations';
 
 interface BatchNoSelectorProps {
   stockItemUuid: string;
+  /** The location the stock is taken from; without it, the stock of every location */
+  partyUuid?: string | null;
   initialValue?: string;
   onValueChange?: (value: string) => void;
   error?: string;
 }
 
-const BatchNoSelector: React.FC<BatchNoSelectorProps> = ({ stockItemUuid, error, initialValue, onValueChange }) => {
-  const { isLoading, stockItemBatchNos } = useStockItemBatchNumbers(stockItemUuid);
+/**
+ * The batches of an item that have stock at the operation's location, soonest expiry first.
+ *
+ * They come from the inventory of that location, one row per batch. The list was the item's batches
+ * (`stockbatch`) given the quantity of the first inventory row with the same batch number, from any
+ * location: a batch could show another location's quantity, and one with stock only elsewhere was
+ * offered (#634).
+ */
+const BatchNoSelector: React.FC<BatchNoSelectorProps> = ({
+  stockItemUuid,
+  partyUuid,
+  error,
+  initialValue,
+  onValueChange,
+}) => {
   const { t } = useTranslation();
-  const { items, setStockItemUuid, isLoading: isLoadingBatchinfo } = useStockItemBatchInformationHook();
-
-  useEffect(() => {
-    setStockItemUuid(stockItemUuid);
-  }, [stockItemUuid, setStockItemUuid]);
-
-  const stockItemBatchesInfo = useMemo(() => {
-    if (!stockItemBatchNos) return [];
-
-    return stockItemBatchNos.map((item) => {
-      const matchingBatch = items?.find((batch) => batch.batchNumber === item.batchNo);
-
-      return matchingBatch
-        ? ({
-            ...item,
-            ...matchingBatch,
-            quantity: String(matchingBatch.quantity),
-          } as StockBatchWithUoM)
-        : (item as StockBatchWithUoM);
-    });
-  }, [stockItemBatchNos, items]);
+  const { items: inventory, isLoading } = useStockItemInventory({
+    v: ResourceRepresentation.Default,
+    stockItemUuid,
+    partyUuid,
+    groupBy: LocationStockItemBatchNo,
+    includeBatchNo: true,
+  });
 
   const filteredBatches = useMemo(() => {
-    if (!stockItemBatchesInfo) return [];
+    const batches = new Map<string, StockBatchWithUoM & { total: number }>();
+    for (const row of inventory?.results ?? []) {
+      if (!row.stockBatchUuid) continue;
+      const quantity = Number(row.quantity) || 0;
+      const batch = batches.get(row.stockBatchUuid);
+      if (batch) {
+        batch.total += quantity;
+      } else {
+        batches.set(row.stockBatchUuid, {
+          uuid: row.stockBatchUuid,
+          batchNo: row.batchNumber,
+          expiration: row.expiration,
+          stockItemUuid: row.stockItemUuid,
+          voided: false,
+          quantity: '',
+          quantityUoM: row.quantityUoM,
+          quantityFactor: row.quantityFactor,
+          quantityUoMUuid: row.quantityUoMUuid,
+          total: quantity,
+        });
+      }
+    }
 
     const expiryTime = (batch: StockBatchWithUoM) =>
       batch.expiration ? new Date(batch.expiration).getTime() : Number.POSITIVE_INFINITY;
 
-    // Soonest expiry first (first expired, first out); batches without an expiry last
-    return stockItemBatchesInfo
-      .filter((batch) => {
-        const quantity = typeof batch.quantity === 'string' ? parseFloat(batch.quantity) : batch.quantity;
-
-        return !isNaN(quantity) && quantity > 0;
-      })
+    // Soonest expiry first (first expired, first out); batches without an expiry last. The line's own
+    // batch stays listed when it has no stock left, so that an existing line still shows it.
+    return [...batches.values()]
+      .filter((batch) => batch.total > 0 || batch.uuid === initialValue)
+      .map(({ total, ...batch }) => ({ ...batch, quantity: String(total) } as StockBatchWithUoM))
       .sort((a, b) => expiryTime(a) - expiryTime(b));
-  }, [stockItemBatchesInfo]);
+  }, [inventory, initialValue]);
 
   const initialSelectedItem = useMemo(
     () => filteredBatches.find((batch) => batch.uuid === initialValue) ?? null,
@@ -111,7 +133,7 @@ const BatchNoSelector: React.FC<BatchNoSelectorProps> = ({ stockItemUuid, error,
     [onValueChange],
   );
 
-  if (isLoading || isLoadingBatchinfo) {
+  if (isLoading) {
     return <SelectSkeleton role="progressbar" />;
   }
 
@@ -128,6 +150,7 @@ const BatchNoSelector: React.FC<BatchNoSelectorProps> = ({ stockItemUuid, error,
       selectedItem={initialSelectedItem}
       style={{ flexGrow: 1 }}
       titleText={t('batchNo', 'Batch number')}
+      translateWithId={comboBoxTranslateWithId(t)}
     />
   );
 };

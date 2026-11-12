@@ -16,8 +16,8 @@ import { useTranslation } from 'react-i18next';
 import { showSnackbar } from '@openmrs/esm-framework';
 import { type StockOperationDTO } from '../../../core/api/types/stockOperation/StockOperationDTO';
 import { type StockOperationType } from '../../../core/api/types/stockOperation/StockOperationType';
-import { LocationTypeLocation } from '../../../core/api/types/stockOperation/LocationType';
 import { getStockOperationUniqueId } from '../../stock-operation.utils';
+import { getOperationStockPartyUuid } from '../stock-operations-form-utils';
 import { type BaseStockOperationItemFormData, type StockOperationItemDtoSchema } from '../../validation-schema';
 import useOperationTypePermisions from '../hooks/useOperationTypePermisions';
 import StockItemSearch from '../input-components/stock-item-search.component';
@@ -35,6 +35,8 @@ type StockOperationItemsFormStepProps = {
   onNext?: () => void;
   onPrevious?: () => void;
   onLaunchItemsForm?: (stockOperationItem?: BaseStockOperationItemFormData) => void;
+  /** The operation can no longer be changed: no item search, no edit or delete buttons */
+  readOnly?: boolean;
 };
 const StockOperationItemsFormStep: React.FC<StockOperationItemsFormStepProps> = ({
   stockOperationType,
@@ -42,6 +44,7 @@ const StockOperationItemsFormStep: React.FC<StockOperationItemsFormStepProps> = 
   onNext,
   onPrevious,
   onLaunchItemsForm,
+  readOnly = false,
 }) => {
   const { t } = useTranslation();
   const operationTypePermision = useOperationTypePermisions(stockOperationType);
@@ -51,12 +54,8 @@ const StockOperationItemsFormStep: React.FC<StockOperationItemsFormStepProps> = 
   const observableOperationItems = form.watch('stockOperationItems');
   const sourceUuid = form.watch('sourceUuid');
   const destinationUuid = form.watch('destinationUuid');
-  // « Available » at the location the operation is made at: its source when that is a stock location,
-  // otherwise its destination (a receipt's source is a supplier)
-  const availabilityPartyUuid =
-    stockOperationType?.hasSource && stockOperationType?.sourceType === LocationTypeLocation
-      ? sourceUuid
-      : destinationUuid;
+  // « Available » at the location the operation is made at
+  const availabilityPartyUuid = getOperationStockPartyUuid(stockOperationType, sourceUuid, destinationUuid);
 
   const handleRemoveItem = useCallback(
     (index: number) => {
@@ -123,9 +122,9 @@ const StockOperationItemsFormStep: React.FC<StockOperationItemsFormStepProps> = 
             },
           ]
         : []),
-      { key: 'actions', header: t('actions', 'Actions') },
+      ...(readOnly ? [] : [{ key: 'actions', header: t('actions', 'Actions') }]),
     ];
-  }, [operationTypePermision, t]);
+  }, [operationTypePermision, t, readOnly]);
 
   const tableRows = useMemo(() => {
     return observableOperationItems?.map((item, index) => {
@@ -233,16 +232,18 @@ const StockOperationItemsFormStep: React.FC<StockOperationItemsFormStepProps> = 
         <div className={styles.heading}>
           <h4>{headerTitle}</h4>
         </div>
-        <StockItemSearch
-          onSelectedItem={(stockItem) =>
-            onLaunchItemsForm({
-              uuid: `new-item-${getStockOperationUniqueId()}`,
-              stockItemUuid: stockItem.uuid,
-              hasExpiration: stockItem.hasExpiration,
-              purchasePrice: stockItem.purchasePrice,
-            })
-          }
-        />
+        {!readOnly && (
+          <StockItemSearch
+            onSelectedItem={(stockItem) =>
+              onLaunchItemsForm({
+                uuid: `new-item-${getStockOperationUniqueId()}`,
+                stockItemUuid: stockItem.uuid,
+                hasExpiration: stockItem.hasExpiration,
+                purchasePrice: stockItem.purchasePrice,
+              })
+            }
+          />
+        )}
         <DataTable rows={tableRows ?? []} headers={headers} isSortable={false} useZebraStyles>
           {({ rows, headers, getTableProps, getHeaderProps, getRowProps }) => (
             <TableContainer>
