@@ -13,7 +13,7 @@ const useTranslatedError = () => {
         case 'Responsible Person Required':
           return t('responsiblePersonRequired', 'Responsible Person Required');
         case 'Location Required':
-          return t('locationRequired', 'Location Required');
+          return t('operationLocationRequired', 'Location Required');
         case 'Reason Required':
           return t('reasonRequired', 'Reason Required');
         default:
