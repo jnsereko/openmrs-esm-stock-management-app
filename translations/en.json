@@ -237,6 +237,7 @@
   "number": "Number",
   "onlyCsvFilesAt2mbOrLess": "Only .csv files at 2MB or less",
   "operationDate": "Operation Date",
+  "operationFilter": "Operation",
   "operationLocationRequired": "Location Required",
   "operationModalTitle": "{{title}} Operation",
   "operationNumber": "Operation Number",

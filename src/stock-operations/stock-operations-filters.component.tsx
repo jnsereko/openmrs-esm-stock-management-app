@@ -58,13 +58,23 @@ const StockOperationsFilters: React.FC<StockOperationFiltersProps> = ({ conceptU
     return <DropdownSkeleton />;
   }
 
+  // filterName is also the filter's identity (StockFilters); show its translation
+  const filterLabel =
+    filterName === StockFilters.SOURCES
+      ? t('sources', 'Sources')
+      : filterName === StockFilters.STATUS
+      ? t('status', 'Status')
+      : filterName === StockFilters.OPERATION
+      ? t('operationFilter', 'Operation')
+      : filterName;
+
   return (
     <MultiSelect
       autoAlign
       className={styles.filtersAlign}
       disabled={!dataItems.length}
       id="multiSelect"
-      label={filterName}
+      label={filterLabel}
       labelInline
       items={dataItems}
       itemToString={(item) => (item ? item.display : t('notSet', 'Not Set'))}
@@ -76,7 +86,7 @@ const StockOperationsFilters: React.FC<StockOperationFiltersProps> = ({ conceptU
           );
         }
       }}
-      placeholder={t('filterBy', 'Filter by {{filterName}}', { filterName })}
+      placeholder={t('filterBy', 'Filter by {{filterName}}', { filterName: filterLabel })}
     />
   );
 };
