@@ -9,6 +9,9 @@ import { type StockOperationFilter } from '../stock-operations/stock-operations.
 import useStockList from './useStockList';
 import MetricsCard from '../core/components/card/metrics-card-component';
 import styles from './stock-home.scss';
+import { daysUntilExpiry, expiringWithin } from './expiry.utils';
+
+const SIX_MONTHS_IN_DAYS = 180;
 
 const StockManagementMetrics: React.FC = (filter: StockOperationFilter) => {
   const { t } = useTranslation();
@@ -16,23 +19,23 @@ const StockManagementMetrics: React.FC = (filter: StockOperationFilter) => {
   const { items: expiryItems } = useStockInventory();
   const { items: stockItems } = useStockInventoryItems();
 
-  const currentDate = new Date();
+  // A batch with an expiry date expires, whether or not its stock item is in the first page of stock items
+  // (the item list is paged, so most batches used to find no item, lose hasExpiration and drop out)
+  const mergedArray = expiryItems
+    .filter((batch) => batch?.expiration)
+    .map((batch) => {
+      const matchingItem = stockItems?.find((item) => batch?.stockItemUuid === item.uuid);
+      return { ...matchingItem, ...batch };
+    });
 
-  let mergedArray = expiryItems.map((batch) => {
-    const matchingItem = stockItems?.find((item) => batch?.stockItemUuid === item.uuid);
-    return { ...batch, ...matchingItem };
-  });
-
-  mergedArray = mergedArray.filter((item) => item.hasExpiration);
-
+  // Expired, or within the item's expiry notice (six months when the item has none)
   const filteredData = mergedArray.filter((item) => {
-    const expiryNotice = item.expiryNotice || 0;
-    const expirationDate = new Date(item.expiration);
-    const differenceInDays = Math.ceil((expirationDate.getTime() - currentDate.getTime()) / (1000 * 60 * 60 * 24));
-    return differenceInDays <= expiryNotice || differenceInDays < 0;
+    const remaining = daysUntilExpiry(item.expiration);
+    return remaining !== null && remaining <= (item.expiryNotice || SIX_MONTHS_IN_DAYS);
   });
 
-  const sixMonthsExpiryStocks = filteredData.filter((stock) => stock.hasExpiration && stock.expiryNotice <= 180);
+  // « In 6 months »: batches that expire in the next 180 days, whatever their item's notice
+  const sixMonthsExpiryStocks = expiringWithin(mergedArray, SIX_MONTHS_IN_DAYS);
 
   const { items } = useDisposalList({
     v: ResourceRepresentation.Full,

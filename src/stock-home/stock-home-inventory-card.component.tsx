@@ -4,6 +4,7 @@ import { Button } from '@carbon/react';
 import { WarningHex } from '@carbon/react/icons';
 import { showModal } from '@openmrs/esm-framework';
 import { useStockInventory } from './stock-home-inventory-expiry.resource';
+import { expiringWithin } from './expiry.utils';
 import { useStockInventoryItems } from './stock-home-inventory-items.resource';
 import styles from './stock-home-detail-card.scss';
 
@@ -20,22 +21,14 @@ const StockHomeInventoryCard = () => {
     return <p className={styles.content}>{t('noInventoryAlerts', 'No inventory alerts to display')}</p>;
   }
 
-  const currentDate = new Date();
+  const mergedArray = expiryItems
+    .filter((batch) => batch?.expiration)
+    .map((batch) => {
+      const matchingItem = stockItems?.find((item) => batch?.stockItemUuid === item.uuid);
+      return { ...matchingItem, ...batch };
+    });
 
-  let mergedArray = expiryItems.map((batch) => {
-    const matchingItem = stockItems?.find((item) => batch?.stockItemUuid === item.uuid);
-    return { ...batch, ...matchingItem };
-  });
-
-  mergedArray = mergedArray.filter((item) => item.hasExpiration);
-
-  const filteredData = mergedArray
-    .filter((item) => {
-      const expirationDate = new Date(item.expiration);
-      const differenceInDays = Math.ceil((expirationDate.getTime() - currentDate.getTime()) / (1000 * 60 * 60 * 24));
-      return differenceInDays <= 180 && differenceInDays >= 0;
-    })
-    .slice(0, 5);
+  const filteredData = expiringWithin(mergedArray, 180).slice(0, 5);
 
   const launchExpiredStockModal = () => {
     const dispose = showModal('expired-stock-modal', {
