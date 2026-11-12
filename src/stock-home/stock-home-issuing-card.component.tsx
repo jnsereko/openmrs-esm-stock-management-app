@@ -7,6 +7,7 @@ import { showModal } from '@openmrs/esm-framework';
 import { useStockIssuing } from './stock-home-issuing.resource';
 import styles from './stock-home-detail-card.scss';
 import { formatStockItemName } from '../core/utils/stringUtils';
+import { translateOperationStatus } from '../core/utils/translations';
 
 const StockHomeIssuingCard = () => {
   const { t } = useTranslation();
@@ -61,7 +62,7 @@ const StockHomeIssuingCard = () => {
           </div>
           <div className={styles.cardText}>
             <p>
-              {item?.status} · {item?.sourceName} · {item?.destinationName}
+              {translateOperationStatus(t, item?.status)} · {item?.sourceName} · {item?.destinationName}
             </p>
             <p>
               <strong>{item?.stockItemName}</strong> {item?.stockItemPackagingUOMName}, {item?.quantity}

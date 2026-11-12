@@ -12,6 +12,7 @@ import {
 } from '@carbon/react';
 import { useTranslation } from 'react-i18next';
 import { formatStockItemName } from '../core/utils/stringUtils';
+import { translateOperationStatus } from '../core/utils/translations';
 
 interface IssuingStockModalProps {
   issuingStock: any[];
@@ -47,7 +48,7 @@ const IssuingStockModal = ({ issuingStock, closeModal }: IssuingStockModalProps)
               <TableBody>
                 {issuingStock.map((item, index) => (
                   <TableRow key={index}>
-                    <TableCell>{item?.status || 'N/A'}</TableCell>
+                    <TableCell>{translateOperationStatus(t, item?.status) || 'N/A'}</TableCell>
                     <TableCell>{item?.sourceName || 'N/A'}</TableCell>
                     <TableCell>{item?.destinationName || 'N/A'}</TableCell>
                     <TableCell>{formatStockItemName(item?.stockItemName) || 'N/A'}</TableCell>

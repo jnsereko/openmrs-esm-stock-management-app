@@ -39,10 +39,14 @@ const StockAvailability: React.FC<{ stockItemUuid: string }> = ({ stockItemUuid 
     <div className={styles.availability}>
       {totalQuantity > 0 ? (
         <span>
-          Available: {totalQuantity.toLocaleString()} {commonUOM}
+          {t('availableQuantity', 'Available: {{quantity}} {{unit}}', {
+            quantity: totalQuantity.toLocaleString(),
+            unit: commonUOM ?? '',
+            interpolation: { escapeValue: false },
+          })}
         </span>
       ) : (
-        <span className={styles.outOfStock}>Out of Stock</span>
+        <span className={styles.outOfStock}>{t('outOfStockLabel', 'Out of Stock')}</span>
       )}
     </div>
   );

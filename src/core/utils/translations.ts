@@ -7,6 +7,8 @@ export function translateOperationStatus(t: TFunction, status: string | null | u
       return t('statusNew', 'New');
     case 'SUBMITTED':
       return t('submitted', 'Submitted');
+    case 'AUTHORIZED':
+      return t('statusAuthorized', 'Authorized');
     case 'DISPATCHED':
       return t('dispatched', 'Dispatched');
     case 'COMPLETED':
@@ -28,7 +30,8 @@ export function paginationTexts(t: TFunction) {
     itemsPerPageText: t('itemsPerPage', 'Items per page:'),
     itemRangeText: (min: number, max: number, total: number) =>
       t('paginationItemRange', '{{min}}–{{max}} of {{total}} items', { min, max, total }),
-    pageRangeText: (_current: number, total: number) => t('paginationPageRange', 'of {{total}} pages', { total }),
+    pageRangeText: (_current: number, total: number) =>
+      t('paginationPageRange', 'of {{count}} pages', { count: total }),
     backwardText: t('previousPage', 'Previous page'),
     forwardText: t('nextPage', 'Next page'),
   };

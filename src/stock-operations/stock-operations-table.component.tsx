@@ -165,7 +165,7 @@ const StockOperations: React.FC<StockOperationsTableProps> = () => {
           onInputChange,
           rows,
         }) => (
-          <TableContainer>
+          <TableContainer className={styles.stockTableContainer}>
             <TableToolbar
               style={{
                 position: 'static',
@@ -247,7 +247,9 @@ const StockOperations: React.FC<StockOperationsTableProps> = () => {
                               <span>
                                 <span>{cell.value.commonNames}</span>
                                 {cell.value.more > 0 && (
-                                  <Link onClick={() => expandRow(row.id)}>{`...(${cell.value.more} more)`}</Link>
+                                  <Link onClick={() => expandRow(row.id)}>
+                                    {t('moreItems', '...({{count}} more)', { count: cell.value.more })}
+                                  </Link>
                                 )}
                               </span>
                             ) : (

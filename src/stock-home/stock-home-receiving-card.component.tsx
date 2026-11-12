@@ -7,6 +7,7 @@ import { ResourceRepresentation } from '../core/api/api';
 import { useStockReceiving } from './stock-home-receiving.resource';
 import styles from './stock-home-detail-card.scss';
 import { formatStockItemName } from '../core/utils/stringUtils';
+import { translateOperationStatus } from '../core/utils/translations';
 
 const StockHomeReceivingCard = () => {
   const { t } = useTranslation();
@@ -42,7 +43,7 @@ const StockHomeReceivingCard = () => {
             </div>
             <div className={styles.cardText}>
               <p>
-                {item?.status} · {item?.sourceName} · {item?.destinationName}
+                {translateOperationStatus(t, item?.status)} · {item?.sourceName} · {item?.destinationName}
               </p>
               <p>
                 <strong>{formatStockItemName(stock?.stockItemName)}</strong> {stock?.stockItemPackagingUOMName},{' '}

@@ -5,10 +5,13 @@ export const StockOperationStatusCancelled = 'CANCELLED';
 export const StockOperationStatusDispatched = 'DISPATCHED';
 export const StockOperationStatusCompleted = 'COMPLETED';
 export const StockOperationStatusRejected = 'REJECTED';
+// Set by the stock module when a requisition is approved
+export const StockOperationStatusAuthorized = 'AUTHORIZED';
 
 export const StockOperationStatusTypes = [
   StockOperationStatusNew,
   StockOperationStatusSubmitted,
+  StockOperationStatusAuthorized,
   StockOperationStatusDispatched,
   StockOperationStatusCompleted,
   StockOperationStatusReturned,

@@ -12,6 +12,7 @@ import {
 } from '@carbon/react';
 import { useTranslation } from 'react-i18next';
 import { formatStockItemName } from '../core/utils/stringUtils';
+import { translateOperationStatus } from '../core/utils/translations';
 
 const ReceivingStockModal = ({ closeModal, receivingStock }) => {
   const { t } = useTranslation();
@@ -43,7 +44,7 @@ const ReceivingStockModal = ({ closeModal, receivingStock }) => {
                 {receivingStock.map((item, index) =>
                   item?.stockOperationItems.map((stock, stockIndex) => (
                     <TableRow key={`${index}-${stockIndex}`}>
-                      <TableCell>{item?.status || 'N/A'}</TableCell>
+                      <TableCell>{translateOperationStatus(t, item?.status) || 'N/A'}</TableCell>
                       <TableCell>{item?.sourceName || 'N/A'}</TableCell>
                       <TableCell>{item?.destinationName || 'N/A'}</TableCell>
                       <TableCell>{formatStockItemName(stock?.stockItemName) || 'N/A'}</TableCell>

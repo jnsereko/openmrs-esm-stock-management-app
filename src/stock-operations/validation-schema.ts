@@ -231,6 +231,9 @@ export const getStockOperationFormSchema = (operation: OperationType): z.Schema 
           destinationUuid: z.string({ required_error: 'Destination Required' }).min(1, {
             message: 'Destination Required',
           }),
+          sourceUuid: z.string({ required_error: 'Source Required' }).min(1, {
+            message: 'Source Required',
+          }),
           stockOperationItems: getStockOperationItemFormSchema(operation)
             .array()
             .nonempty('You must add atleast one stock item'),

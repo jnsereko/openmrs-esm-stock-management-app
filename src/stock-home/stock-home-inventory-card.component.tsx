@@ -7,11 +7,20 @@ import { useStockInventory } from './stock-home-inventory-expiry.resource';
 import { expiringWithin } from './expiry.utils';
 import { useStockInventoryItems } from './stock-home-inventory-items.resource';
 import styles from './stock-home-detail-card.scss';
+import { useStockItemInventory } from '../stock-items/stock-items.resource';
+import { LocationStockItemBatchNo } from '../core/api/types/stockItem/StockItem';
+import { ResourceRepresentation } from '../core/api/api';
 
 const StockHomeInventoryCard = () => {
   const { t } = useTranslation();
   const { items: expiryItems, isLoading: inventoryLoading } = useStockInventory();
   const { items: stockItems, isLoading } = useStockInventoryItems();
+  // Batches carry no quantity; take each batch's quantity on hand, summed over locations, from the inventory
+  const { items: inventory } = useStockItemInventory({
+    v: ResourceRepresentation.Default,
+    groupBy: LocationStockItemBatchNo,
+    includeBatchNo: true,
+  });
 
   if (isLoading || inventoryLoading) {
     return null;
@@ -25,7 +34,10 @@ const StockHomeInventoryCard = () => {
     .filter((batch) => batch?.expiration)
     .map((batch) => {
       const matchingItem = stockItems?.find((item) => batch?.stockItemUuid === item.uuid);
-      return { ...matchingItem, ...batch };
+      const quantity = inventory?.results
+        ?.filter((row) => row.stockBatchUuid === batch.uuid)
+        .reduce((sum, row) => sum + (Number(row.quantity) || 0), 0);
+      return { ...matchingItem, ...batch, quantity };
     });
 
   const filteredData = expiringWithin(mergedArray, 180).slice(0, 5);
@@ -48,8 +60,13 @@ const StockHomeInventoryCard = () => {
           <div className={styles.cardText}>
             <p>{t('expiringStock', 'Expiring stock')}</p>
             <p>
-              <strong>{item?.drugName}</strong> {t('batchNumberLabel', 'Batch number:')} {item?.batchNo}{' '}
-              {t('quantityLabel', 'Quantity:')} {item?.quantity} {item?.dispensingUnitName}
+              <strong>{item?.drugName ?? item?.commonName}</strong>{' '}
+              {t('batchQuantityLabel', 'Batch number: {{batchNo}}, quantity: {{quantity}} {{unit}}', {
+                batchNo: item?.batchNo,
+                quantity: item?.quantity ?? '--',
+                unit: item?.dispensingUnitName ?? '',
+                interpolation: { escapeValue: false },
+              })}
             </p>
           </div>
         </div>
