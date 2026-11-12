@@ -32,7 +32,61 @@ export function paginationTexts(t: TFunction) {
       t('paginationItemRange', '{{min}}–{{max}} of {{total}} items', { min, max, total }),
     pageRangeText: (_current: number, total: number) =>
       t('paginationPageRange', 'of {{count}} pages', { count: total }),
+    // The page picker's label; Carbon 1.119 (the app shell's) reads it from this prop
+    pageSelectLabelText: (total: number) => t('paginationPageSelectLabel', 'Page of {{count}} pages', { count: total }),
     backwardText: t('previousPage', 'Previous page'),
     forwardText: t('nextPage', 'Next page'),
+  };
+}
+
+/** DataTable's `translateWithId`: the expand, collapse and select labels, which default to English. */
+export function dataTableTranslateWithId(t: TFunction) {
+  return (messageId: string) => {
+    switch (messageId) {
+      case 'carbon.table.row.expand':
+        return t('expandCurrentRow', 'Expand current row');
+      case 'carbon.table.row.collapse':
+        return t('collapseCurrentRow', 'Collapse current row');
+      case 'carbon.table.all.expand':
+        return t('expandAllRows', 'Expand all rows');
+      case 'carbon.table.all.collapse':
+        return t('collapseAllRows', 'Collapse all rows');
+      case 'carbon.table.all.select':
+        return t('selectAllRows', 'Select all rows');
+      case 'carbon.table.all.unselect':
+        return t('unselectAllRows', 'Unselect all rows');
+      case 'carbon.table.row.select':
+        return t('selectRow', 'Select row');
+      case 'carbon.table.row.unselect':
+        return t('unselectRow', 'Unselect row');
+      default:
+        return messageId;
+    }
+  };
+}
+
+/** TableHeader's `translateWithId`: the sort button's description, which defaults to English. */
+export function tableHeaderTranslateWithId(t: TFunction) {
+  return (
+    messageId: string,
+    args?: { header?: unknown; sortDirection?: string; isSortHeader?: boolean; sortStates?: Record<string, string> },
+  ) => {
+    const header = typeof args?.header === 'string' ? args.header : '';
+    if (args?.isSortHeader && args.sortDirection === args.sortStates?.ASC) {
+      return t('sortRowsDescending', 'Click to sort rows by {{header}} header in descending order', {
+        header,
+        interpolation: { escapeValue: false },
+      });
+    }
+    if (args?.isSortHeader && args.sortDirection === args.sortStates?.DESC) {
+      return t('unsortRows', 'Click to unsort rows by {{header}} header', {
+        header,
+        interpolation: { escapeValue: false },
+      });
+    }
+    return t('sortRowsAscending', 'Click to sort rows by {{header}} header in ascending order', {
+      header,
+      interpolation: { escapeValue: false },
+    });
   };
 }

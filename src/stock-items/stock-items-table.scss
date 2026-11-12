@@ -110,16 +110,37 @@
 // table scrolls, so the toolbar's filter dropdown is not clipped.
 .tableScroll {
   overflow-x: auto;
+}
 
-  // Long French headers (« Niveau de Réapprovisionnement ») and names wrap instead of widening the table
+// Long French names wrap instead of widening the table. Two classes, so that the narrower padding
+// also holds when Carbon's stylesheet loads after this one, as on UAT (it did not, and the table
+// scrolled at 1280 px)
+.tableScroll :global(.cds--data-table) {
   th,
   td {
     overflow-wrap: break-word;
     padding-inline: layout.$spacing-03;
   }
 
+  // The sort button carries the header's padding
+  th:global(.cds--table-sort__header) {
+    padding-inline: 0;
+  }
+
+  :global(.cds--table-sort) {
+    padding-inline-start: layout.$spacing-03;
+  }
+
+  // Carbon pads a plain header's label as well as the header (« Actions » took 82 px)
+  th:not(:global(.cds--table-sort__header)) :global(.cds--table-header-label) {
+    padding-inline: 0;
+  }
+
+  // Headers wrap only between words: hyphenated, « Niveau de Réapprovisionnement » broke over 7 lines
   th {
-    hyphens: auto;
+    hyphens: manual;
+    overflow-wrap: normal;
+    word-break: keep-all;
   }
 }
 

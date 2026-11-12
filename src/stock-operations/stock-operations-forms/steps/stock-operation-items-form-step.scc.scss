@@ -7,6 +7,25 @@
   width: 100%;
 }
 
+// At 1280 px the workspace is narrower than this table was (« Next » cut off by 89 px): cells use less
+// padding and wrap their text, headers between words only
+.tableContainer :global(.cds--data-table) {
+  th,
+  td {
+    padding-inline: layout.$spacing-03;
+  }
+
+  td {
+    overflow-wrap: break-word;
+    hyphens: auto;
+  }
+
+  th {
+    overflow-wrap: normal;
+    word-break: keep-all;
+  }
+}
+
 .availability {
   font-size: 0.875rem;
 

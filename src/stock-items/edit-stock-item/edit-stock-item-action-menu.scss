@@ -10,3 +10,11 @@
   text-align: start;
   white-space: normal;
 }
+
+// Carbon sizes buttons to max-content (up to 20rem), so the name column could not shrink below 320 px
+// and the Items table scrolled at 1280 px. Two classes outrank Carbon's .cds--btn in either load order.
+.nameButton:global(.cds--btn) {
+  inline-size: auto;
+  max-inline-size: 100%;
+  white-space: normal;
+}

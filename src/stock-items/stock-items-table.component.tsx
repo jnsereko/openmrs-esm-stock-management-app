@@ -33,7 +33,7 @@ import EditStockItemActionsMenu from './edit-stock-item/edit-stock-item-action-m
 import FilterStockItems from './components/filter-stock-items/filter-stock-items.component';
 import { type CustomTableHeader } from '../core/components/table/types';
 import styles from './stock-items-table.scss';
-import { paginationTexts } from '../core/utils/translations';
+import { paginationTexts, tableHeaderTranslateWithId } from '../core/utils/translations';
 import { type TFunction } from 'i18next';
 
 interface StockItemsTableProps {
@@ -224,7 +224,8 @@ const StockItemsTableComponent: React.FC<StockItemsTableProps> = () => {
                             })}
                             className={isDesktop ? styles.desktopHeader : styles.tabletHeader}
                             key={`${header.key}`}
-                            isSortable={header.key !== 'name'}
+                            isSortable={header.key !== 'name' && header.key !== 'actions'}
+                            translateWithId={tableHeaderTranslateWithId(t)}
                           >
                             {(() => {
                               const customHeader = header as CustomTableHeader;
@@ -237,7 +238,6 @@ const StockItemsTableComponent: React.FC<StockItemsTableProps> = () => {
                           </TableHeader>
                         ),
                     )}
-                    <TableHeader />
                   </TableRow>
                 </TableHead>
                 <TableBody>

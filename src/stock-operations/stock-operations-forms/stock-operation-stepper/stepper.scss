@@ -14,7 +14,9 @@
   gap: layout.$spacing-03;
   align-items: baseline;
   flex-direction: column;
-  width: 200px;
+  // 160 px rather than 200: at 1280 px the steps' tables need the room (step names wrap)
+  width: 10rem;
+  flex-shrink: 0;
   background-color: colors.$gray-10;
 }
 
@@ -39,4 +41,7 @@
 
 .content {
   flex: 1;
+  // A flex item does not shrink below its content by default, so a wide step (the items table)
+  // pushed the step's buttons out of the workspace
+  min-inline-size: 0;
 }

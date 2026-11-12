@@ -16,6 +16,7 @@ import { useTranslation } from 'react-i18next';
 import { showSnackbar } from '@openmrs/esm-framework';
 import { type StockOperationDTO } from '../../../core/api/types/stockOperation/StockOperationDTO';
 import { type StockOperationType } from '../../../core/api/types/stockOperation/StockOperationType';
+import { LocationTypeLocation } from '../../../core/api/types/stockOperation/LocationType';
 import { getStockOperationUniqueId } from '../../stock-operation.utils';
 import { type BaseStockOperationItemFormData, type StockOperationItemDtoSchema } from '../../validation-schema';
 import useOperationTypePermisions from '../hooks/useOperationTypePermisions';
@@ -48,6 +49,14 @@ const StockOperationItemsFormStep: React.FC<StockOperationItemsFormStepProps> = 
 
   const form = useFormContext<StockOperationItemDtoSchema>();
   const observableOperationItems = form.watch('stockOperationItems');
+  const sourceUuid = form.watch('sourceUuid');
+  const destinationUuid = form.watch('destinationUuid');
+  // « Available » at the location the operation is made at: its source when that is a stock location,
+  // otherwise its destination (a receipt's source is a supplier)
+  const availabilityPartyUuid =
+    stockOperationType?.hasSource && stockOperationType?.sourceType === LocationTypeLocation
+      ? sourceUuid
+      : destinationUuid;
 
   const handleRemoveItem = useCallback(
     (index: number) => {
@@ -134,7 +143,11 @@ const StockOperationItemsFormStep: React.FC<StockOperationItemsFormStepProps> = 
       return {
         id: uuid || `${uniqueId}-${index}`,
         item: stockItemUuid ? <StockOperationItemCell stockItemUuid={stockItemUuid} /> : '--',
-        itemDetails: stockItemUuid ? <StockAvailability stockItemUuid={stockItemUuid} /> : '--',
+        itemDetails: stockItemUuid ? (
+          <StockAvailability stockItemUuid={stockItemUuid} partyUuid={availabilityPartyUuid} />
+        ) : (
+          '--'
+        ),
         batch: (
           <StockOperationItemBatchNoCell
             operation={stockOperationType}
@@ -186,7 +199,15 @@ const StockOperationItemsFormStep: React.FC<StockOperationItemsFormStepProps> = 
         ),
       };
     });
-  }, [observableOperationItems, onLaunchItemsForm, handleRemoveItem, stockOperationType, t, uniqueId]);
+  }, [
+    observableOperationItems,
+    onLaunchItemsForm,
+    handleRemoveItem,
+    stockOperationType,
+    t,
+    uniqueId,
+    availabilityPartyUuid,
+  ]);
 
   const handleNext = async () => {
     const valid = await form.trigger(['stockOperationItems']);

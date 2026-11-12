@@ -37,7 +37,12 @@ import StockOperationTypesSelector from './stock-operation-types-selector/stock-
 import StockOperationsFilters from './stock-operations-filters.component';
 import StockOperationExpandedRow from './add-stock-operation/stock-operations-expanded-row/stock-operation-expanded-row.component';
 import styles from './stock-operations-table.scss';
-import { paginationTexts, translateOperationStatus } from '../core/utils/translations';
+import {
+  dataTableTranslateWithId,
+  paginationTexts,
+  tableHeaderTranslateWithId,
+  translateOperationStatus,
+} from '../core/utils/translations';
 
 interface StockOperationsTableProps {
   status?: string;
@@ -56,6 +61,16 @@ const StockOperations: React.FC<StockOperationsTableProps> = () => {
   const [selectedSources, setSelectedSources] = useState<string[]>([]);
   const [selectedStatus, setSelectedStatus] = useState<string[]>([]);
   const [selectedOperations, setSelectedOperations] = useState<string[]>([]);
+  // The expanded rows are kept here rather than in DataTable: DataTable keeps a row open across a
+  // filter change and, for one render, still lists the old rows against the new page of operations,
+  // so the opened row was handed no operation and the page crashed (« Autorisé » filter, #632)
+  const [expandedRowIds, setExpandedRowIds] = useState<string[]>([]);
+  const collapseAllRows = useCallback(() => setExpandedRowIds([]), []);
+  const toggleRow = useCallback(
+    (rowId: string) =>
+      setExpandedRowIds((ids) => (ids.includes(rowId) ? ids.filter((id) => id !== rowId) : [...ids, rowId])),
+    [],
+  );
 
   const { items, tableHeaders, currentPage, pageSizes, totalItems, goTo, currentPageSize, setPageSize, isLoading } =
     useStockOperationPages({
@@ -71,17 +86,22 @@ const StockOperations: React.FC<StockOperationsTableProps> = () => {
   const filterApplied =
     selectedFromDate || selectedToDate || selectedSources.length || selectedStatus.length || selectedOperations.length;
 
-  const handleOnFilterChange = useCallback((selectedItems, filterType) => {
-    if (filterType === StockFilters.SOURCES) {
-      setSelectedSources(selectedItems);
-    } else if (filterType === StockFilters.OPERATION) {
-      setSelectedOperations(selectedItems);
-    } else {
-      setSelectedStatus(selectedItems);
-    }
-  }, []);
+  const handleOnFilterChange = useCallback(
+    (selectedItems, filterType) => {
+      collapseAllRows();
+      if (filterType === StockFilters.SOURCES) {
+        setSelectedSources(selectedItems);
+      } else if (filterType === StockFilters.OPERATION) {
+        setSelectedOperations(selectedItems);
+      } else {
+        setSelectedStatus(selectedItems);
+      }
+    },
+    [collapseAllRows],
+  );
 
   const handleDateFilterChange = ([startDate, endDate]) => {
+    collapseAllRows();
     if (startDate) {
       setSelectedFromDate(startDate);
       if (selectedToDate && startDate && selectedToDate < startDate) {
@@ -154,17 +174,14 @@ const StockOperations: React.FC<StockOperationsTableProps> = () => {
       <h2 className={styles.tableHeader}>
         {t('stockOperationsTableHeader', 'Stock operations to track movement of stock.')}
       </h2>
-      <DataTable headers={tableHeaders} isSortable rows={tableRows} useZebraStyles>
-        {({
-          expandRow,
-          getExpandedRowProps,
-          getHeaderProps,
-          getRowProps,
-          getTableProps,
-          headers,
-          onInputChange,
-          rows,
-        }) => (
+      <DataTable
+        headers={tableHeaders}
+        isSortable
+        rows={tableRows}
+        useZebraStyles
+        translateWithId={dataTableTranslateWithId(t)}
+      >
+        {({ getExpandedRowProps, getHeaderProps, getRowProps, getTableProps, headers, onInputChange, rows }) => (
           <TableContainer className={styles.stockTableContainer}>
             <TableToolbar
               style={{
@@ -226,18 +243,26 @@ const StockOperations: React.FC<StockOperationsTableProps> = () => {
                           })}
                           className={isDesktop ? styles.desktopHeader : styles.tabletHeader}
                           key={`${header.key}`}
+                          translateWithId={tableHeaderTranslateWithId(t)}
                         >
                           {header.header?.content ?? header.header}
                         </TableHeader>
                       ),
                   )}
-                  <TableHeader></TableHeader>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {rows?.map((row: any, index) => {
-                  const props = getRowProps({ row });
-                  const expandedRowProps = getExpandedRowProps({ row });
+                {rows?.map((row: any) => {
+                  const model = items?.find((item) => item?.uuid === row.id);
+                  const isExpanded = Boolean(model) && expandedRowIds.includes(row.id);
+                  const props = {
+                    ...getRowProps({ row }),
+                    isExpanded,
+                    onExpand: () => toggleRow(row.id),
+                    'aria-label': isExpanded
+                      ? t('collapseCurrentRow', 'Collapse current row')
+                      : t('expandCurrentRow', 'Expand current row'),
+                  };
                   return (
                     <React.Fragment key={row.id}>
                       <TableExpandRow className={isDesktop ? styles.desktopRow : styles.tabletRow} {...props}>
@@ -247,7 +272,7 @@ const StockOperations: React.FC<StockOperationsTableProps> = () => {
                               <span>
                                 <span>{cell.value.commonNames}</span>
                                 {cell.value.more > 0 && (
-                                  <Link onClick={() => expandRow(row.id)}>
+                                  <Link onClick={() => toggleRow(row.id)}>
                                     {t('moreItems', '...({{count}} more)', { count: cell.value.more })}
                                   </Link>
                                 )}
@@ -258,12 +283,12 @@ const StockOperations: React.FC<StockOperationsTableProps> = () => {
                           </TableCell>
                         ))}
                       </TableExpandRow>
-                      {row.isExpanded ? (
-                        <TableExpandedRow colSpan={headers.length + 2}>
-                          <StockOperationExpandedRow model={items[index]} />
+                      {isExpanded ? (
+                        <TableExpandedRow {...getExpandedRowProps({ row })} colSpan={headers.length + 1}>
+                          <StockOperationExpandedRow model={model} />
                         </TableExpandedRow>
                       ) : (
-                        <TableExpandedRow className={styles.hiddenRow} colSpan={headers.length + 2} />
+                        <TableExpandedRow className={styles.hiddenRow} colSpan={headers.length + 1} />
                       )}
                     </React.Fragment>
                   );

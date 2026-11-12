@@ -50,12 +50,9 @@ export function useStockOperationPages(filter: StockOperationFilter) {
         header: t('date', 'Date'),
         key: 'operationDate',
       },
-      {
-        id: 7,
-        key: 'details',
-        header: '',
-      },
-      { key: 'actions', header: '' },
+      // No empty « details » column: the body had a blank cell under the actions header and the edit
+      // button under an extra one, which made the table 50 px wider than it needs to be
+      { id: 7, key: 'actions', header: '', isSortable: false },
     ],
     [t],
   );

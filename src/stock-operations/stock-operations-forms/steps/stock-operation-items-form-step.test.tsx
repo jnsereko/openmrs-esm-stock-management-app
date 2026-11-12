@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import userEvent from '@testing-library/user-event';
 import { render, screen, within } from '@testing-library/react';
 import { FormProvider, useForm, type UseFormReturn } from 'react-hook-form';
-import { requisitionOperationTypeMock } from '@mocks';
+import { receiptOperationTypeMock, requisitionOperationTypeMock, stockIssueOperationtypeMock } from '@mocks';
 import { type StockOperationType } from '../../../core/api/types/stockOperation/StockOperationType';
 import { type StockOperationItemDtoSchema } from '../../validation-schema';
 import StockOperationItemsFormStep from './stock-operation-items-form-step.component';
@@ -14,7 +14,9 @@ vi.mock('../input-components/stock-item-search.component', () => ({
 vi.mock('./stock-operation-item-cell.component', () => ({
   default: ({ stockItemUuid }: { stockItemUuid: string }) => <span>{stockItemUuid}</span>,
 }));
-vi.mock('./stock-availability-cell.component', () => ({ default: () => <span>availability</span> }));
+vi.mock('./stock-availability-cell.component', () => ({
+  default: ({ partyUuid }) => <span>availability at {partyUuid}</span>,
+}));
 vi.mock('./quantity-uom-cell.component', () => ({ default: () => <span>uom</span> }));
 vi.mock('./stock-operation-item-batch-no-cell.component', () => ({ default: () => <span>batch</span> }));
 vi.mock('./stock-operation-item-expiry-cell.component', () => ({ default: () => <span>expiry</span> }));
@@ -27,15 +29,22 @@ const items = [
 
 let formRef: UseFormReturn<StockOperationItemDtoSchema>;
 
-const Wrapper: React.FC<{ onLaunchItemsForm: () => void }> = ({ onLaunchItemsForm }) => {
+const Wrapper: React.FC<{ onLaunchItemsForm: () => void; operationType?: unknown }> = ({
+  onLaunchItemsForm,
+  operationType = requisitionOperationTypeMock,
+}) => {
   const form = useForm<StockOperationItemDtoSchema>({
-    defaultValues: { stockOperationItems: items } as unknown as StockOperationItemDtoSchema,
+    defaultValues: {
+      stockOperationItems: items,
+      sourceUuid: 'source-party',
+      destinationUuid: 'destination-party',
+    } as unknown as StockOperationItemDtoSchema,
   });
   formRef = form;
   return (
     <FormProvider {...form}>
       <StockOperationItemsFormStep
-        stockOperationType={requisitionOperationTypeMock as unknown as StockOperationType}
+        stockOperationType={operationType as StockOperationType}
         onLaunchItemsForm={onLaunchItemsForm}
       />
     </FormProvider>
@@ -74,5 +83,14 @@ describe('StockOperationItemsFormStep', () => {
     expect(onLaunchItemsForm).toHaveBeenCalledTimes(1);
     expect(onLaunchItemsForm).toHaveBeenCalledWith(expect.objectContaining({ uuid: 'item-3-uuid' }));
     expect(formRef.getValues('stockOperationItems')).toHaveLength(3);
+  });
+
+  it("shows availability at the operation's source location, or at its destination for a receipt", () => {
+    const { unmount } = render(<Wrapper onLaunchItemsForm={vi.fn()} operationType={stockIssueOperationtypeMock} />);
+    expect(screen.getAllByText('availability at source-party')).toHaveLength(3);
+    unmount();
+
+    render(<Wrapper onLaunchItemsForm={vi.fn()} operationType={receiptOperationTypeMock} />);
+    expect(screen.getAllByText('availability at destination-party')).toHaveLength(3);
   });
 });

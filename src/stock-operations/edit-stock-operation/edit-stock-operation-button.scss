@@ -20,7 +20,9 @@
   font-weight: 500;
   color: #4d4d4d;
   white-space: normal;
-  overflow-wrap: anywhere;
+  // Break only at the <wbr> after each « - », never inside the 14-digit date
+  overflow-wrap: normal;
+  word-break: keep-all;
   text-align: start;
 }
 

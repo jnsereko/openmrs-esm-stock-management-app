@@ -147,4 +147,24 @@
   td {
     hyphens: auto;
   }
+
+  // Headers wrap only between words
+  th {
+    overflow-wrap: normal;
+    word-break: keep-all;
+  }
+
+  // The sort button carries a sortable header's padding; Carbon's 1rem plus room for the sort icon
+  // made the headers, not the data, set the table's width (1027 px for 977 at 1280 px)
+  th:global(.cds--table-sort__header) {
+    padding-inline: 0;
+  }
+
+  :global(.cds--table-sort) {
+    padding-inline-start: layout.$spacing-03;
+  }
+
+  th:not(:global(.cds--table-sort__header)) :global(.cds--table-header-label) {
+    padding-inline: 0;
+  }
 }

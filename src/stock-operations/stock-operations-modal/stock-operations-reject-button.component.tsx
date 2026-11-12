@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import { Button } from '@carbon/react';
-import { Repeat } from '@carbon/react/icons';
+import { CloseOutline } from '@carbon/react/icons';
 import { useTranslation } from 'react-i18next';
 import { showModal } from '@openmrs/esm-framework';
 import { type StockOperationDTO } from '../../core/api/types/stockOperation/StockOperationDTO';
@@ -20,8 +20,9 @@ const StockOperationRejectButton: React.FC<StockOperationRejectButtonProps> = ({
     });
   }, [operation]);
 
+  // A cross for Reject, the loop arrows for Return (they were the other way round)
   return (
-    <Button onClick={launchRejectModal} renderIcon={(props) => <Repeat size={16} {...props} />}>
+    <Button onClick={launchRejectModal} renderIcon={(props) => <CloseOutline size={16} {...props} />}>
       {t('reject', 'Reject')}
     </Button>
   );
