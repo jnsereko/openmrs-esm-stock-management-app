@@ -6,6 +6,7 @@ import { DocumentImport, View } from '@carbon/react/icons';
 import { showModal } from '@openmrs/esm-framework';
 import { useStockIssuing } from './stock-home-issuing.resource';
 import styles from './stock-home-detail-card.scss';
+import { formatStockItemName } from '../core/utils/stringUtils';
 
 const StockHomeIssuingCard = () => {
   const { t } = useTranslation();
@@ -32,7 +33,7 @@ const StockHomeIssuingCard = () => {
       status: item?.status,
       sourceName: item?.sourceName,
       destinationName: item?.destinationName,
-      stockItemName: stock?.stockItemName,
+      stockItemName: formatStockItemName(stock?.stockItemName),
       stockItemPackagingUOMName: stock?.stockItemPackagingUOMName,
       quantity: stock?.quantity,
       key: `${index}-${stockIndex}`,

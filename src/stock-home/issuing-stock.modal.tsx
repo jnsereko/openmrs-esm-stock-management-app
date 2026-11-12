@@ -11,6 +11,7 @@ import {
   TableRow,
 } from '@carbon/react';
 import { useTranslation } from 'react-i18next';
+import { formatStockItemName } from '../core/utils/stringUtils';
 
 interface IssuingStockModalProps {
   issuingStock: any[];
@@ -49,7 +50,7 @@ const IssuingStockModal = ({ issuingStock, closeModal }: IssuingStockModalProps)
                     <TableCell>{item?.status || 'N/A'}</TableCell>
                     <TableCell>{item?.sourceName || 'N/A'}</TableCell>
                     <TableCell>{item?.destinationName || 'N/A'}</TableCell>
-                    <TableCell>{item?.stockItemName || 'N/A'}</TableCell>
+                    <TableCell>{formatStockItemName(item?.stockItemName) || 'N/A'}</TableCell>
                     <TableCell>{item?.stockItemPackagingUOMName || 'N/A'}</TableCell>
                     <TableCell>{item?.quantity || 'N/A'}</TableCell>
                   </TableRow>

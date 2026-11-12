@@ -24,3 +24,15 @@ export function toErrorMessage(payload: any) {
   }
   return errorMessage;
 }
+
+/**
+ * The stock module names an item "<drug name> (<common name>)". When the common name is the drug
+ * name, that reads "X (X)"; show it once.
+ */
+export function formatStockItemName(name: string | null | undefined) {
+  const match = name?.match(/^(.*\S)\s*\((.*)\)$/s);
+  if (match && match[1].trim().toLowerCase() === match[2].trim().toLowerCase()) {
+    return match[1].trim();
+  }
+  return name;
+}

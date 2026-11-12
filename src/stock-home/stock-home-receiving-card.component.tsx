@@ -6,6 +6,7 @@ import { showModal } from '@openmrs/esm-framework';
 import { ResourceRepresentation } from '../core/api/api';
 import { useStockReceiving } from './stock-home-receiving.resource';
 import styles from './stock-home-detail-card.scss';
+import { formatStockItemName } from '../core/utils/stringUtils';
 
 const StockHomeReceivingCard = () => {
   const { t } = useTranslation();
@@ -44,7 +45,8 @@ const StockHomeReceivingCard = () => {
                 {item?.status} · {item?.sourceName} · {item?.destinationName}
               </p>
               <p>
-                <strong>{stock?.stockItemName}</strong> {stock?.stockItemPackagingUOMName}, {stock?.quantity}
+                <strong>{formatStockItemName(stock?.stockItemName)}</strong> {stock?.stockItemPackagingUOMName},{' '}
+                {stock?.quantity}
               </p>
             </div>
           </div>

@@ -4,6 +4,7 @@ import { type StockOperationItemCost } from '../../core/api/types/stockOperation
 import { type StockOperationItemDTO } from '../../core/api/types/stockOperation/StockOperationItemDTO';
 import { HEALTH_CENTER_NAME } from '../../constants';
 import { OperationType } from '../../core/api/types/stockOperation/StockOperationType';
+import { formatStockItemName } from '../../core/utils/stringUtils';
 
 export interface StockOperationPrintData {
   operationNumber?: string;
@@ -72,7 +73,7 @@ export const BuildStockOperationData = async (
   data.items = stockOperationItems.map((p) => {
     const item: StockOperationItemData = {};
     item.itemCode = p?.acronym;
-    item.itemDescription = p?.stockItemName;
+    item.itemDescription = formatStockItemName(p?.stockItemName);
     item.purchasePrice = p?.purchasePrice;
     item.batchNumber = p?.batchNo;
     item.expiryDate = p?.expiration;

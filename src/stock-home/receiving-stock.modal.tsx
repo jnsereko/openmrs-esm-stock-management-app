@@ -11,6 +11,7 @@ import {
   TableRow,
 } from '@carbon/react';
 import { useTranslation } from 'react-i18next';
+import { formatStockItemName } from '../core/utils/stringUtils';
 
 const ReceivingStockModal = ({ closeModal, receivingStock }) => {
   const { t } = useTranslation();
@@ -45,7 +46,7 @@ const ReceivingStockModal = ({ closeModal, receivingStock }) => {
                       <TableCell>{item?.status || 'N/A'}</TableCell>
                       <TableCell>{item?.sourceName || 'N/A'}</TableCell>
                       <TableCell>{item?.destinationName || 'N/A'}</TableCell>
-                      <TableCell>{stock?.stockItemName || 'N/A'}</TableCell>
+                      <TableCell>{formatStockItemName(stock?.stockItemName) || 'N/A'}</TableCell>
                       <TableCell>{stock?.stockItemPackagingUOMName || 'N/A'}</TableCell>
                       <TableCell>{stock?.quantity || 'N/A'}</TableCell>
                     </TableRow>

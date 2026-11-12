@@ -15,6 +15,7 @@ import {
 } from '@carbon/react';
 import styles from './stock-operation-items-form-step.scc.scss';
 import { ArrowLeft } from '@carbon/react/icons';
+import { formatStockItemName } from '../../../core/utils/stringUtils';
 
 const formatDate = (date: Date | string | null) => {
   if (!date) return ' ';
@@ -49,7 +50,7 @@ const ReceivedItems: React.FC<ReceivedItemsProps> = ({ stockOperation, onPreviou
   const rows =
     stockOperation?.stockOperationItems?.map((item) => ({
       id: item.uuid,
-      item: item.stockItemName,
+      item: formatStockItemName(item.stockItemName),
       requested: item.quantityRequested || ' ',
       batch: item.batchNo,
       expiry: formatDate(item.expiration),
