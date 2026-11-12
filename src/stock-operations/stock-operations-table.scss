@@ -42,8 +42,12 @@
   margin-top: layout.$spacing-05;
 }
 
-// Carbon gives the toolbar a fixed height; it must grow with its wrapped content
-.toolbar {
+// Carbon's .cds--toolbar-content has a fixed block-size of 3rem, at the same specificity as
+// .toolbarContent; on UVL Carbon's stylesheet loads after this one and won, so the wrapped row was
+// drawn over the table header. Scoping it under .cds--table-toolbar outranks Carbon whatever the
+// load order (TableToolbar ignores className, so the toolbar itself cannot take a class). The
+// toolbar section only has a min-block-size and grows with its content.
+:global(.cds--table-toolbar) .toolbarContent {
   block-size: auto;
   min-block-size: layout.$spacing-09;
 }
