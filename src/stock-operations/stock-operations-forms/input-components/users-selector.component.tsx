@@ -8,12 +8,21 @@ import { otherUser } from '../../../core/utils/utils';
 import { useUser } from '../../../stock-lookups/stock-lookups.resource';
 import useSearchUser from '../hooks/useSearchUser';
 
+function matchesUser(item: User | string, inputValue: string | null) {
+  const query = inputValue?.trim().toLowerCase();
+  if (typeof item === 'string') return !query || item.toLowerCase().includes(query);
+  if (!query || item?.uuid === otherUser.uuid) return true;
+  return [item?.person?.display, item?.display, (item as User & { username?: string })?.username].some((text) =>
+    text?.toLowerCase().includes(query),
+  );
+}
+
 const UsersSelector = () => {
   const { isLoading, userList, setSearchString } = useSearchUser();
   const { t } = useTranslation();
   const debouncedSearch = useDebounce((query: string) => {
     setSearchString(query);
-  }, 1000);
+  }, 300);
 
   const form = useFormContext<{ responsiblePersonUuid: string; responsiblePersonOther: string }>();
   const observableresponsiblePersonUuid = form.watch('responsiblePersonUuid');
@@ -69,6 +78,8 @@ const UsersSelector = () => {
                   : ''
               }
               itemToString={(item) => (typeof item === 'string' ? item : item?.person?.display || '')}
+              // Narrow the users already listed at once, while the server search for the typed text runs
+              shouldFilterItem={({ item, inputValue }) => matchesUser(item, inputValue)}
               onInputChange={debouncedSearch}
               placeholder={t('filter', 'Filter...')}
               invalid={!!error?.message}

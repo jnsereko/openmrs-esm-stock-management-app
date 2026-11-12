@@ -47,6 +47,13 @@ export const configSchema = {
     _default: false,
     _description: 'Whether to include item costs on the printout',
   },
+  responsiblePersonExcludedRoles: {
+    _type: Type.Array,
+    _elements: { _type: Type.String },
+    _default: [],
+    _description:
+      'Users holding any of these roles (role names, e.g. "System Developer") are not offered as the responsible person of a stock operation, so that system and integration accounts do not crowd out staff',
+  },
   stockAdjustmentReasonUUID: {
     _type: Type.ConceptUuid,
     _description: 'UUID for the stock adjustment reasons',
@@ -86,6 +93,7 @@ export type ConfigObject = {
   packingUnitsUUID: string;
   printBalanceOnHand: boolean;
   printItemCost: boolean;
+  responsiblePersonExcludedRoles: Array<string>;
   stockAdjustmentReasonUUID: string;
   stockItemCategoryUUID: string;
   stockSourceTypeUUID: string;

@@ -160,4 +160,35 @@ describe('User Selector', () => {
     await new Promise((resolve) => setTimeout(resolve, 2000)); // Simulate debounce
     expect(setSearchString).toHaveBeenCalledWith('test');
   });
+
+  it('narrows the listed users as soon as a name is typed, before the server search returns', async () => {
+    const user = userEvent.setup();
+    const person = (uuid: string, name: string) => ({
+      uuid,
+      person: { display: name, uuid },
+      display: name,
+      givenName: name,
+      familyName: '',
+      firstName: name,
+      lastName: '',
+      privileges: [],
+    });
+    mockUseSearchUser.mockReturnValue({
+      isLoading: false,
+      userList: [person('1', 'Super User'), person('2', 'Evelyne Irakoze')],
+      setSearchString: vi.fn(),
+      setLimit: vi.fn(),
+      setRepresentation: vi.fn(),
+    });
+    mockUseUser.mockReturnValue({ isLoading: false, data: null, error: null });
+
+    render(<UsersSelector />);
+
+    const combobox = screen.getByRole('combobox');
+    await user.click(combobox);
+    await user.type(combobox, 'evel');
+
+    expect(screen.getByText('Evelyne Irakoze')).toBeInTheDocument();
+    expect(screen.queryByText('Super User')).not.toBeInTheDocument();
+  });
 });

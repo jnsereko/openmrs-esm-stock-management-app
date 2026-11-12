@@ -1,4 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useConfig } from '@openmrs/esm-framework';
+import { type ConfigObject } from '../../../config-schema';
 import {
   type ConceptFilterCriteria,
   type UserFilterCriteria,
@@ -16,9 +18,19 @@ const useSearchUser = (filter?: ConceptFilterCriteria) => {
   );
 
   const {
-    items: { results: userList },
+    items: { results },
     isLoading,
   } = useUsers(conceptFilter);
+  const { responsiblePersonExcludedRoles } = useConfig<ConfigObject>();
+
+  // Leave out system and integration accounts, recognised by their roles
+  const userList = useMemo(() => {
+    const excluded = new Set(responsiblePersonExcludedRoles ?? []);
+    if (!excluded.size) return results;
+    return results?.filter(
+      (user) => !user.roles?.some((role) => excluded.has(role.display) || excluded.has(role.role)),
+    );
+  }, [results, responsiblePersonExcludedRoles]);
 
   const [searchString, setSearchString] = useState(null);
 

@@ -155,7 +155,7 @@ export function useUsers(filter: UserFilterCriteria) {
       data: PageableResult<User>;
     },
     Error
-  >(apiUrl, openmrsFetch);
+  >(apiUrl, openmrsFetch, { keepPreviousData: true });
   return {
     items: data?.data || <PageableResult<User>>{},
     isLoading,
