@@ -179,7 +179,7 @@ const StockItemsTableComponent: React.FC<StockItemsTableProps> = () => {
       </h2>
       <DataTable rows={tableRows} headers={tableHeaders} isSortable useZebraStyles>
         {({ rows, headers, getHeaderProps, getTableProps, getRowProps, getBatchActionProps }) => (
-          <TableContainer>
+          <TableContainer className={styles.stockTableContainer}>
             <TableToolbar
               style={{
                 position: 'static',
