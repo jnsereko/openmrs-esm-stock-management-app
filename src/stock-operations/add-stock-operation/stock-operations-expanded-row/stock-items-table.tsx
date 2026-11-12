@@ -26,8 +26,9 @@ const StockItemsTable: React.FC<Props> = ({ items }) => {
   const [searchText, setSearchText] = useState<string>('');
 
   const handleSearch = (item: StockOperationItemDTO) => {
-    if (!searchText) return true;
-    return item.commonName.toLowerCase().includes(searchText);
+    const query = searchText.trim().toLowerCase();
+    if (!query) return true;
+    return (item.commonName ?? '').toLowerCase().includes(query);
   };
   const filtered = items.filter(handleSearch);
   const { results, totalPages, currentPage, goTo } = usePagination(filtered, pageSize);
