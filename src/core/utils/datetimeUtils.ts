@@ -24,6 +24,17 @@ export const today = () => {
 
 export const DATE_PICKER_CONTROL_FORMAT = 'd/m/Y';
 
+/**
+ * Formats a calendar date picked in the browser as `YYYY-MM-DD`, from its local day.
+ *
+ * The date picker returns local midnight. Sent as a `Date`, it is serialized to UTC, which east of
+ * UTC is the evening before, and the server keeps only the date part of that, a day early. A plain
+ * date is parsed by the server as that same day.
+ */
+export const toDateOnlyString = (date: Date | string | null | undefined) => {
+  return date ? dayjs(date).format('YYYY-MM-DD') : date;
+};
+
 export const isDateAfterToday = (date: Date | null | undefined) => {
   if (date) {
     if (typeof date === 'string' || date instanceof String) {
