@@ -33,9 +33,25 @@ import EditStockItemActionsMenu from './edit-stock-item/edit-stock-item-action-m
 import FilterStockItems from './components/filter-stock-items/filter-stock-items.component';
 import { type CustomTableHeader } from '../core/components/table/types';
 import styles from './stock-items-table.scss';
+import { paginationTexts } from '../core/utils/translations';
+import { type TFunction } from 'i18next';
 
 interface StockItemsTableProps {
   from?: string;
+}
+
+// Carbon's batch actions bar (« Cancel », « n items selected ») defaults to English
+function batchActionText(t: TFunction, id: string, totalSelected?: number) {
+  switch (id) {
+    case 'carbon.table.batch.cancel':
+      return t('cancel', 'Cancel');
+    case 'carbon.table.batch.selectAll':
+      return t('selectAll', 'Select all');
+    case 'carbon.table.batch.item.selected':
+      return t('itemSelected', '{{count}} item selected', { count: totalSelected });
+    default:
+      return t('itemsSelected', '{{count}} items selected', { count: totalSelected });
+  }
 }
 
 const StockItemsTableComponent: React.FC<StockItemsTableProps> = () => {
@@ -165,14 +181,16 @@ const StockItemsTableComponent: React.FC<StockItemsTableProps> = () => {
         {({ rows, headers, getHeaderProps, getTableProps, getRowProps, getBatchActionProps }) => (
           <TableContainer>
             <TableToolbar
-              className={styles.toolbar}
               style={{
                 position: 'static',
                 overflow: 'visible',
                 backgroundColor: 'color',
               }}
             >
-              <TableBatchActions {...getBatchActionProps()} />
+              <TableBatchActions
+                {...getBatchActionProps()}
+                translateWithId={(id, state) => batchActionText(t, id, state?.totalSelected)}
+              />
               <TableToolbarContent className={styles.toolbarContent}>
                 <TableToolbarSearch
                   onChange={(e) =>
@@ -256,6 +274,7 @@ const StockItemsTableComponent: React.FC<StockItemsTableProps> = () => {
         )}
       </DataTable>
       <Pagination
+        {...paginationTexts(t)}
         className={styles.paginationOverride}
         onChange={({ page, pageSize }) => {
           setCurrentPage(page);

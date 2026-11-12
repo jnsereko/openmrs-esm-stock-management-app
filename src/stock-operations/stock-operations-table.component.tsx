@@ -37,6 +37,7 @@ import StockOperationTypesSelector from './stock-operation-types-selector/stock-
 import StockOperationsFilters from './stock-operations-filters.component';
 import StockOperationExpandedRow from './add-stock-operation/stock-operations-expanded-row/stock-operation-expanded-row.component';
 import styles from './stock-operations-table.scss';
+import { paginationTexts, translateOperationStatus } from '../core/utils/translations';
 
 interface StockOperationsTableProps {
   status?: string;
@@ -118,7 +119,7 @@ const StockOperations: React.FC<StockOperationsTableProps> = () => {
             commonNames,
             more: itemCountGreaterThanThreshhold ? stockOperation?.stockOperationItems?.length - threshHold : 0,
           },
-          status: `${stockOperation?.status}`,
+          status: translateOperationStatus(t, stockOperation?.status),
           source: `${stockOperation?.sourceName ?? ''}`,
           destination: `${stockOperation?.destinationName ?? ''}`,
           location: (
@@ -139,7 +140,7 @@ const StockOperations: React.FC<StockOperationsTableProps> = () => {
           actions: <EditStockOperationActionMenu stockOperation={stockOperation} showIcon={true} showprops={false} />,
         };
       }),
-    [items],
+    [items, t],
   );
 
   if (isLoading && !filterApplied) {
@@ -166,7 +167,6 @@ const StockOperations: React.FC<StockOperationsTableProps> = () => {
         }) => (
           <TableContainer>
             <TableToolbar
-              className={styles.toolbar}
               style={{
                 position: 'static',
                 overflow: 'visible',
@@ -288,6 +288,7 @@ const StockOperations: React.FC<StockOperationsTableProps> = () => {
       </DataTable>
       {items.length > 0 && (
         <Pagination
+          {...paginationTexts(t)}
           page={currentPage}
           pageSize={currentPageSize}
           pageSizes={pageSizes}

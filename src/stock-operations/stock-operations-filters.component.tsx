@@ -5,6 +5,7 @@ import { getStockOperationTypes, useConcept } from '../stock-lookups/stock-looku
 import { StockFilters } from '../constants';
 import { StockOperationStatusTypes } from '../core/api/types/stockOperation/StockOperationStatus';
 import styles from '../stock-items/stock-items-table.scss';
+import { translateOperationStatus } from '../core/utils/translations';
 
 interface StockOperationFiltersProps {
   conceptUuid?: string;
@@ -77,7 +78,13 @@ const StockOperationsFilters: React.FC<StockOperationFiltersProps> = ({ conceptU
       label={filterLabel}
       labelInline
       items={dataItems}
-      itemToString={(item) => (item ? item.display : t('notSet', 'Not Set'))}
+      itemToString={(item) =>
+        item
+          ? filterName === StockFilters.STATUS
+            ? translateOperationStatus(t, item.display)
+            : item.display
+          : t('notSet', 'Not Set')
+      }
       onChange={({ selectedItems }) => {
         if (selectedItems) {
           onFilterChange(

@@ -15,6 +15,7 @@ import {
 import { formatDate, parseDate, usePagination } from '@openmrs/esm-framework';
 import { type StockOperationItemDTO } from '../../../core/api/types/stockOperation/StockOperationItemDTO';
 import styles from './stock-items-table.scss';
+import { paginationTexts } from '../../../core/utils/translations';
 
 type Props = {
   items: Array<StockOperationItemDTO>;
@@ -100,6 +101,7 @@ const StockItemsTable: React.FC<Props> = ({ items }) => {
         )}
       </DataTable>
       <Pagination
+        {...paginationTexts(t)}
         page={currentPage}
         pageSize={pageSize}
         pageSizes={pageSizesOptions}
