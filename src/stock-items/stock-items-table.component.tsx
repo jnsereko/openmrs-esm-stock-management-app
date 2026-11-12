@@ -165,6 +165,7 @@ const StockItemsTableComponent: React.FC<StockItemsTableProps> = () => {
         {({ rows, headers, getHeaderProps, getTableProps, getRowProps, getBatchActionProps }) => (
           <TableContainer>
             <TableToolbar
+              className={styles.toolbar}
               style={{
                 position: 'static',
                 overflow: 'visible',

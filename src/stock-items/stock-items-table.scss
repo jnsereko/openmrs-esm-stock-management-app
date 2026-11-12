@@ -110,4 +110,21 @@
 // table scrolls, so the toolbar's filter dropdown is not clipped.
 .tableScroll {
   overflow-x: auto;
+
+  // Long French headers (« Niveau de Réapprovisionnement ») and names wrap instead of widening the table
+  th,
+  td {
+    overflow-wrap: break-word;
+    padding-inline: layout.$spacing-03;
+  }
+
+  th {
+    hyphens: auto;
+  }
+}
+
+// Carbon gives the toolbar a fixed height; once its controls wrap it must grow, or it covers the table header
+.toolbar {
+  block-size: auto;
+  min-block-size: layout.$spacing-09;
 }

@@ -33,14 +33,25 @@
 
 .toolbarContent {
   display: flex;
-  align-items: center;
-  height: layout.$spacing-09;
+  align-items: flex-end;
+  // Wrap the filters onto a second line rather than covering the table header or clipping the buttons
+  flex-wrap: wrap;
+  row-gap: layout.$spacing-03;
+  block-size: auto;
+  min-block-size: layout.$spacing-09;
   margin-top: layout.$spacing-05;
+}
+
+// Carbon gives the toolbar a fixed height; it must grow with its wrapped content
+.toolbar {
+  block-size: auto;
+  min-block-size: layout.$spacing-09;
 }
 
 .container {
   display: flex;
-  align-items: center;
+  flex-wrap: wrap;
+  align-items: flex-end;
   justify-content: space-between;
 }
 

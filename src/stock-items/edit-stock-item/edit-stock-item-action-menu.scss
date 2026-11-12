@@ -1,0 +1,12 @@
+@use '@carbon/layout';
+
+// A long drug name wraps inside its cell instead of widening the table: Carbon buttons do not wrap
+// and keep room for an icon this button does not have.
+.nameButton {
+  block-size: auto;
+  min-block-size: layout.$spacing-07;
+  max-inline-size: 18rem;
+  padding-inline-end: layout.$spacing-05;
+  text-align: start;
+  white-space: normal;
+}

@@ -166,6 +166,7 @@ const StockOperations: React.FC<StockOperationsTableProps> = () => {
         }) => (
           <TableContainer>
             <TableToolbar
+              className={styles.toolbar}
               style={{
                 position: 'static',
                 overflow: 'visible',

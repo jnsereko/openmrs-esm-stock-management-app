@@ -46,7 +46,8 @@ const StockOperationTypesSelector = () => {
         color: '#fff',
         minHeight: '1rem',
         padding: '.95rem !important',
-        width: '8rem',
+        width: 'auto',
+        paddingInline: '1rem',
         marginRight: '0.5rem',
         whiteSpace: 'nowrap',
       }}
