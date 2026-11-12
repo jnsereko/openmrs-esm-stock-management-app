@@ -178,4 +178,50 @@ describe('BatchNoSelector', () => {
     expect(screen.queryByText('BATCH-002')).not.toBeInTheDocument();
     expect(screen.queryByText('BATCH-003')).not.toBeInTheDocument();
   });
+
+  it('should list the batch that expires soonest first', async () => {
+    const user = userEvent.setup();
+    mockUseStockItemBatchNumbers.mockReturnValue({
+      isLoading: false,
+      stockItemBatchNos: [
+        {
+          uuid: 'late',
+          batchNo: 'LATE',
+          quantity: '10',
+          expiration: new Date(2027, 5, 30),
+          stockItemUuid: 'i',
+          voided: false,
+        },
+        { uuid: 'none', batchNo: 'NONE', quantity: '10', expiration: null, stockItemUuid: 'i', voided: false },
+        {
+          uuid: 'soon',
+          batchNo: 'SOON',
+          quantity: '10',
+          expiration: new Date(2026, 11, 31),
+          stockItemUuid: 'i',
+          voided: false,
+        },
+      ] as Array<StockBatchDTO>,
+      setLimit: vi.fn(),
+      setRepresentation: vi.fn(),
+      setSearchString: vi.fn(),
+    });
+    mockUseStockItemBatchInformationHook.mockReturnValue({
+      ...mockUseStockItemBatchInformationHook(),
+      items: [
+        { batchNumber: 'LATE', quantity: 10 },
+        { batchNumber: 'NONE', quantity: 10 },
+        { batchNumber: 'SOON', quantity: 10 },
+      ] as StockItemInventory[],
+    });
+
+    render(<BatchNoSelector stockItemUuid={mockStockItemUuid} onValueChange={mockOnValueChange} />);
+    await user.click(screen.getByRole('combobox'));
+
+    expect(screen.getAllByRole('option').map((option) => option.textContent.split(' |')[0])).toEqual([
+      'SOON',
+      'LATE',
+      'NONE',
+    ]);
+  });
 });

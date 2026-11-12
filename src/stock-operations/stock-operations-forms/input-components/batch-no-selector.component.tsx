@@ -41,11 +41,17 @@ const BatchNoSelector: React.FC<BatchNoSelectorProps> = ({ stockItemUuid, error,
   const filteredBatches = useMemo(() => {
     if (!stockItemBatchesInfo) return [];
 
-    return stockItemBatchesInfo.filter((batch) => {
-      const quantity = typeof batch.quantity === 'string' ? parseFloat(batch.quantity) : batch.quantity;
+    const expiryTime = (batch: StockBatchWithUoM) =>
+      batch.expiration ? new Date(batch.expiration).getTime() : Number.POSITIVE_INFINITY;
 
-      return !isNaN(quantity) && quantity > 0;
-    });
+    // Soonest expiry first (first expired, first out); batches without an expiry last
+    return stockItemBatchesInfo
+      .filter((batch) => {
+        const quantity = typeof batch.quantity === 'string' ? parseFloat(batch.quantity) : batch.quantity;
+
+        return !isNaN(quantity) && quantity > 0;
+      })
+      .sort((a, b) => expiryTime(a) - expiryTime(b));
   }, [stockItemBatchesInfo]);
 
   const initialSelectedItem = useMemo(
@@ -70,7 +76,13 @@ const BatchNoSelector: React.FC<BatchNoSelectorProps> = ({ stockItemUuid, error,
       if (!batch.quantityFactor) return withUnit;
 
       const factor = parseFloat(batch.quantityFactor);
-      return !isNaN(factor) && factor > 1 ? `${withUnit} (${factor} units each)` : withUnit;
+      return !isNaN(factor) && factor > 1
+        ? t('quantityWithUnitsEach', '{{quantity}} ({{factor}} units each)', {
+            quantity: withUnit,
+            factor,
+            interpolation: { escapeValue: false },
+          })
+        : withUnit;
     },
     [t],
   );
@@ -82,7 +94,12 @@ const BatchNoSelector: React.FC<BatchNoSelectorProps> = ({ stockItemUuid, error,
       const quantityDisplay = formatQuantityDisplay(batch);
       const expiryDate = batch.expiration ? formatForDatePicker(batch.expiration) : t('noExpiry', 'No expiry');
 
-      return `${batch.batchNo} | Qty: ${quantityDisplay} | Expiry: ${expiryDate}`;
+      return t('batchOption', '{{batchNo}} | Qty: {{quantity}} | Expiry: {{expiry}}', {
+        batchNo: batch.batchNo,
+        quantity: quantityDisplay,
+        expiry: expiryDate,
+        interpolation: { escapeValue: false },
+      });
     },
     [formatQuantityDisplay, t],
   );
