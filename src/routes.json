@@ -77,7 +77,8 @@
       },
       "order": 3,
       "online": true,
-      "offline": true
+      "offline": true,
+      "privileges": "Task: stockmanagement.userRoleScopes.mutate"
     },
     {
       "name": "stock-user-scopes-db",
@@ -95,7 +96,8 @@
       },
       "order": 2,
       "online": true,
-      "offline": true
+      "offline": true,
+      "privileges": "Task: stockmanagement.stockSources.mutate"
     },
     {
       "name": "stock-sources-db",
@@ -132,7 +134,8 @@
       },
       "order": 6,
       "online": true,
-      "offline": true
+      "offline": true,
+      "privileges": "Manage Global Properties"
     },
     {
       "name": "stock-settings-db",
