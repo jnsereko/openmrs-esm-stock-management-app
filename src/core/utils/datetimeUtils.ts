@@ -20,6 +20,12 @@ export const formatExpiryDate = (date: Date | string | null | undefined) => {
   return isNaN(value?.getTime()) ? '' : formatDate(value, { time: false, noToday: true });
 };
 
+/**
+ * A date in a list (Operations, an item's transactions), in the same format as expiry dates:
+ * « 12 nov. 2026 » in French. They showed 12-Nov-2026 beside « 30 mars 2028 » (#638).
+ */
+export const formatListDate = formatExpiryDate;
+
 export const formatDisplayDateTime = (date: Date | null | undefined, format?: string) => {
   return date ? dayjs(date).format(format ?? 'DD-MMM-YYYY HH:mm') : '';
 };

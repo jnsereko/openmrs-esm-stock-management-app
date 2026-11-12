@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { toDateOnlyString } from './datetimeUtils';
+import { formatExpiryDate, formatListDate, toDateOnlyString } from './datetimeUtils';
 
 describe('toDateOnlyString', () => {
   it('keeps the local calendar day the date picker returned', () => {
@@ -11,5 +11,13 @@ describe('toDateOnlyString', () => {
   it('leaves an empty expiration empty', () => {
     expect(toDateOnlyString(null)).toBeNull();
     expect(toDateOnlyString(undefined)).toBeUndefined();
+  });
+});
+
+describe('formatListDate', () => {
+  // The Operations list showed 12-Nov-2026 beside expiry dates such as « 30 mars 2028 » (#638)
+  it('formats a list date as expiry dates are formatted, never as « Today »', () => {
+    expect(formatListDate).toBe(formatExpiryDate);
+    expect(formatListDate(null)).toBe('');
   });
 });

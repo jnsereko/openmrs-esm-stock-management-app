@@ -1,0 +1,38 @@
+import { describe, expect, it } from 'vitest';
+import i18next from 'i18next';
+import { datePickerMonthLabels, paginationTexts } from './translations';
+
+describe('paginationTexts', () => {
+  // « 1–1 sur 1 éléments »: the range was translated without a count, so never singular (#638)
+  it('makes the item range singular for one item', async () => {
+    const i18n = i18next.createInstance();
+    await i18n.init({
+      lng: 'fr',
+      resources: {
+        fr: {
+          translation: {
+            paginationItemRange_one: '{{min}}–{{max}} sur {{total}} élément',
+            paginationItemRange_other: '{{min}}–{{max}} sur {{total}} éléments',
+          },
+        },
+      },
+    });
+    const { itemRangeText } = paginationTexts(i18n.t);
+
+    expect(itemRangeText(1, 1, 1)).toBe('1–1 sur 1 élément');
+    expect(itemRangeText(1, 10, 56)).toBe('1–10 sur 56 éléments');
+  });
+});
+
+describe('datePickerMonthLabels', () => {
+  it("names the calendar's month arrows", () => {
+    const t = ((key: string, defaultValue: string) => `${key}:${defaultValue}`) as unknown as Parameters<
+      typeof datePickerMonthLabels
+    >[0];
+
+    expect(datePickerMonthLabels(t)).toEqual({
+      prevMonthAriaLabel: 'previousMonth:Previous month',
+      nextMonthAriaLabel: 'nextMonth:Next month',
+    });
+  });
+});

@@ -17,7 +17,7 @@ const DeleteStockRuleModal: React.FC<DeleteStockRuleModalProps> = ({ close, onCo
 
   return (
     <>
-      <ModalHeader closeModal={close} className={styles.productiveHeading03}>
+      <ModalHeader iconDescription={t('close', 'Close')} closeModal={close} className={styles.productiveHeading03}>
         {t('deleteStockRule', 'Delete Stock Rule')}?
       </ModalHeader>
       <ModalBody>

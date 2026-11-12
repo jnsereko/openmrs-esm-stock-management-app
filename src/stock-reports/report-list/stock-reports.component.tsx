@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { paginationTexts } from '../../core/utils/translations';
 import {
   Button,
   DataTable,
@@ -244,6 +245,7 @@ const StockReports: React.FC = () => {
         {({ rows, headers, getHeaderProps, getTableProps, getRowProps, onInputChange }) => (
           <TableContainer>
             <TableToolbar
+              aria-label={t('dataTableToolbar', 'Data table toolbar')}
               style={{
                 position: 'static',
                 overflow: 'visible',
@@ -252,6 +254,8 @@ const StockReports: React.FC = () => {
             >
               <TableToolbarContent className={styles.toolbarContent}>
                 <TableToolbarSearch
+                  labelText={t('filterTable', 'Filter table')}
+                  placeholder={t('filterTable', 'Filter table')}
                   closeButtonLabelText={t('clearSearch', 'Clear search input')}
                   persistent
                   onChange={onInputChange}
@@ -327,6 +331,7 @@ const StockReports: React.FC = () => {
         )}
       </DataTable>
       <Pagination
+        {...paginationTexts(t)}
         page={currentPage}
         pageSize={currentPageSize}
         pageSizes={pageSizes}

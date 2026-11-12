@@ -18,6 +18,7 @@ import {
   Tile,
 } from '@carbon/react';
 import { useTranslation } from 'react-i18next';
+import { paginationTexts } from '../core/utils/translations';
 import { isDesktop, restBaseUrl } from '@openmrs/esm-framework';
 import { useHandleMutate } from '../utils';
 import { ResourceRepresentation } from '../core/api/api';
@@ -89,6 +90,7 @@ const StockSourcesItems: React.FC = () => {
         {({ rows, headers, getHeaderProps, getTableProps, getRowProps, onInputChange }) => (
           <TableContainer>
             <TableToolbar
+              aria-label={t('dataTableToolbar', 'Data table toolbar')}
               style={{
                 position: 'static',
                 overflow: 'visible',
@@ -97,6 +99,8 @@ const StockSourcesItems: React.FC = () => {
             >
               <TableToolbarContent className={styles.toolbarContent}>
                 <TableToolbarSearch
+                  labelText={t('filterTable', 'Filter table')}
+                  placeholder={t('filterTable', 'Filter table')}
                   closeButtonLabelText={t('clearSearch', 'Clear search input')}
                   persistent
                   onChange={onInputChange}
@@ -175,6 +179,7 @@ const StockSourcesItems: React.FC = () => {
         )}
       </DataTable>
       <Pagination
+        {...paginationTexts(t)}
         page={currentPage}
         pageSize={currentPageSize}
         pageSizes={pageSizes}

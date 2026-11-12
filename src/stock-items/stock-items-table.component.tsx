@@ -184,6 +184,7 @@ const StockItemsTableComponent: React.FC<StockItemsTableProps> = () => {
         {({ rows, headers, getHeaderProps, getTableProps, getRowProps, getBatchActionProps }) => (
           <TableContainer className={styles.stockTableContainer}>
             <TableToolbar
+              aria-label={t('dataTableToolbar', 'Data table toolbar')}
               style={{
                 position: 'static',
                 overflow: 'visible',
@@ -196,6 +197,7 @@ const StockItemsTableComponent: React.FC<StockItemsTableProps> = () => {
               />
               <TableToolbarContent className={styles.toolbarContent}>
                 <TableToolbarSearch
+                  labelText={t('searchStockItems', 'Search stock items')}
                   closeButtonLabelText={t('clearSearch', 'Clear search input')}
                   onChange={(e) =>
                     handleSearch(typeof e === 'string' ? e : (e as React.ChangeEvent<HTMLInputElement>).target.value)

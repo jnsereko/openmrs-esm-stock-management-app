@@ -17,7 +17,7 @@ const DeleteStockUserScopeModal: React.FC<DeleteStockUserScopeModalProps> = ({ c
 
   return (
     <>
-      <ModalHeader closeModal={close} className={styles.productiveHeading03}>
+      <ModalHeader iconDescription={t('close', 'Close')} closeModal={close} className={styles.productiveHeading03}>
         {t('deleteStockUserScope', 'Delete Stock User Scope')}?
       </ModalHeader>
       <ModalBody>

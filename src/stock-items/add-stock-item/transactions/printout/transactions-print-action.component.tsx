@@ -151,7 +151,7 @@ const TransactionsPrintAction: React.FC<Props> = ({ columns, data, itemUuid, fil
   return (
     <>
       {enablePrintButton && (
-        <ComboButton label="Print">
+        <ComboButton label={t('print', 'Print')}>
           <MenuItem
             label={t('printStockCard', 'Print Stock Card')}
             renderIcon={(props) => <Printer size={24} {...props} />}

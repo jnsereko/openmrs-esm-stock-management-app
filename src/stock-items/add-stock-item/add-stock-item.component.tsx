@@ -77,7 +77,15 @@ const AddEditStockItem: React.FC<Workspace2DefinitionProps<AddStockItemProps>> =
     <Workspace2
       title={
         stockItem
-          ? `Edit ${stockItem.drugName || stockItem.conceptName || ''} ${stockItem.isDrug ? '(Drug)' : '(Non Drug)'}`
+          ? stockItem.isDrug
+            ? t('editDrugStockItemTitle', 'Edit {{name}} (Drug)', {
+                name: stockItem.drugName || stockItem.conceptName || '',
+                interpolation: { escapeValue: false },
+              })
+            : t('editNonDrugStockItemTitle', 'Edit {{name}} (Non Drug)', {
+                name: stockItem.drugName || stockItem.conceptName || '',
+                interpolation: { escapeValue: false },
+              })
           : t('addItem', 'Add stock item')
       }
     >

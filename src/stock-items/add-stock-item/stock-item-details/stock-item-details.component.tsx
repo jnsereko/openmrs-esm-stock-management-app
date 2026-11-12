@@ -170,7 +170,10 @@ const StockItemDetails = ({ stockItem, handleTabChange, onCloseWorkspace }: Stoc
               legendText=""
               invalid={!!errors.hasExpiration}
               invalidText={errors.hasExpiration && errors?.hasExpiration?.message}
-              options={expirationOptions} // Pass expirationOptions directly
+              options={expirationOptions.map((option) => ({
+                ...option,
+                label: option.value ? t('yes', 'Yes') : t('no', 'No'),
+              }))}
             />
           </FormGroup>
 

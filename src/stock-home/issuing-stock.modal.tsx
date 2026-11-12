@@ -33,7 +33,11 @@ const IssuingStockModal = ({ issuingStock, closeModal }: IssuingStockModalProps)
 
   return (
     <>
-      <ModalHeader closeModal={closeModal} title={t('issuedStock', 'Issued stock')} />
+      <ModalHeader
+        iconDescription={t('close', 'Close')}
+        closeModal={closeModal}
+        title={t('issuedStock', 'Issued stock')}
+      />
       <ModalBody>
         {issuingStock && issuingStock.length > 0 ? (
           <TableContainer>

@@ -72,7 +72,8 @@ describe('StockItemsTableComponent', () => {
     expect(screen.getByRole('radio', { name: /non pharmaceuticals/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /import/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /settings/i })).toBeInTheDocument();
-    expect(screen.getByRole('searchbox', { name: /filter table/i })).toBeInTheDocument();
+    // Named by its placeholder, not Carbon's English « Filter table » (#638)
+    expect(screen.getByRole('searchbox', { name: /search stock items/i })).toBeInTheDocument();
 
     const settingsMenuButton = screen.getByRole('button', { name: /settings/i });
     await user.click(settingsMenuButton);

@@ -52,7 +52,7 @@ const DeletePackagingUnitModal: React.FC<DeletePackagingUnitModalProps> = ({ row
 
   return (
     <div>
-      <ModalHeader closeModal={closeModal} className={styles.productiveHeading03}>
+      <ModalHeader iconDescription={t('close', 'Close')} closeModal={closeModal} className={styles.productiveHeading03}>
         {t('removePackagingUnit', 'Remove Packaging Unit')}?
       </ModalHeader>
       <ModalBody>

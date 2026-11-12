@@ -48,7 +48,8 @@ const tableHeaders = [
   { id: 0, header: 'Type', key: 'operationTypeName' },
   { id: 1, header: 'Number', key: 'operationNumber' },
   { id: 2, header: 'Status', key: 'status' },
-  { id: 3, key: 'actions', header: '', isSortable: false },
+  { id: 3, header: 'Date', key: 'operationDate' },
+  { id: 4, key: 'actions', header: '', isSortable: false },
 ];
 
 describe('StockOperations table', () => {
@@ -136,5 +137,33 @@ describe('StockOperations table', () => {
     expect(vi.mocked(useStockOperationPages).mock.calls.some(([filter]) => filter.q === 'REQ-0')).toBe(false);
     expect(screen.getByText('REQ-0002')).toBeInTheDocument();
     expect(screen.queryByText('REQ-0001')).not.toBeInTheDocument();
+  });
+
+  // #638: the list showed « 12-Nov-2026 » beside expiry dates such as « 30 mars 2028 »; the toolbar was
+  // named « data table toolbar »
+  it('shows operation dates in the format of expiry dates and names its toolbar', () => {
+    const operationDate = new Date(2026, 10, 12, 21, 0, 0);
+    vi.mocked(useStockOperationPages).mockReturnValue({
+      items: [{ ...operation('op-1', 'SIS-0058', 'COMPLETED'), operationDate }],
+      tableHeaders,
+      currentPage: 1,
+      pageSizes: [10],
+      totalItems: 1,
+      goTo: vi.fn(),
+      currentPageSize: 10,
+      setPageSize: vi.fn(),
+      isLoading: false,
+    } as unknown as ReturnType<typeof useStockOperationPages>);
+    const language = window.i18next.language;
+    window.i18next.language = 'fr';
+    try {
+      render(<StockOperations />);
+    } finally {
+      window.i18next.language = language;
+    }
+
+    expect(screen.getByText('12 nov. 2026')).toBeInTheDocument();
+    expect(screen.getByLabelText('Data table toolbar')).toBeInTheDocument();
+    expect(screen.getByText('1–1 of 1 items')).toBeInTheDocument();
   });
 });

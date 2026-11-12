@@ -13,6 +13,7 @@ import {
 import classNames from 'classnames';
 import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
+import { datePickerMonthLabels } from '../../../core/utils/translations';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useConfig, useLayoutType } from '@openmrs/esm-framework';
 import { type z } from 'zod';
@@ -135,6 +136,7 @@ const StockItemForm: React.FC<StockItemFormProps> = ({
                   const { value, onChange, onBlur, name, ref } = field;
                   return (
                     <DatePicker
+                      {...datePickerMonthLabels(t)}
                       datePickerType="single"
                       minDate={formatForDatePicker(today())}
                       locale="en"

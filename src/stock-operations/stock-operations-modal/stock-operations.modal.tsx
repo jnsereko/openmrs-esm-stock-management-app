@@ -120,6 +120,7 @@ const StockOperationsModal: React.FC<StockOperationsModalProps> = ({ title, requ
     <div>
       <Form onSubmit={handleClick}>
         <ModalHeader
+          iconDescription={t('close', 'Close')}
           closeModal={closeModal}
           title={t('operationModalTitle', '{{title}} Operation', { title: actionLabel })}
         />

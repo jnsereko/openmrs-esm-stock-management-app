@@ -56,7 +56,7 @@ import { useHandleMutate } from '../../utils';
 import useSearchUser from '../../stock-operations/stock-operations-forms/hooks/useSearchUser';
 import { useDebounce } from '../../core/hooks/debounce-hook';
 import styles from './add-stock-user-role-scope.scss';
-import { comboBoxTranslateWithId } from '../../core/utils/translations';
+import { comboBoxTranslateWithId, datePickerMonthLabels } from '../../core/utils/translations';
 
 const MinDate: Date = today();
 
@@ -339,6 +339,7 @@ const AddStockUserRoleScope: React.FC<Workspace2DefinitionProps<AddStockUserRole
 
             {!formModel?.permanent && (
               <DatePicker
+                {...datePickerMonthLabels(t)}
                 dateFormat={DATE_PICKER_CONTROL_FORMAT}
                 datePickerType="range"
                 light

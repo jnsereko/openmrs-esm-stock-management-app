@@ -17,7 +17,7 @@ const DeleteStockSourceModal: React.FC<DeleteStockSourceModalProps> = ({ close, 
 
   return (
     <>
-      <ModalHeader closeModal={close} className={styles.modalHeader}>
+      <ModalHeader iconDescription={t('close', 'Close')} closeModal={close} className={styles.modalHeader}>
         {t('deleteStock', 'Delete Stock source')}?
       </ModalHeader>
       <ModalBody>

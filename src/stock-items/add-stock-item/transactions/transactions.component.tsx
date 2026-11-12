@@ -4,7 +4,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import DataList from '../../../core/components/table/table.component';
-import { formatDisplayDate, formatExpiryDate } from '../../../core/utils/datetimeUtils';
+import { formatExpiryDate, formatListDate } from '../../../core/utils/datetimeUtils';
+import { translateOperationStatus } from '../../../core/utils/translations';
 import { type StockItemInventoryFilter } from '../../stock-items.resource';
 import TransactionsPrintAction from './printout/transactions-print-action.component';
 import TransactionsLocationsFilter from './transaction-filters/transaction-locations-filter.component';
@@ -47,7 +48,7 @@ const Transactions: React.FC<TransactionsProps> = ({ stockItemUuid }) => {
         id: stockItemTransaction?.uuid,
         key: `key-${stockItemTransaction?.uuid}`,
         uuid: `${stockItemTransaction?.uuid}`,
-        date: formatDisplayDate(stockItemTransaction?.dateCreated),
+        date: formatListDate(stockItemTransaction?.dateCreated),
         location:
           stockItemTransaction.operationSourcePartyName && stockItemTransaction.operationDestinationPartyName ? (
             stockItemTransaction.operationSourcePartyName === stockItemTransaction?.partyName ? (
@@ -81,7 +82,7 @@ const Transactions: React.FC<TransactionsProps> = ({ stockItemUuid }) => {
             stockItemTransaction?.partyName
           ),
         transaction: stockItemTransaction?.isPatientTransaction
-          ? 'Patient Dispense'
+          ? t('patientDispense', 'Patient Dispense')
           : stockItemTransaction.stockOperationTypeName,
         quantity: `${stockItemTransaction?.quantity?.toLocaleString()} ${stockItemTransaction?.packagingUomName ?? ''}`,
         batch: stockItemTransaction.stockBatchNo
@@ -95,18 +96,24 @@ const Transactions: React.FC<TransactionsProps> = ({ stockItemUuid }) => {
             operationNumber={stockItemTransaction?.stockOperationNumber}
           />
         ),
-        status: stockItemTransaction?.stockOperationStatus ?? '',
+        status: translateOperationStatus(t, stockItemTransaction?.stockOperationStatus) ?? '',
         in:
           stockItemTransaction?.quantity >= 0
-            ? `${stockItemTransaction?.quantity?.toLocaleString()} ${stockItemTransaction?.packagingUomName ?? ''} of ${
-                stockItemTransaction.packagingUomFactor
-              }`
+            ? t('transactionQuantity', '{{quantity}} {{unit}} of {{factor}}', {
+                quantity: stockItemTransaction?.quantity?.toLocaleString(),
+                unit: stockItemTransaction?.packagingUomName ?? '',
+                factor: stockItemTransaction.packagingUomFactor,
+                interpolation: { escapeValue: false },
+              })
             : '',
         out:
           stockItemTransaction?.quantity < 0
-            ? `${(-1 * stockItemTransaction?.quantity)?.toLocaleString()} ${
-                stockItemTransaction?.packagingUomName ?? ''
-              } of ${stockItemTransaction.packagingUomFactor}`
+            ? t('transactionQuantity', '{{quantity}} {{unit}} of {{factor}}', {
+                quantity: (-1 * stockItemTransaction?.quantity)?.toLocaleString(),
+                unit: stockItemTransaction?.packagingUomName ?? '',
+                factor: stockItemTransaction.packagingUomFactor,
+                interpolation: { escapeValue: false },
+              })
             : '',
         totalin:
           stockItemTransaction?.quantity >= 0
@@ -119,7 +126,7 @@ const Transactions: React.FC<TransactionsProps> = ({ stockItemUuid }) => {
         balance: `${balance} ${stockItemTransaction?.packagingUomName ?? ''}`,
       };
     });
-  }, [items, inventory]);
+  }, [items, inventory, t]);
 
   if (isLoading) {
     return <DataTableSkeleton role="progressbar" />;

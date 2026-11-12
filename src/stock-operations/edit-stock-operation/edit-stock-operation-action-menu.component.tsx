@@ -1,10 +1,10 @@
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { Button, InlineLoading } from '@carbon/react';
-import { Edit } from '@carbon/react/icons';
+import { Edit, View } from '@carbon/react/icons';
 import { showSnackbar } from '@openmrs/esm-framework';
 import { useTranslation } from 'react-i18next';
 import { type StockOperationDTO } from '../../core/api/types/stockOperation/StockOperationDTO';
-import { launchStockoperationAddOrEditWorkSpace } from '../stock-operation.utils';
+import { isStockOperationEditable, launchStockoperationAddOrEditWorkSpace } from '../stock-operation.utils';
 import { useStockOperationAndItems } from '../stock-operations.resource';
 import useFilteredOperationTypesByRoles from '../stock-operations-forms/hooks/useFilteredOperationTypesByRoles';
 import styles from './edit-stock-operation-button.scss';
@@ -56,6 +56,9 @@ const EditStockOperationActionMenu: React.FC<EditStockOperationActionMenuProps> 
     }
   }, [operationTypesError, stockOperationError, t]);
 
+  // The pencil said « Edit » on operations that open as « View » (#638)
+  const isEditable = isStockOperationEditable(fetchedStockOperation ?? _stockOperation);
+
   if (isOperationTypesLoading || isStockOperationLoading) {
     return <InlineLoading status="active" iconDescription="Loading" />;
   }
@@ -70,9 +73,9 @@ const EditStockOperationActionMenu: React.FC<EditStockOperationActionMenuProps> 
       kind="ghost"
       size="sm"
       onClick={handleLaunchWorkspace}
-      renderIcon={showIcon ? () => <Edit size={16} /> : undefined}
+      renderIcon={showIcon ? () => (isEditable ? <Edit size={16} /> : <View size={16} />) : undefined}
       // The pencil alone had no name for screen readers
-      aria-label={showprops ? undefined : t('edit', 'Edit')}
+      aria-label={showprops ? undefined : isEditable ? t('edit', 'Edit') : t('view', 'View')}
     >
       {showprops && (
         <span className={styles.operationNumberText}>

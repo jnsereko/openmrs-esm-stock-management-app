@@ -37,6 +37,7 @@ import StockItemForm, { type StockItemFormProps } from './stock-item-form/stock-
 import StockOperationStepper from './stock-operation-stepper/stock-operation-stepper.component';
 import { getOperationStockPartyUuid } from './stock-operations-form-utils';
 import { useStockOperationAndItems } from '../stock-operations.resource';
+import { isStockOperationEditable } from '../stock-operation.utils';
 
 /**
  * Props interface for the StockOperationForm component
@@ -68,15 +69,8 @@ const StockOperationForm: React.FC<Workspace2DefinitionProps<StockOperationFormP
   const formschema = useMemo(() => {
     return getStockOperationFormSchema(operationType);
   }, [operationType]);
-  // An operation can be changed only while it is new or returned (as the server checks); a submitted,
-  // dispatched or completed one opens to be looked at, not as « Edit » with edit and delete buttons
-  const isEditable = useMemo(
-    () =>
-      !stockOperation ||
-      ((stockOperation.status === 'NEW' || stockOperation.status === 'RETURNED') &&
-        stockOperation.permission?.canEdit !== false),
-    [stockOperation],
-  );
+  // Not editable: opens as « View » without edit and delete buttons
+  const isEditable = useMemo(() => isStockOperationEditable(stockOperation), [stockOperation]);
   const showReceivedItems = useMemo(() => {
     return (
       (StockOperationTypeIsStockIssue(stockOperation?.operationType as OperationType) ||

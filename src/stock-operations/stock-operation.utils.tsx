@@ -15,6 +15,15 @@ export const launchStockoperationAddOrEditWorkSpace = (
   });
 };
 
+/**
+ * An operation can be changed only while it is new or returned (as the server checks); a submitted,
+ * dispatched or completed one opens to be looked at, as « View » (#634, #638).
+ */
+export const isStockOperationEditable = (stockOperation?: StockOperationDTO | null) =>
+  !stockOperation ||
+  ((stockOperation.status === 'NEW' || stockOperation.status === 'RETURNED') &&
+    stockOperation.permission?.canEdit !== false);
+
 export const useUrlQueryParams = () => {
   return new URLSearchParams(useLocation().search);
 };

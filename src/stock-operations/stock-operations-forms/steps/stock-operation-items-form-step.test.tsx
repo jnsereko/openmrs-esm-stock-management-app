@@ -66,7 +66,7 @@ describe('StockOperationItemsFormStep', () => {
     expect(screen.getByText('stock-item-b')).toBeInTheDocument();
     expect(screen.getByText('stock-item-c')).toBeInTheDocument();
 
-    await user.click(within(getRow('stock-item-b')).getByLabelText('Delete'));
+    await user.click(within(getRow('stock-item-b')).getByRole('button', { name: 'Delete' }));
 
     expect(screen.queryByText('stock-item-b')).not.toBeInTheDocument();
     expect(screen.getByText('stock-item-a')).toBeInTheDocument();
@@ -80,7 +80,7 @@ describe('StockOperationItemsFormStep', () => {
     const onLaunchItemsForm = vi.fn();
     render(<Wrapper onLaunchItemsForm={onLaunchItemsForm} />);
 
-    await user.click(within(getRow('stock-item-c')).getByLabelText('Edit'));
+    await user.click(within(getRow('stock-item-c')).getByRole('button', { name: 'Edit' }));
 
     expect(onLaunchItemsForm).toHaveBeenCalledTimes(1);
     expect(onLaunchItemsForm).toHaveBeenCalledWith(expect.objectContaining({ uuid: 'item-3-uuid' }));

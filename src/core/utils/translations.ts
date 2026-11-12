@@ -28,8 +28,9 @@ export function translateOperationStatus(t: TFunction, status: string | null | u
 export function paginationTexts(t: TFunction) {
   return {
     itemsPerPageText: t('itemsPerPage', 'Items per page:'),
+    // count picks the singular, « 1–1 sur 1 élément » (#638)
     itemRangeText: (min: number, max: number, total: number) =>
-      t('paginationItemRange', '{{min}}–{{max}} of {{total}} items', { min, max, total }),
+      t('paginationItemRange', '{{min}}–{{max}} of {{total}} items', { min, max, total, count: total }),
     pageRangeText: (_current: number, total: number) =>
       t('paginationPageRange', 'of {{count}} pages', { count: total }),
     // The page picker's label; Carbon 1.119 (the app shell's) reads it from this prop
@@ -106,5 +107,13 @@ export function comboBoxTranslateWithId(t: TFunction) {
       default:
         return messageId;
     }
+  };
+}
+
+/** DatePicker's previous and next month arrows, which default to English (#638). */
+export function datePickerMonthLabels(t: TFunction) {
+  return {
+    prevMonthAriaLabel: t('previousMonth', 'Previous month'),
+    nextMonthAriaLabel: t('nextMonth', 'Next month'),
   };
 }

@@ -28,7 +28,11 @@ const ReceivingStockModal = ({ closeModal, receivingStock }) => {
 
   return (
     <>
-      <ModalHeader closeModal={closeModal} title={t('receivedStock', 'Received stock')} />
+      <ModalHeader
+        iconDescription={t('close', 'Close')}
+        closeModal={closeModal}
+        title={t('receivedStock', 'Received stock')}
+      />
       <ModalBody>
         {receivingStock && receivingStock.length > 0 ? (
           <TableContainer>

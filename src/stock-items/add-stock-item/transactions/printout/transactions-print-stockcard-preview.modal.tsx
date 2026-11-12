@@ -26,7 +26,11 @@ const TransactionsStockcardPrintPreviewModal: React.FC<TransactionsStockcardPrin
   });
   return (
     <>
-      <ModalHeader closeModal={onClose} title={t('printStockCard', 'Print Stock Card')} />
+      <ModalHeader
+        iconDescription={t('close', 'Close')}
+        closeModal={onClose}
+        title={t('printStockCard', 'Print Stock Card')}
+      />
       <ModalBody>
         <div ref={ref}>
           <TransactionsStockcardPrintout title={title} columns={columns} items={data} />

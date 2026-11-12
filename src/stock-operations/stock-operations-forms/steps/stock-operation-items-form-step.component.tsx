@@ -176,6 +176,8 @@ const StockOperationItemsFormStep: React.FC<StockOperationItemsFormStepProps> = 
               type="button"
               size="sm"
               className="submitButton clear-padding-margin"
+              // iconDescription names an icon-only Button only with hasIconOnly (#638)
+              hasIconOnly
               iconDescription={t('edit', 'Edit')}
               kind="ghost"
               renderIcon={Edit}
@@ -187,6 +189,7 @@ const StockOperationItemsFormStep: React.FC<StockOperationItemsFormStepProps> = 
               type="button"
               size="sm"
               className="submitButton clear-padding-margin"
+              hasIconOnly
               iconDescription={t('delete', 'Delete')}
               kind="ghost"
               renderIcon={TrashCan}

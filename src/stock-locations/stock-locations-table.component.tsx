@@ -42,6 +42,8 @@ const StockLocationsItems: React.FC<StockLocationsTableProps> = () => {
         {({ onInputChange }) => (
           <>
             <TableToolbarSearch
+              labelText={t('filterTable', 'Filter table')}
+              placeholder={t('filterTable', 'Filter table')}
               closeButtonLabelText={t('clearSearch', 'Clear search input')}
               persistent
               onChange={onInputChange}

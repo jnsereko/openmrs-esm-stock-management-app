@@ -31,7 +31,11 @@ const ExpiredStockModal = ({ closeModal, expiredStock }: ExpiredStockModalProps)
 
   return (
     <>
-      <ModalHeader closeModal={closeModal} title={t('expiredStock', 'Expired stock')} />
+      <ModalHeader
+        iconDescription={t('close', 'Close')}
+        closeModal={closeModal}
+        title={t('expiredStock', 'Expired stock')}
+      />
       <ModalBody>
         {expiredStock.length > 0 ? (
           <TableContainer>

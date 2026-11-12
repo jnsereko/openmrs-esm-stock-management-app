@@ -135,8 +135,8 @@
   margin: layout.$spacing-05 0;
 }
 
-// Long French names and locations wrap, hyphenated, rather than pushing the table wider than its
-// container (it scrolled sideways at 1366 px)
+// Long French names and locations wrap rather than pushing the table wider than its container (it
+// scrolled sideways at 1366 px). Not hyphenated: « Requisi-tion », « Com-primé » (#638)
 .stockTableContainer :global(.cds--data-table) {
   th,
   td {
@@ -144,8 +144,10 @@
     padding-inline: layout.$spacing-03;
   }
 
-  td {
-    hyphens: auto;
+  // Item names such as « Sirop 1mg/1mg/0.15mg/5mg/1mg/333mg » break anywhere rather than widen the
+  // table; other cells break only between words, like the Items page (#636, #638)
+  td.itemNamesCell {
+    overflow-wrap: anywhere;
   }
 
   // Headers wrap only between words

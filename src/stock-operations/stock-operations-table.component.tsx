@@ -28,7 +28,7 @@ import { ArrowRight } from '@carbon/react/icons';
 import { useTranslation } from 'react-i18next';
 import { isDesktop, restBaseUrl } from '@openmrs/esm-framework';
 import { DATE_PICKER_CONTROL_FORMAT, DATE_PICKER_FORMAT, StockFilters } from '../constants';
-import { formatDisplayDate } from '../core/utils/datetimeUtils';
+import { formatListDate } from '../core/utils/datetimeUtils';
 import { useHandleMutate } from '../utils';
 import { useDebounce } from '../core/hooks/debounce-hook';
 import { ResourceRepresentation } from '../core/api/api';
@@ -40,6 +40,7 @@ import StockOperationExpandedRow from './add-stock-operation/stock-operations-ex
 import styles from './stock-operations-table.scss';
 import {
   dataTableTranslateWithId,
+  datePickerMonthLabels,
   paginationTexts,
   tableHeaderTranslateWithId,
   translateOperationStatus,
@@ -179,7 +180,7 @@ const StockOperations: React.FC<StockOperationsTableProps> = () => {
           responsiblePerson: `${
             stockOperation?.responsiblePersonFamilyName ?? stockOperation?.responsiblePersonOther ?? ''
           } ${stockOperation?.responsiblePersonGivenName ?? ''}`,
-          operationDate: formatDisplayDate(stockOperation?.operationDate),
+          operationDate: formatListDate(stockOperation?.operationDate),
           actions: <EditStockOperationActionMenu stockOperation={stockOperation} showIcon={true} showprops={false} />,
         };
       }),
@@ -207,6 +208,7 @@ const StockOperations: React.FC<StockOperationsTableProps> = () => {
         {({ getExpandedRowProps, getHeaderProps, getRowProps, getTableProps, headers, rows }) => (
           <TableContainer className={styles.stockTableContainer}>
             <TableToolbar
+              aria-label={t('dataTableToolbar', 'Data table toolbar')}
               style={{
                 position: 'static',
                 overflow: 'visible',
@@ -227,6 +229,7 @@ const StockOperations: React.FC<StockOperationsTableProps> = () => {
                     className={styles.datePicker}
                     datePickerType="range"
                     dateFormat={DATE_PICKER_CONTROL_FORMAT}
+                    {...datePickerMonthLabels(t)}
                     onChange={([startDate, endDate]) => handleDateFilterChange([startDate, endDate])}
                     value={[selectedFromDate, selectedToDate]}
                   >
@@ -292,7 +295,10 @@ const StockOperations: React.FC<StockOperationsTableProps> = () => {
                     <React.Fragment key={row.id}>
                       <TableExpandRow className={isDesktop ? styles.desktopRow : styles.tabletRow} {...props}>
                         {row.cells.map((cell) => (
-                          <TableCell key={cell.id}>
+                          <TableCell
+                            key={cell.id}
+                            className={cell?.info?.header === 'stockOperationItems' ? styles.itemNamesCell : undefined}
+                          >
                             {cell?.info?.header === 'stockOperationItems' ? (
                               <span>
                                 <span>{cell.value.commonNames}</span>

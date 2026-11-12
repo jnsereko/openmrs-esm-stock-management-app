@@ -52,7 +52,7 @@ import { useConcept, useStockTagLocations } from '../../stock-lookups/stock-look
 import { ResourceRepresentation } from '../../core/api/api';
 import { useReportTypes } from '../stock-reports.resource';
 import styles from './create-stock-report.scss';
-import { comboBoxTranslateWithId } from '../../core/utils/translations';
+import { comboBoxTranslateWithId, datePickerMonthLabels } from '../../core/utils/translations';
 
 interface CreateReportProps {
   model?: ReportModel;
@@ -536,6 +536,7 @@ const CreateReport: React.FC<Workspace2DefinitionProps<CreateReportProps>> = ({ 
               name="startDate"
               render={({ field: { onChange, value } }) => (
                 <DatePicker
+                  {...datePickerMonthLabels(t)}
                   datePickerType="single"
                   maxDate={formatForDatePicker(today())}
                   locale="en"
@@ -560,6 +561,7 @@ const CreateReport: React.FC<Workspace2DefinitionProps<CreateReportProps>> = ({ 
               name="endDate"
               render={({ field: { onChange, value } }) => (
                 <DatePicker
+                  {...datePickerMonthLabels(t)}
                   datePickerType="single"
                   maxDate={formatForDatePicker(today())}
                   locale="en"
@@ -799,6 +801,7 @@ const CreateReport: React.FC<Workspace2DefinitionProps<CreateReportProps>> = ({ 
               name="date"
               render={({ field: { onChange, value } }) => (
                 <DatePicker
+                  {...datePickerMonthLabels(t)}
                   datePickerType="single"
                   maxDate={formatForDatePicker(today())}
                   locale="en"

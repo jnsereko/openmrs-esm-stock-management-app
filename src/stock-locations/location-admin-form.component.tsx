@@ -86,7 +86,7 @@ const LocationAdministrationForm: React.FC<LocationAdministrationFormProps> = ({
 
   return (
     <>
-      <ModalHeader closeModal={close} title={headerTitle} />
+      <ModalHeader iconDescription={t('close', 'Close')} closeModal={close} title={headerTitle} />
       <ModalBody hasScrollingContent>
         <form id="stock-location-form" onSubmit={handleSubmit(onSubmit, onError)}>
           <Stack gap={3}>

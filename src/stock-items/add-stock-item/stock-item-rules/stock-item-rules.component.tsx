@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { paginationTexts } from '../../../core/utils/translations';
 import {
   DataTable,
   DataTableSkeleton,
@@ -86,6 +87,7 @@ const StockItemRules: React.FC<StockItemRulesProps> = ({ stockItemUuid, model, c
         {({ rows, headers, getHeaderProps, getTableProps, getRowProps, onInputChange }) => (
           <TableContainer>
             <TableToolbar
+              aria-label={t('dataTableToolbar', 'Data table toolbar')}
               style={{
                 position: 'static',
                 overflow: 'visible',
@@ -94,6 +96,8 @@ const StockItemRules: React.FC<StockItemRulesProps> = ({ stockItemUuid, model, c
             >
               <TableToolbarContent className={styles.toolbarContent}>
                 <TableToolbarSearch
+                  labelText={t('filterTable', 'Filter table')}
+                  placeholder={t('filterTable', 'Filter table')}
                   closeButtonLabelText={t('clearSearch', 'Clear search input')}
                   persistent
                   onChange={onInputChange}
@@ -164,6 +168,7 @@ const StockItemRules: React.FC<StockItemRulesProps> = ({ stockItemUuid, model, c
         )}
       </DataTable>
       <Pagination
+        {...paginationTexts(t)}
         page={currentPage}
         pageSize={currentPageSize}
         pageSizes={pageSizes}

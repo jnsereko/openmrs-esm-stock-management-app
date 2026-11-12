@@ -28,10 +28,9 @@ const StockOpertationStatus: React.FC<Props> = ({
             time: true,
             mode: 'standard',
           })}
-        </span>
-
-        <span className={styles.text}>{t('by', 'By')}</span>
-
+        </span>{' '}
+        {/* Spaces in the text too: the margins alone read « 00:22ParKWIZERA » to screen readers and copy (#638) */}
+        <span className={styles.text}>{t('by', 'By')}</span>{' '}
         <span className={styles.text}>
           {statusFillerFamilyName} &nbsp;
           {statusFillerGivenName}

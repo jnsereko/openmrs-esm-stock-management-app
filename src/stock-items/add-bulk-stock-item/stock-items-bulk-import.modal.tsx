@@ -55,7 +55,11 @@ const ImportBulkStockItemsModal: React.FC<ImportBulkStockItemsModalProps> = ({ c
   return (
     <div>
       <Form>
-        <ModalHeader closeModal={closeModal} title={t('importStockItems', 'Import stock items')} />
+        <ModalHeader
+          iconDescription={t('close', 'Close')}
+          closeModal={closeModal}
+          title={t('importStockItems', 'Import stock items')}
+        />
         <ModalBody>
           <FileUploader
             accept={['.csv']}

@@ -130,8 +130,11 @@ export const URL_STOCK_ITEMS = ROUTING_BASE_URL + 'stock-items';
 export const URL_STOCK_ITEMS_ROUTES = ROUTING_BASE_URL + 'stock-items/*';
 export const URL_STOCK_ITEMS_NEW = URL_STOCK_ITEMS + '/new';
 export const URL_STOCK_ITEMS_EDIT = URL_STOCK_ITEMS + '/:id';
-export const URL_STOCK_ITEM = (uuid: string, tab?: string): string =>
-  `${URL_STOCK_ITEMS}/${uuid}${tab ? `?tab=${tab}` : ''}`;
+// The app has no stock-items route (it showed a blank page): the Items page opens the item named by
+// `stockItem` (#638)
+export const STOCK_ITEM_URL_PARAM = 'stockItem';
+export const URL_STOCK_ITEM = (uuid: string): string =>
+  `${ROUTING_BASE_URL}stock-management/items?${STOCK_ITEM_URL_PARAM}=${encodeURIComponent(uuid)}`;
 export const URL_STOCK_ITEMS_REDIRECT = (uuid: string, tab?: string): string =>
   `${URL_STOCK_ITEMS}/redirect/${uuid}${tab ? `?tab=${tab}` : ''}`;
 export const URL_IMPORT_ERROR_FILE = (importSessionId: string) =>

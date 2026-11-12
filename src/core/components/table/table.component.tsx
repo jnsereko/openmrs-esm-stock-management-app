@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { paginationTexts } from '../../utils/translations';
 import { saveAs } from 'file-saver';
 import {
   DataTable,
@@ -108,6 +109,7 @@ const DataList: React.FC<ListProps> = ({ columns, data, children, totalItems, go
             <TableContainer className={styles.tableContainer}>
               {hasToolbar && (
                 <TableToolbar
+                  aria-label={t('dataTableToolbar', 'Data table toolbar')}
                   style={{
                     position: 'static',
                     overflow: 'visible',
@@ -139,6 +141,7 @@ const DataList: React.FC<ListProps> = ({ columns, data, children, totalItems, go
                           />
                         </OverflowMenu>
                         <TableToolbarSearch
+                          labelText={t('searchThisList', 'Search this list')}
                           closeButtonLabelText={t('clearSearch', 'Clear search input')}
                           className={styles.itemListSearch}
                           expanded
@@ -182,8 +185,7 @@ const DataList: React.FC<ListProps> = ({ columns, data, children, totalItems, go
                 </div>
               ) : null}
               <Pagination
-                forwardText={t('nextPage', 'Next page')}
-                backwardText={t('previousPage', 'Previous page')}
+                {...paginationTexts(t)}
                 page={currentPage}
                 pageSize={currentPageSize}
                 pageSizes={pageSizes}
