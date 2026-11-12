@@ -54,6 +54,9 @@ function batchActionText(t: TFunction, id: string, totalSelected?: number) {
   }
 }
 
+// Only names may break inside a word; « Médicament » in the Type column must not (#636)
+const nameColumns = ['genericName', 'commonName', 'tradeName'];
+
 const StockItemsTableComponent: React.FC<StockItemsTableProps> = () => {
   const { t } = useTranslation();
   const handleMutate = useHandleMutate();
@@ -193,6 +196,7 @@ const StockItemsTableComponent: React.FC<StockItemsTableProps> = () => {
               />
               <TableToolbarContent className={styles.toolbarContent}>
                 <TableToolbarSearch
+                  closeButtonLabelText={t('clearSearch', 'Clear search input')}
                   onChange={(e) =>
                     handleSearch(typeof e === 'string' ? e : (e as React.ChangeEvent<HTMLInputElement>).target.value)
                   }
@@ -251,7 +255,14 @@ const StockItemsTableComponent: React.FC<StockItemsTableProps> = () => {
                         >
                           {row.cells.map(
                             (cell) =>
-                              cell?.info?.header !== 'details' && <TableCell key={cell.id}>{cell.value}</TableCell>,
+                              cell?.info?.header !== 'details' && (
+                                <TableCell
+                                  key={cell.id}
+                                  className={nameColumns.includes(cell?.info?.header) ? styles.nameCell : undefined}
+                                >
+                                  {cell.value}
+                                </TableCell>
+                              ),
                           )}
                         </TableRow>
                       </React.Fragment>

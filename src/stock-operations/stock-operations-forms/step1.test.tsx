@@ -465,4 +465,49 @@ describe('Stock Operation step 1 (baseoperation details)', () => {
 
     expect(vi.mocked(showSnackbar)).not.toHaveBeenCalledWith(expect.objectContaining({ kind: 'error' }));
   });
+
+  it('shows the details of an operation that can no longer be changed as read-only', async () => {
+    const parties = [
+      { uuid: 'rx', name: 'Pharmacie (Rx)' },
+      { uuid: 'box1', name: 'Box 1' },
+    ];
+    mockUseParties.mockReturnValue({
+      destinationParties: parties,
+      sourceParties: parties,
+      isLoading: false,
+      error: undefined,
+      sourceTags: [],
+      destinationTags: [],
+      parties,
+      mutate: vi.fn(),
+      sourcePartiesFilter: () => true,
+      destinationPartiesFilter: () => true,
+    } as any);
+
+    const completed = {
+      uuid: 'op-1',
+      status: 'COMPLETED',
+      operationNumber: 'SIS-0058',
+      operationTypeName: 'Stock Issue',
+      operationTypeUuid: stockIssueOperationtypeMock.uuid,
+      sourceUuid: 'rx',
+      destinationUuid: 'box1',
+      remarks: 'Checked',
+      stockOperationItems: [],
+      permission: { canEdit: false },
+    };
+    render(
+      <StockOperationForm
+        {...mockWorkspace2Props({
+          stockOperationType: stockIssueOperationtypeMock as any,
+          stockOperation: completed as any,
+        })}
+      />,
+    );
+
+    // « Voir »: no clear or menu buttons that look usable, and the remarks cannot be typed in (#636)
+    expect(screen.getByRole('combobox', { name: /source/i })).toHaveAttribute('readonly');
+    expect(screen.getByRole('combobox', { name: /destination/i })).toHaveAttribute('readonly');
+    expect(screen.getByRole('textbox', { name: /remarks/i })).toHaveAttribute('readonly');
+  });
 });

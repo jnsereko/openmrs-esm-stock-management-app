@@ -89,12 +89,13 @@ const StockOperationsModal: React.FC<StockOperationsModalProps> = ({ title, requ
     executeStockOperationAction(payload).then(
       () => {
         setIsApproving(false);
+        // One line: the title (« Opération : Soumettre ») said again what the subtitle says (#636)
         showSnackbar({
-          title: t('operationSuccessTitle', '{{title}} Operation', { title: actionLabel }),
-          subtitle: t('operationSuccessful', 'You have successfully {{title}} operation', {
+          title: t('operationSuccessful', 'You have successfully {{title}} operation', {
             title: actionLabel,
           }),
           kind: 'success',
+          isLowContrast: true,
         });
         closeModal();
         handleMutate(`${restBaseUrl}/stockmanagement/stockoperation`);

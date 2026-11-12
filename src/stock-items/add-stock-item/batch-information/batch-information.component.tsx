@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
-import { formatDisplayDate } from '../../../core/utils/datetimeUtils';
+import { formatExpiryDate } from '../../../core/utils/datetimeUtils';
 import { DataTableSkeleton } from '@carbon/react';
 import { type StockItemInventoryFilter } from '../../stock-items.resource';
 import { useStockItemBatchInformationHook } from './batch-information.resource';
@@ -56,7 +56,7 @@ const BatchInformation: React.FC<BatchInformationProps> = ({ stockItemUuid }) =>
       id: `${row.partyUuid}${row.stockBatchUuid}${index}`,
       key: `${row.partyUuid}${row.stockBatchUuid}${index}`,
       uuid: `${row.partyUuid}${row.stockBatchUuid}${index}`,
-      expires: formatDisplayDate(row?.expiration),
+      expires: formatExpiryDate(row?.expiration),
       location: row?.partyName,
       quantity: row?.quantity?.toLocaleString() ?? '',
       batch: row.batchNumber ?? '',

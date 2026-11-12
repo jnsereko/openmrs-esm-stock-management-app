@@ -1,11 +1,13 @@
 import React from 'react';
 import { ComboBox, TextInputSkeleton } from '@carbon/react';
+import { useTranslation } from 'react-i18next';
 import { type Control, Controller, type FieldValues } from 'react-hook-form';
 import { type StockSource } from '../../../core/api/types/stockOperation/StockSource';
 import { useStockSources } from '../../../stock-sources/stock-sources.resource';
 import { type Concept } from '../../../core/api/types/concept/Concept';
 import { type StockItemReferenceDTO } from '../../../core/api/types/stockItem/StockItemReference';
 import { ResourceRepresentation } from '../../../core/api/api';
+import { comboBoxTranslateWithId } from '../../../core/utils/translations';
 
 interface StockSourceSelectorProps<T> {
   row?: StockItemReferenceDTO;
@@ -21,6 +23,7 @@ interface StockSourceSelectorProps<T> {
 }
 
 const StockSourceSelector = <T,>(props: StockSourceSelectorProps<T>) => {
+  const { t } = useTranslation();
   const {
     items: { results: sourcesList },
     isLoading,
@@ -35,6 +38,7 @@ const StockSourceSelector = <T,>(props: StockSourceSelectorProps<T>) => {
       control={props.control}
       render={({ field: { onChange, value, ref } }) => (
         <ComboBox
+          translateWithId={comboBoxTranslateWithId(t)}
           titleText={props.title}
           id={props.name}
           size={'md'}

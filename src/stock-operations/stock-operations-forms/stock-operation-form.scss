@@ -16,6 +16,15 @@
   padding: layout.$spacing-05 0 0 0;
 }
 
+// A « View » operation's details: Carbon greys out the clear (✕), menu (▾) and calendar buttons of a
+// read-only field but still shows them, as if the field could be changed (#636). Three classes, so
+// this holds whichever order Carbon's stylesheet loads in.
+.readOnlyDetails :global(.cds--combo-box--readonly) :global(.cds--list-box__selection),
+.readOnlyDetails :global(.cds--combo-box--readonly) :global(.cds--list-box__menu-icon),
+.readOnlyDetails :global(.cds--date-picker) :global(.cds--date-picker__icon) {
+  display: none;
+}
+
 .button {
   height: layout.$spacing-10;
   display: flex;

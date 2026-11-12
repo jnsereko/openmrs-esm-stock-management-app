@@ -5,6 +5,7 @@ import { showSnackbar, useConfig } from '@openmrs/esm-framework';
 import { type ConfigObject } from '../../config-schema';
 import { useConcept } from '../../stock-lookups/stock-lookups.resource';
 import styles from './stock-sources-filter.scss';
+import { comboBoxTranslateWithId } from '../../core/utils/translations';
 
 const StockSourcesFilter: React.FC<{
   onFilterChange: (selectedSourceType: string) => void;
@@ -33,6 +34,7 @@ const StockSourcesFilter: React.FC<{
   return (
     <div className={styles.filterContainer}>
       <Dropdown
+        translateWithId={comboBoxTranslateWithId(t)}
         id="stockSourcesFilter"
         initialSelectedItem={items?.answers?.[0]}
         items={[...(items?.answers || [])]}

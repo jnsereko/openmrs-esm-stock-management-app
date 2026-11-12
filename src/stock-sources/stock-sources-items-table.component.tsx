@@ -96,7 +96,11 @@ const StockSourcesItems: React.FC = () => {
               }}
             >
               <TableToolbarContent className={styles.toolbarContent}>
-                <TableToolbarSearch persistent onChange={onInputChange} />
+                <TableToolbarSearch
+                  closeButtonLabelText={t('clearSearch', 'Clear search input')}
+                  persistent
+                  onChange={onInputChange}
+                />
                 <div
                   style={{
                     display: 'flex',

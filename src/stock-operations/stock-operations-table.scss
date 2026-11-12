@@ -172,4 +172,7 @@
 // Clear the floating help button (bottom right of the window) so it does not cover « Next page » (#634)
 .paginationOverride:global(.cds--pagination) {
   padding-inline-end: layout.$spacing-10;
+  // Room under the table at the end of the page, so that scrolled to the bottom the last row's edit
+  // button and the pager sit above the help button rather than under it (1366 px, #636)
+  margin-block-end: layout.$spacing-10;
 }

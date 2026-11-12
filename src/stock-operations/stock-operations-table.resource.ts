@@ -1,22 +1,28 @@
 import { type StockOperationFilter, useStockOperations } from './stock-operations.resource';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 /**
  * One page of operations, paged by the server. The list was fetched once (the server's first 50)
  * and paged in the browser, so the oldest operations never showed and the last page repeated the
- * one before it (#634). The server's `startIndex` is a page number, from 0.
+ * one before it (#634). The server's `startIndex` is a page number, from 0. The search (`q`) runs on
+ * the server too (#636).
  */
 export function useStockOperationPages(filter: StockOperationFilter) {
   const pageSizes = [10, 20, 30, 40, 50];
   const [currentPageSize, setPageSize] = useState(10);
-  const [currentPage, setCurrentPage] = useState(1);
 
-  // A new filter starts again from the first page
-  const filterKey = JSON.stringify(filter);
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [filterKey, currentPageSize]);
+  // A new filter or page size starts again from the first page. The page is kept with the filter it was
+  // chosen for, so the first request after a change already asks for page 1: resetting it in an effect
+  // sent one request for the old page with the new filter first (#636)
+  const filterKey = `${JSON.stringify(filter)}|${currentPageSize}`;
+  const [paging, setPaging] = useState({ filterKey, page: 1 });
+  if (paging.filterKey !== filterKey) {
+    // Forget the old page too, or going back to the previous filter (clearing the search) reopened it
+    setPaging({ filterKey, page: 1 });
+  }
+  const currentPage = paging.filterKey === filterKey ? paging.page : 1;
+  const goTo = useCallback((page: number) => setPaging({ filterKey, page }), [filterKey]);
 
   const { items, isLoading, error } = useStockOperations({
     ...filter,
@@ -78,7 +84,7 @@ export function useStockOperationPages(filter: StockOperationFilter) {
     currentPage,
     currentPageSize,
     paginatedItems: pageItems,
-    goTo: setCurrentPage,
+    goTo,
     pageSizes,
     isLoading,
     error,

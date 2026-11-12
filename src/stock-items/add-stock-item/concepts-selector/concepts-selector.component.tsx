@@ -1,8 +1,10 @@
 import React, { type ReactNode, useMemo, useState } from 'react';
 import { ComboBox, TextInputSkeleton } from '@carbon/react';
+import { useTranslation } from 'react-i18next';
 import { type Control, Controller, type FieldValues } from 'react-hook-form';
 import { type Concept } from '../../../core/api/types/concept/Concept';
 import { useConcepts } from '../../../stock-lookups/stock-lookups.resource';
+import { comboBoxTranslateWithId } from '../../../core/utils/translations';
 
 interface ConceptsSelectorProps<T> {
   conceptUuid?: string;
@@ -17,6 +19,7 @@ interface ConceptsSelectorProps<T> {
 }
 
 const ConceptsSelector = <T,>(props: ConceptsSelectorProps<T>) => {
+  const { t } = useTranslation();
   const {
     items: { results: concepts },
     isLoading,
@@ -43,6 +46,7 @@ const ConceptsSelector = <T,>(props: ConceptsSelectorProps<T>) => {
       name={props.controllerName}
       render={({ field: { onChange, value, ref } }) => (
         <ComboBox
+          translateWithId={comboBoxTranslateWithId(t)}
           id={props.name}
           invalid={props.invalid}
           invalidText={props.invalidText}

@@ -180,6 +180,7 @@ const StockOperationForm: React.FC<Workspace2DefinitionProps<StockOperationFormP
             stockOperation={stockOperation}
             stockOperationType={stockOperationType}
             onNext={() => setSelectedIndex(1)}
+            readOnly={!isEditable}
           />
         ),
         disabled: !stockOperation,

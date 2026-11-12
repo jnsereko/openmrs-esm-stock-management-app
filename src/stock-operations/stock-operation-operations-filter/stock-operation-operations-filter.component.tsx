@@ -3,6 +3,7 @@ import { Dropdown, DropdownSkeleton } from '@carbon/react';
 import { useTranslation } from 'react-i18next';
 import { useStockOperationTypes } from '../../stock-lookups/stock-lookups.resource';
 import styles from './stock-operation-operations-filter.scss';
+import { comboBoxTranslateWithId } from '../../core/utils/translations';
 
 const StockOperationOperationsFilter: React.FC = () => {
   const { t } = useTranslation();
@@ -15,6 +16,7 @@ const StockOperationOperationsFilter: React.FC = () => {
     <>
       <div className={styles.filterContainer}>
         <Dropdown
+          translateWithId={comboBoxTranslateWithId(t)}
           id="stockOperationOperationsFiter"
           items={types.results}
           itemToString={(item) => (item ? item.name : t('notSet', 'Not Set'))}

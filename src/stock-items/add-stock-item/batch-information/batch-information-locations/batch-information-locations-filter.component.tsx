@@ -3,6 +3,7 @@ import { ComboBox } from '@carbon/react';
 import { type Control, Controller, type FieldValues } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { useStockTagLocations } from '../../../../stock-lookups/stock-lookups.resource';
+import { comboBoxTranslateWithId } from '../../../../core/utils/translations';
 
 interface BatchInformationLocationsFilterProps<T> {
   onLocationIdChange?: (location: string) => void;
@@ -28,6 +29,7 @@ const BatchInformationLocationsFilter = <T,>(props: BatchInformationLocationsFil
       control={props.control}
       render={({ field: { onChange, value, ref } }) => (
         <ComboBox
+          translateWithId={comboBoxTranslateWithId(t)}
           titleText={props.title}
           id={props.name}
           size={'md'}

@@ -18,6 +18,7 @@ import { useTranslation } from 'react-i18next';
 import { type locationData } from '../stock-items/types';
 import { useLocationTags } from './stock-locations-table.resource';
 import styles from './stock-locations-table.scss';
+import { comboBoxTranslateWithId } from '../core/utils/translations';
 
 const LocationAdministrationSchema = z.object({
   name: z.string().max(255),
@@ -112,6 +113,7 @@ const LocationAdministrationForm: React.FC<LocationAdministrationFormProps> = ({
                   control={control}
                   render={({ field }) => (
                     <FilterableMultiSelect
+                      translateWithId={comboBoxTranslateWithId(t)}
                       id="tag"
                       titleText={t('selectTags', 'Select tags')}
                       helperText={t('selectTagsHelper', 'Select one or more tags for this location')}

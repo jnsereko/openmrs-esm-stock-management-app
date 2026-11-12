@@ -2,6 +2,7 @@ import React from 'react';
 import { Dropdown } from '@carbon/react';
 import { useTranslation } from 'react-i18next';
 import styles from './stock-operation-statuses-filter.scss';
+import { comboBoxTranslateWithId } from '../../core/utils/translations';
 
 const StockOperationStatusesFilter: React.FC = () => {
   const { t } = useTranslation();
@@ -11,6 +12,7 @@ const StockOperationStatusesFilter: React.FC = () => {
   return (
     <div className={styles.filterContainer}>
       <Dropdown
+        translateWithId={comboBoxTranslateWithId(t)}
         id="stockOperationStatusesFiter"
         items={items}
         itemToString={(item) => (item ? item : t('notSet', 'Not Set'))}

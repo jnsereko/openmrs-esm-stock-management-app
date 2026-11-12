@@ -1,11 +1,13 @@
 import React, { type ReactNode } from 'react';
 import { ComboBox, TextInputSkeleton } from '@carbon/react';
+import { useTranslation } from 'react-i18next';
 import { type Concept } from '../../../core/api/types/concept/Concept';
 import { type Control, Controller, type FieldValues } from 'react-hook-form';
 import { useConcept } from '../../../stock-lookups/stock-lookups.resource';
 import { type ConfigObject } from '../../../config-schema';
 import { type StockItemPackagingUOMDTO } from '../../../core/api/types/stockItem/StockItemPackagingUOM';
 import { useConfig } from '@openmrs/esm-framework';
+import { comboBoxTranslateWithId } from '../../../core/utils/translations';
 
 interface PackagingUnitsConceptSelectorProps<T> {
   row?: StockItemPackagingUOMDTO;
@@ -22,6 +24,7 @@ interface PackagingUnitsConceptSelectorProps<T> {
 }
 
 const PackagingUnitsConceptSelector = <T,>(props: PackagingUnitsConceptSelectorProps<T>) => {
+  const { t } = useTranslation();
   const { packingUnitsUUID } = useConfig<ConfigObject>();
 
   const {
@@ -37,6 +40,7 @@ const PackagingUnitsConceptSelector = <T,>(props: PackagingUnitsConceptSelectorP
       control={props.control}
       render={({ field: { onChange } }) => (
         <ComboBox
+          translateWithId={comboBoxTranslateWithId(t)}
           titleText={props.title}
           id={`${props.name}-${props.row.id}-${props.row.uuid}`}
           size="md"

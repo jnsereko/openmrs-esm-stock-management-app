@@ -124,8 +124,8 @@
 
   // A long name without spaces (« Paidoterin Sirop 1mg/1mg/0.15mg/5mg/1mg/333mg 100ml ») may break
   // anywhere. With break-word it still set the column's minimum width, and the table overflowed at
-  // 1280 px (#634)
-  td {
+  // 1280 px (#634). Only the name columns: in Type, « Médicament » broke mid-word (#636)
+  td.nameCell {
     overflow-wrap: anywhere;
   }
 
@@ -169,4 +169,7 @@
 // Clear the floating help button (bottom right of the window) so it does not cover « Next page » (#634)
 .paginationOverride:global(.cds--pagination) {
   padding-inline-end: layout.$spacing-10;
+  // Room under the table at the end of the page, so that scrolled to the bottom the last row's edit
+  // button and the pager sit above the help button rather than under it (1366 px, #636)
+  margin-block-end: layout.$spacing-10;
 }

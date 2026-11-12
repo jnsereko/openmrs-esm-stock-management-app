@@ -176,7 +176,11 @@ function StockUserRoleScopesItems() {
               }}
             >
               <TableToolbarContent className={styles.toolbarContent}>
-                <TableToolbarSearch persistent onChange={onInputChange} />
+                <TableToolbarSearch
+                  closeButtonLabelText={t('clearSearch', 'Clear search input')}
+                  persistent
+                  onChange={onInputChange}
+                />
                 <TableToolbarMenu iconDescription={t('settings', 'Settings')}>
                   <TableToolbarAction className={styles.toolbarAction} onClick={handleRefresh}>
                     {t('refresh', 'Refresh')}

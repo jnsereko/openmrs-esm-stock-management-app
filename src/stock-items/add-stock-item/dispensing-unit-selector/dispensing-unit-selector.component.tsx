@@ -1,10 +1,12 @@
 import React, { type ReactNode } from 'react';
 import { ComboBox, TextInputSkeleton } from '@carbon/react';
+import { useTranslation } from 'react-i18next';
 import { type Control, Controller, type FieldValues } from 'react-hook-form';
 import { useConfig } from '@openmrs/esm-framework';
 import { type Concept } from '../../../core/api/types/concept/Concept';
 import { type ConfigObject } from '../../../config-schema';
 import { useConcept } from '../../../stock-lookups/stock-lookups.resource';
+import { comboBoxTranslateWithId } from '../../../core/utils/translations';
 
 interface DispensingUnitSelectorProps<T> {
   control: Control<FieldValues, T>;
@@ -19,6 +21,7 @@ interface DispensingUnitSelectorProps<T> {
 }
 
 const DispensingUnitSelector = <T,>(props: DispensingUnitSelectorProps<T>) => {
+  const { t } = useTranslation();
   const { packingUnitsUUID } = useConfig<ConfigObject>();
   const {
     items: { answers: packingUnits },
@@ -35,6 +38,7 @@ const DispensingUnitSelector = <T,>(props: DispensingUnitSelectorProps<T>) => {
       name={props.controllerName}
       render={({ field: { onChange, value, ref } }) => (
         <ComboBox
+          translateWithId={comboBoxTranslateWithId(t)}
           id={props.name}
           name={props.name}
           items={packingUnits || []}

@@ -52,6 +52,7 @@ import { useConcept, useStockTagLocations } from '../../stock-lookups/stock-look
 import { ResourceRepresentation } from '../../core/api/api';
 import { useReportTypes } from '../stock-reports.resource';
 import styles from './create-stock-report.scss';
+import { comboBoxTranslateWithId } from '../../core/utils/translations';
 
 interface CreateReportProps {
   model?: ReportModel;
@@ -488,6 +489,7 @@ const CreateReport: React.FC<Workspace2DefinitionProps<CreateReportProps>> = ({ 
                 name="reportName"
                 render={({ field: { onChange } }) => (
                   <ComboBox
+                    translateWithId={comboBoxTranslateWithId(t)}
                     id="report"
                     titleText={t('reportName', 'Report name')}
                     items={Array.isArray(reportTypes) ? reportTypes : [reportTypes]}
@@ -511,6 +513,7 @@ const CreateReport: React.FC<Workspace2DefinitionProps<CreateReportProps>> = ({ 
                   name="stockItemCategoryConceptUuid"
                   render={({ field: { onChange } }) => (
                     <ComboBox
+                      translateWithId={comboBoxTranslateWithId(t)}
                       id="stockReportItem"
                       size="md"
                       titleText={t('stockItemCategory', 'Stock Item Category')}
@@ -596,6 +599,7 @@ const CreateReport: React.FC<Workspace2DefinitionProps<CreateReportProps>> = ({ 
               name="patientUuid"
               render={({ field: { onChange } }) => (
                 <ComboBox
+                  translateWithId={comboBoxTranslateWithId(t)}
                   id="patient"
                   titleText={t('patient', 'Patient')}
                   items={patientSearchResults}
@@ -619,6 +623,7 @@ const CreateReport: React.FC<Workspace2DefinitionProps<CreateReportProps>> = ({ 
               name="stockItemUuid"
               render={({ field: { onChange } }) => (
                 <ComboBox
+                  translateWithId={comboBoxTranslateWithId(t)}
                   id="stockItem"
                   titleText={t('stockItem', 'Stock Item')}
                   items={stockItemSearchResults}

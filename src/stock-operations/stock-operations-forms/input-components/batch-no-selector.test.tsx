@@ -3,7 +3,7 @@ import { vi, describe, it, expect, beforeEach } from 'vitest';
 import userEvent from '@testing-library/user-event';
 import { render, screen } from '@testing-library/react';
 import { type StockItemInventory } from '../../../core/api/types/stockItem/StockItemInventory';
-import { formatForDatePicker } from '../../../constants';
+import { formatExpiryDate } from '../../../core/utils/datetimeUtils';
 import { useStockItemInventory } from '../../../stock-items/stock-items.resource';
 import BatchNoSelector from './batch-no-selector.component';
 
@@ -65,7 +65,7 @@ describe('BatchNoSelector', () => {
     await user.click(combobox);
     await user.type(combobox, 'BATCH-001');
 
-    const option = screen.getByText(`BATCH-001 | Qty: 10 | Expiry: ${formatForDatePicker(mockExpiration)}`);
+    const option = screen.getByText(`BATCH-001 | Qty: 10 | Expiry: ${formatExpiryDate(mockExpiration)}`);
 
     await user.click(option);
 
@@ -164,5 +164,46 @@ describe('BatchNoSelector', () => {
     await user.click(screen.getByRole('combobox'));
 
     expect(screen.getAllByRole('option').map((option) => option.textContent.split(' | ')[1])).toEqual(['Qty: 371']);
+  });
+
+  it('narrows the batches to those matching the typed text', async () => {
+    const user = userEvent.setup();
+    mockInventory([
+      row('1', 'UAT-B3-QA', 239, new Date('2027-12-30')),
+      row('2', 'UAT-B9-QA', 140, new Date('2028-03-30')),
+      row('3', 'E2E-B14-RCPT', 21, new Date('2026-12-31')),
+    ]);
+
+    render(<BatchNoSelector stockItemUuid={mockStockItemUuid} onValueChange={mockOnValueChange} />);
+
+    // « Filtrer... » only highlighted the first match and kept every batch listed (#636)
+    await user.type(screen.getByRole('combobox'), 'b9');
+    expect(optionBatchNumbers()).toEqual(['UAT-B9-QA']);
+
+    await user.clear(screen.getByRole('combobox'));
+    await user.type(screen.getByRole('combobox'), 'uat');
+    expect(optionBatchNumbers()).toEqual(['UAT-B3-QA', 'UAT-B9-QA']);
+  });
+
+  it('shows the expiry as the app shows dates elsewhere, not dd/MM/yyyy', async () => {
+    const user = userEvent.setup();
+    mockInventory([row('1', 'UAT-B3-QA', 239, new Date('2027-12-30T00:00:00Z'))]);
+
+    render(<BatchNoSelector stockItemUuid={mockStockItemUuid} onValueChange={mockOnValueChange} />);
+    await user.click(screen.getByRole('combobox'));
+
+    const option = screen.getByRole('option');
+    expect(option).toHaveTextContent(`Expiry: ${formatExpiryDate(new Date('2027-12-30T00:00:00Z'))}`);
+    expect(option).not.toHaveTextContent('30/12/2027');
+  });
+
+  it('lists every batch again when opened with a batch chosen', async () => {
+    const user = userEvent.setup();
+    mockInventory([row('1', 'UAT-B3-QA', 239, null), row('2', 'UAT-B9-QA', 140, null)]);
+
+    render(<BatchNoSelector stockItemUuid={mockStockItemUuid} initialValue="2" onValueChange={mockOnValueChange} />);
+    await user.click(screen.getByRole('button', { name: /open/i }));
+
+    expect(optionBatchNumbers()).toEqual(['UAT-B3-QA', 'UAT-B9-QA']);
   });
 });

@@ -93,7 +93,11 @@ const StockItemRules: React.FC<StockItemRulesProps> = ({ stockItemUuid, model, c
               }}
             >
               <TableToolbarContent className={styles.toolbarContent}>
-                <TableToolbarSearch persistent onChange={onInputChange} />
+                <TableToolbarSearch
+                  closeButtonLabelText={t('clearSearch', 'Clear search input')}
+                  persistent
+                  onChange={onInputChange}
+                />
                 <div
                   style={{
                     display: 'flex',

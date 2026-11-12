@@ -1,6 +1,7 @@
 import React from 'react';
 import styles from './stock-reports.scss';
 import { formatDate, parseDate } from '@openmrs/esm-framework';
+import { formatExpiryDate } from '../../core/utils/datetimeUtils';
 import { BatchJobStatusCancelled, parseParametersToMap } from '../../core/api/types/BatchJob';
 import { useTranslation } from 'react-i18next';
 
@@ -89,12 +90,7 @@ const StockReportStatus = (props: StockReportStatusProps) => {
         <div>
           <span className={styles.textHeading}>{t('expires', 'Expires')}:</span>
           <div className={styles.statusDescriptions}>
-            <span className={styles.text}>
-              {formatDate(parseDate(props.model?.expiration.toString()), {
-                time: true,
-                mode: 'standard',
-              })}
-            </span>
+            <span className={styles.text}>{formatExpiryDate(props.model?.expiration)}</span>
           </div>
         </div>
       )}

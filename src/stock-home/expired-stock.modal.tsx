@@ -11,6 +11,7 @@ import {
   TableRow,
 } from '@carbon/react';
 import { useTranslation } from 'react-i18next';
+import { formatExpiryDate } from '../core/utils/datetimeUtils';
 
 interface ExpiredStockModalProps {
   closeModal: () => void;
@@ -27,16 +28,6 @@ const ExpiredStockModal = ({ closeModal, expiredStock }: ExpiredStockModalProps)
     { key: 'dispensingUnitName', header: 'Unit' },
     { key: 'expiration', header: 'Expiration Date' },
   ];
-
-  const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat('en-GB', {
-      year: 'numeric',
-      month: 'short',
-      day: '2-digit',
-    }).format(date);
-  };
 
   return (
     <>
@@ -59,7 +50,7 @@ const ExpiredStockModal = ({ closeModal, expiredStock }: ExpiredStockModalProps)
                     <TableCell>{item?.batchNo || 'N/A'}</TableCell>
                     <TableCell>{item?.quantity || 'N/A'}</TableCell>
                     <TableCell>{item?.dispensingUnitName || 'N/A'}</TableCell>
-                    <TableCell>{formatDate(item?.expiration)}</TableCell>
+                    <TableCell>{formatExpiryDate(item?.expiration) || 'N/A'}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

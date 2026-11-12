@@ -31,12 +31,15 @@ type BaseOperationDetailsFormStepProps = {
   stockOperation?: StockOperationDTO;
   stockOperationType: StockOperationType;
   onNext?: () => void;
+  /** An operation that can no longer be changed: its details are shown, not offered for editing (#636) */
+  readOnly?: boolean;
 };
 
 const BaseOperationDetailsFormStep: FC<BaseOperationDetailsFormStepProps> = ({
   stockOperation,
   stockOperationType,
   onNext,
+  readOnly = false,
 }) => {
   const { t } = useTranslation();
   const translateError = useTranslatedError();
@@ -107,7 +110,7 @@ const BaseOperationDetailsFormStep: FC<BaseOperationDetailsFormStepProps> = ({
     );
 
   return (
-    <Stack gap={4} className={styles.grid}>
+    <Stack gap={4} className={`${styles.grid} ${readOnly ? styles.readOnlyDetails : ''}`}>
       <div className={styles.heading}>
         <h4>{t('operationTypeDetails', '{{operationType}} Details', { operationType: stockOperationType.name })}</h4>
       </div>
@@ -117,7 +120,7 @@ const BaseOperationDetailsFormStep: FC<BaseOperationDetailsFormStepProps> = ({
           name="operationDate"
           render={({ field, fieldState: { error } }) => (
             <DatePicker
-              readOnly={field.disabled}
+              readOnly={readOnly || field.disabled}
               datePickerType="single"
               locale="en"
               className={styles.datePickerInput}
@@ -162,7 +165,7 @@ const BaseOperationDetailsFormStep: FC<BaseOperationDetailsFormStepProps> = ({
                   ? t('from', 'From')
                   : t('location', 'Location')
               }
-              readOnly={field.disabled}
+              readOnly={readOnly || field.disabled}
               name={'sourceUuid'}
               id={'sourceUuid'}
               size="lg"
@@ -193,7 +196,7 @@ const BaseOperationDetailsFormStep: FC<BaseOperationDetailsFormStepProps> = ({
             render={({ field, fieldState: { error } }) => (
               <ComboBox
                 translateWithId={comboBoxTranslateWithId(t)}
-                readOnly={field.disabled}
+                readOnly={readOnly || field.disabled}
                 titleText={
                   isStockIssueOperation
                     ? t('destination', 'Destination')
@@ -224,10 +227,10 @@ const BaseOperationDetailsFormStep: FC<BaseOperationDetailsFormStepProps> = ({
           />
         </Column>
       )}
-      <UsersSelector />
+      <UsersSelector readOnly={readOnly} />
       {operationTypePermision.requiresStockAdjustmentReason && (
         <Column>
-          <StockOperationReasonSelector stockOperationType={stockOperationType?.operationType} />
+          <StockOperationReasonSelector stockOperationType={stockOperationType?.operationType} readOnly={readOnly} />
         </Column>
       )}
       <Column>
@@ -237,9 +240,9 @@ const BaseOperationDetailsFormStep: FC<BaseOperationDetailsFormStepProps> = ({
           render={({ field, fieldState: { error } }) => (
             <TextArea
               {...field}
-              readOnly={field.disabled}
+              readOnly={readOnly || field.disabled}
               disabled={false}
-              maxCount={250}
+              maxCount={readOnly ? undefined : 250}
               onChange={(e: ChangeEvent<HTMLTextAreaElement>) => {
                 field.onChange(e.target.value);
               }}

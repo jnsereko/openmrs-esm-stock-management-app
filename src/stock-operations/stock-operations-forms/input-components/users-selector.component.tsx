@@ -19,7 +19,11 @@ function matchesUser(item: User | string, inputValue: string | null) {
   );
 }
 
-const UsersSelector = () => {
+type UsersSelectorProps = {
+  readOnly?: boolean;
+};
+
+const UsersSelector: React.FC<UsersSelectorProps> = ({ readOnly = false }) => {
   const { isLoading, userList, setSearchString } = useSearchUser();
   const { t } = useTranslation();
   const translateError = useTranslatedError();
@@ -63,7 +67,7 @@ const UsersSelector = () => {
           render={({ field, fieldState: { error } }) => (
             <ComboBox
               translateWithId={comboBoxTranslateWithId(t)}
-              readOnly={field.disabled}
+              readOnly={readOnly || field.disabled}
               titleText={t('responsiblePerson', 'Responsible Person')}
               name={'responsiblePersonUuid'}
               id={'responsiblePersonUuid'}
@@ -108,7 +112,7 @@ const UsersSelector = () => {
             render={({ field, fieldState: { error } }) => (
               <TextInput
                 {...field}
-                readOnly={field.disabled}
+                readOnly={readOnly || field.disabled}
                 disabled={false}
                 id="responsiblePersonOther"
                 name="responsiblePersonOther"

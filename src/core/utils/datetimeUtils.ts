@@ -1,4 +1,5 @@
 import dayjs from 'dayjs';
+import { formatDate, parseDate } from '@openmrs/esm-framework';
 
 export const formatDisplayDate = (date: Date | null | undefined, format?: string) => {
   return date ? dayjs(date).format(format ?? 'DD-MMM-YYYY') : '';
@@ -6,6 +7,17 @@ export const formatDisplayDate = (date: Date | null | undefined, format?: string
 
 export const formatBatchExpiryDate = (date: Date | null | undefined, format?: string) => {
   return date ? dayjs(date).format(format ?? 'YYYY-MMM') : '';
+};
+
+/**
+ * An expiry date, as the app shows dates elsewhere: « 30 déc. 2027 » in French, never « Today ». The
+ * batch picker and the items step showed 30/12/2027 while the operation and item pages showed
+ * 30 déc. 2027 or 30-Dec-2027 (#636).
+ */
+export const formatExpiryDate = (date: Date | string | null | undefined) => {
+  if (!date) return '';
+  const value = date instanceof Date ? date : parseDate(String(date));
+  return isNaN(value?.getTime()) ? '' : formatDate(value, { time: false, noToday: true });
 };
 
 export const formatDisplayDateTime = (date: Date | null | undefined, format?: string) => {

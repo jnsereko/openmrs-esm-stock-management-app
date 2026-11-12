@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useStockRules } from './stock-rules.resource';
 import { ResourceRepresentation } from '../../../core/api/api';
 import styles from './stock-rules-filter.scss';
+import { comboBoxTranslateWithId } from '../../../core/utils/translations';
 
 interface StockRulesFilterProps {
   stockItemUuid: string;
@@ -25,6 +26,7 @@ const StockRulesFilter: React.FC<StockRulesFilterProps> = ({ stockItemUuid }) =>
     <>
       <div className={styles.filterContainer}>
         <Dropdown
+          translateWithId={comboBoxTranslateWithId(t)}
           id="stockRulesFiter"
           items={[...items.results]}
           itemToString={(item) => (item ? item.name : t('notSet', 'Not Set'))}

@@ -12,7 +12,8 @@ import {
   TableRow,
   Tile,
 } from '@carbon/react';
-import { formatDate, parseDate, usePagination } from '@openmrs/esm-framework';
+import { usePagination } from '@openmrs/esm-framework';
+import { formatExpiryDate } from '../../../core/utils/datetimeUtils';
 import { type StockOperationItemDTO } from '../../../core/api/types/stockOperation/StockOperationItemDTO';
 import styles from './stock-items-table.scss';
 import { paginationTexts } from '../../../core/utils/translations';
@@ -65,7 +66,7 @@ const StockItemsTable: React.FC<Props> = ({ items }) => {
       results.map((item, index) => ({
         id: index,
         ...item,
-        expiration: item.expiration ? formatDate(parseDate(`${item.expiration}`)) : '--',
+        expiration: item.expiration ? formatExpiryDate(item.expiration) : '--',
       })),
     [results],
   );
@@ -74,6 +75,7 @@ const StockItemsTable: React.FC<Props> = ({ items }) => {
     <Tile className={styles.container}>
       <span className={styles.title}>{t('stockItems', 'Stock items')}</span>
       <Search
+        closeButtonLabelText={t('clearSearch', 'Clear search input')}
         labelText={t('search', 'Search')}
         placeholder={t('search', 'Search')}
         value={searchText}

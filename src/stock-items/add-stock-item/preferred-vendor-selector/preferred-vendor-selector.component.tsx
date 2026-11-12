@@ -1,9 +1,11 @@
 import React, { type ReactNode } from 'react';
 import { type Control, Controller, type FieldValues } from 'react-hook-form';
 import { ComboBox, TextInputSkeleton } from '@carbon/react';
+import { useTranslation } from 'react-i18next';
 import { useStockSources } from '../../../stock-sources/stock-sources.resource';
 import { ResourceRepresentation } from '../../../core/api/api';
 import { type StockSource } from '../../../core/api/types/stockOperation/StockSource';
+import { comboBoxTranslateWithId } from '../../../core/utils/translations';
 
 interface PreferredVendorSelectorProps<T> {
   onPreferredVendorChange?: (unit: StockSource | null | undefined) => void;
@@ -19,6 +21,7 @@ interface PreferredVendorSelectorProps<T> {
 }
 
 const PreferredVendorSelector = <T,>(props: PreferredVendorSelectorProps<T>) => {
+  const { t } = useTranslation();
   const {
     items: { results: sourcesList },
     isLoading,
@@ -36,6 +39,7 @@ const PreferredVendorSelector = <T,>(props: PreferredVendorSelectorProps<T>) => 
       control={props.control}
       render={({ field: { onChange, value, ref } }) => (
         <ComboBox
+          translateWithId={comboBoxTranslateWithId(t)}
           titleText={props.title}
           id={props.name}
           size={'md'}

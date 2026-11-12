@@ -50,4 +50,44 @@ describe('useStockOperationPages', () => {
     act(() => result.current.setPageSize(20));
     expect(lastFilter()).toMatchObject({ startIndex: 0, limit: 20 });
   });
+
+  it('asks for the first page straight away when the filter changes, not the old page first', () => {
+    const { result, rerender } = renderHook(({ q }) => useStockOperationPages({ q }), {
+      initialProps: { q: undefined as string | undefined },
+    });
+
+    act(() => result.current.goTo(6));
+    mockUseStockOperations.mockClear();
+
+    // From page 6, a search sent one request for page 6 of the new results before page 1 (#636)
+    rerender({ q: 'SIS-0058' });
+    const filters = mockUseStockOperations.mock.calls.map(([filter]) => filter);
+    expect(filters.length).toBeGreaterThan(0);
+    filters.forEach((filter) => expect(filter).toMatchObject({ q: 'SIS-0058', startIndex: 0 }));
+    expect(result.current.currentPage).toBe(1);
+  });
+
+  it('keeps the chosen page while the filter stays the same', () => {
+    const { result, rerender } = renderHook(({ status }) => useStockOperationPages({ status }), {
+      initialProps: { status: 'NEW' },
+    });
+
+    act(() => result.current.goTo(4));
+    rerender({ status: 'NEW' });
+    expect(result.current.currentPage).toBe(4);
+    expect(lastFilter()).toMatchObject({ startIndex: 3 });
+  });
+
+  it('starts from the first page when the search is cleared again', () => {
+    const { result, rerender } = renderHook(({ q }) => useStockOperationPages({ q }), {
+      initialProps: { q: undefined as string | undefined },
+    });
+
+    act(() => result.current.goTo(6));
+    rerender({ q: 'SIS' });
+    rerender({ q: undefined });
+
+    expect(result.current.currentPage).toBe(1);
+    expect(lastFilter()).toMatchObject({ startIndex: 0 });
+  });
 });

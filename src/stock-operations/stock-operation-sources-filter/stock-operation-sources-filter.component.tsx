@@ -5,6 +5,7 @@ import { type ConfigObject } from '../../config-schema';
 import { useConcept } from '../../stock-lookups/stock-lookups.resource';
 import { useConfig } from '@openmrs/esm-framework';
 import styles from './stock-operation-sources-filter.scss';
+import { comboBoxTranslateWithId } from '../../core/utils/translations';
 
 const StockOperationSourcesFilter: React.FC = () => {
   const { t } = useTranslation();
@@ -19,6 +20,7 @@ const StockOperationSourcesFilter: React.FC = () => {
     <>
       <div className={styles.filterContainer}>
         <Dropdown
+          translateWithId={comboBoxTranslateWithId(t)}
           id="stockOperationSourcesFiter"
           items={[...items.answers]}
           itemToString={(item) => (item ? item.display : t('notSet', 'Not Set'))}

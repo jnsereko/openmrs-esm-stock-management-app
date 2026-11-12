@@ -71,6 +71,8 @@ const EditStockOperationActionMenu: React.FC<EditStockOperationActionMenuProps> 
       size="sm"
       onClick={handleLaunchWorkspace}
       renderIcon={showIcon ? () => <Edit size={16} /> : undefined}
+      // The pencil alone had no name for screen readers
+      aria-label={showprops ? undefined : t('edit', 'Edit')}
     >
       {showprops && (
         <span className={styles.operationNumberText}>

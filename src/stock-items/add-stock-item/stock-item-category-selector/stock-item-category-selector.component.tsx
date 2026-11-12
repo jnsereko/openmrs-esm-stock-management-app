@@ -6,6 +6,7 @@ import { ComboBox, TextInputSkeleton } from '@carbon/react';
 import { useConfig } from '@openmrs/esm-framework';
 import { useConcept } from '../../../stock-lookups/stock-lookups.resource';
 import { type ConfigObject } from '../../../config-schema';
+import { comboBoxTranslateWithId } from '../../../core/utils/translations';
 
 interface StockItemCategorySelectorProps<T> {
   onCategoryUuidChange?: (unit: Concept | null | undefined) => void;
@@ -56,6 +57,7 @@ const StockItemCategorySelector = <T,>(props: StockItemCategorySelectorProps<T>)
 
   return (
     <ComboBox
+      translateWithId={comboBoxTranslateWithId(t)}
       titleText={props.title}
       id={props.name}
       size={'md'}

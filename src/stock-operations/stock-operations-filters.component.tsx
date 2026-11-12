@@ -5,7 +5,7 @@ import { getStockOperationTypes, useConcept } from '../stock-lookups/stock-looku
 import { StockFilters } from '../constants';
 import { StockOperationStatusTypes } from '../core/api/types/stockOperation/StockOperationStatus';
 import styles from '../stock-items/stock-items-table.scss';
-import { translateOperationStatus } from '../core/utils/translations';
+import { translateOperationStatus, comboBoxTranslateWithId } from '../core/utils/translations';
 
 interface StockOperationFiltersProps {
   conceptUuid?: string;
@@ -71,6 +71,7 @@ const StockOperationsFilters: React.FC<StockOperationFiltersProps> = ({ conceptU
 
   return (
     <MultiSelect
+      translateWithId={comboBoxTranslateWithId(t)}
       autoAlign
       className={styles.filtersAlign}
       disabled={!dataItems.length}

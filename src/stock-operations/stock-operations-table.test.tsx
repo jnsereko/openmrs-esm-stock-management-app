@@ -1,7 +1,7 @@
 import React from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import userEvent from '@testing-library/user-event';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { type StockOperationDTO } from '../core/api/types/stockOperation/StockOperationDTO';
 import { StockFilters } from '../constants';
 import { useStockOperationPages } from './stock-operations-table.resource';
@@ -100,5 +100,41 @@ describe('StockOperations table', () => {
 
     expect(screen.getByText('details of REQ-0002 (requisition-type)')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Collapse current row' })).toBeInTheDocument();
+  });
+
+  it('sends the search to the server once typing stops', async () => {
+    const user = userEvent.setup();
+    vi.mocked(useStockOperationPages).mockImplementation(({ q }) => {
+      const items = q ? operations.filter((o) => o.operationNumber.startsWith(q)) : operations;
+      return {
+        items,
+        tableHeaders,
+        currentPage: 1,
+        pageSizes: [10],
+        totalItems: items.length,
+        goTo: vi.fn(),
+        currentPageSize: 10,
+        setPageSize: vi.fn(),
+        isLoading: false,
+      } as unknown as ReturnType<typeof useStockOperationPages>;
+    });
+    render(<StockOperations />);
+
+    // The operations are paged by the server: searching only the rows shown found nothing (#636)
+    await user.type(screen.getByRole('searchbox'), ' REQ-0002 ');
+
+    await waitFor(() =>
+      expect(vi.mocked(useStockOperationPages)).toHaveBeenLastCalledWith(expect.objectContaining({ q: 'REQ-0002' })),
+    );
+    expect(
+      vi
+        .mocked(useStockOperationPages)
+        .mock.calls.map(([filter]) => filter.q)
+        .filter(Boolean),
+    ).toEqual(expect.arrayContaining(['REQ-0002']));
+    // Debounced: no request for each letter typed
+    expect(vi.mocked(useStockOperationPages).mock.calls.some(([filter]) => filter.q === 'REQ-0')).toBe(false);
+    expect(screen.getByText('REQ-0002')).toBeInTheDocument();
+    expect(screen.queryByText('REQ-0001')).not.toBeInTheDocument();
   });
 });

@@ -12,9 +12,13 @@ import { comboBoxTranslateWithId } from '../../../core/utils/translations';
 
 type StockOperationReasonSelectorProps = {
   stockOperationType: string;
+  readOnly?: boolean;
 };
 
-const StockOperationReasonSelector: React.FC<StockOperationReasonSelectorProps> = ({ stockOperationType }) => {
+const StockOperationReasonSelector: React.FC<StockOperationReasonSelectorProps> = ({
+  stockOperationType,
+  readOnly = false,
+}) => {
   const { stockAdjustmentReasonUUID, stockTakeReasonUUID } = useConfig<ConfigObject>();
   const operationReason =
     stockOperationType === OperationType.STOCK_TAKE_OPERATION_TYPE ? stockTakeReasonUUID : stockAdjustmentReasonUUID;
@@ -46,7 +50,7 @@ const StockOperationReasonSelector: React.FC<StockOperationReasonSelectorProps> 
       render={({ field, fieldState: { error } }) => (
         <ComboBox
           translateWithId={comboBoxTranslateWithId(t)}
-          readOnly={field.disabled}
+          readOnly={readOnly || field.disabled}
           titleText={t('reason', 'Reason')}
           placeholder={t('chooseAReason', 'Choose a reason')}
           name={'reasonUuid'}

@@ -5,6 +5,7 @@ import { type Control, Controller, type FieldValues } from 'react-hook-form';
 import { type Drug } from '../../../core/api/types/concept/Drug';
 import { fetchStockItem } from '../../stock-items.resource';
 import { useDrugsHook } from './drug-selector.resource';
+import { comboBoxTranslateWithId } from '../../../core/utils/translations';
 
 interface DrugSelectorProps<T> {
   placeholder?: string;
@@ -81,6 +82,7 @@ const DrugSelector = <T,>(props: DrugSelectorProps<T>) => {
 
           return (
             <ComboBox
+              translateWithId={comboBoxTranslateWithId(t)}
               titleText={props.title}
               id={props.name}
               size={'md'}

@@ -4,7 +4,7 @@ import { ComboBox, SelectSkeleton } from '@carbon/react';
 import { type StockBatchWithUoM } from '../../../core/api/types/stockItem/StockBatchDTO';
 import { LocationStockItemBatchNo } from '../../../core/api/types/stockItem/StockItem';
 import { ResourceRepresentation } from '../../../core/api/api';
-import { formatForDatePicker } from '../../../constants';
+import { formatExpiryDate } from '../../../core/utils/datetimeUtils';
 import { useStockItemInventory } from '../../../stock-items/stock-items.resource';
 import { comboBoxTranslateWithId } from '../../../core/utils/translations';
 
@@ -114,7 +114,7 @@ const BatchNoSelector: React.FC<BatchNoSelectorProps> = ({
       if (!batch?.batchNo) return '';
 
       const quantityDisplay = formatQuantityDisplay(batch);
-      const expiryDate = batch.expiration ? formatForDatePicker(batch.expiration) : t('noExpiry', 'No expiry');
+      const expiryDate = batch.expiration ? formatExpiryDate(batch.expiration) : t('noExpiry', 'No expiry');
 
       return t('batchOption', '{{batchNo}} | Qty: {{quantity}} | Expiry: {{expiry}}', {
         batchNo: batch.batchNo,
@@ -124,6 +124,18 @@ const BatchNoSelector: React.FC<BatchNoSelectorProps> = ({
       });
     },
     [formatQuantityDisplay, t],
+  );
+
+  // Carbon's ComboBox only highlights the first match by default; the typed text narrows the batches
+  // (« Filtrer... », #636). The text of the batch already chosen lists them all again, so that opening
+  // the list to change it does not show that batch alone.
+  const shouldFilterItem = useCallback(
+    ({ item, inputValue }: { item: StockBatchWithUoM; inputValue: string | null }) => {
+      const query = inputValue?.trim().toLowerCase();
+      if (!query || (initialSelectedItem && inputValue === itemToString(initialSelectedItem))) return true;
+      return itemToString(item).toLowerCase().includes(query);
+    },
+    [initialSelectedItem, itemToString],
   );
 
   const handleChange = useCallback(
@@ -148,6 +160,7 @@ const BatchNoSelector: React.FC<BatchNoSelectorProps> = ({
       onChange={handleChange}
       placeholder={t('filterPlaceholder', 'Filter...')}
       selectedItem={initialSelectedItem}
+      shouldFilterItem={shouldFilterItem}
       style={{ flexGrow: 1 }}
       titleText={t('batchNo', 'Batch number')}
       translateWithId={comboBoxTranslateWithId(t)}

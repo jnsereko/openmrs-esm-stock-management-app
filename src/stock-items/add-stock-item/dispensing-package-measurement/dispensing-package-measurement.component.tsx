@@ -1,7 +1,9 @@
 import React, { type ReactNode, useMemo } from 'react';
 import { ComboBox, SelectSkeleton } from '@carbon/react';
+import { useTranslation } from 'react-i18next';
 import { type Control, Controller, type FieldValues } from 'react-hook-form';
 import { type StockItemPackagingUOMDTO } from '../../../core/api/types/stockItem/StockItemPackagingUOM';
+import { comboBoxTranslateWithId } from '../../../core/utils/translations';
 
 interface DispensingPackageMeasurementProps<T> {
   dispensingUnitPackagingUoMUuid?: string;
@@ -20,6 +22,7 @@ interface DispensingPackageMeasurementProps<T> {
 }
 
 const DispensingPackageMeasurement = <T,>(props: DispensingPackageMeasurementProps<T>) => {
+  const { t } = useTranslation();
   const initialSelectedItem = useMemo<StockItemPackagingUOMDTO | null>(
     () =>
       props?.packagingUnits.length > 0
@@ -39,6 +42,7 @@ const DispensingPackageMeasurement = <T,>(props: DispensingPackageMeasurementPro
         defaultValue={initialSelectedItem?.uuid ?? ''}
         render={({ field: { onChange, ref } }) => (
           <ComboBox
+            translateWithId={comboBoxTranslateWithId(t)}
             titleText={props.title}
             id={props.name}
             size={'sm'}

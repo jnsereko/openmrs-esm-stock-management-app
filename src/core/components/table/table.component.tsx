@@ -139,6 +139,7 @@ const DataList: React.FC<ListProps> = ({ columns, data, children, totalItems, go
                           />
                         </OverflowMenu>
                         <TableToolbarSearch
+                          closeButtonLabelText={t('clearSearch', 'Clear search input')}
                           className={styles.itemListSearch}
                           expanded
                           onChange={onInputChange}

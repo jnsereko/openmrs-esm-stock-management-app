@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { render, screen } from '@testing-library/react';
 import { useFormContext, type UseFormReturn } from 'react-hook-form';
 import { useConfig, useSession } from '@openmrs/esm-framework';
-import { formatForDatePicker } from '../../constants';
+import { formatExpiryDate } from '../../core/utils/datetimeUtils';
 import { mockWorkspace2Props, receiptOperationTypeMock } from '@mocks';
 import { type BaseStockOperationItemFormData } from '../validation-schema';
 import { type StockItemDTO } from '../../core/api/types/stockItem/StockItem';
@@ -331,6 +331,6 @@ describe('Stock Operation step 2 (stock operation items details)', () => {
     await user.click(screen.getByRole('button', { name: /Next/i }));
     // -------------------------------
     expect(screen.getByText(mockQuantity.toLocaleString())).toBeInTheDocument(); //Find by quentity
-    expect(screen.getByText(formatForDatePicker(mockExpiration))).toBeInTheDocument(); //Find by quentity
+    expect(screen.getByText(formatExpiryDate(mockExpiration))).toBeInTheDocument(); //Find by quentity
   });
 });

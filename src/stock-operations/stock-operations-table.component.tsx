@@ -30,6 +30,7 @@ import { isDesktop, restBaseUrl } from '@openmrs/esm-framework';
 import { DATE_PICKER_CONTROL_FORMAT, DATE_PICKER_FORMAT, StockFilters } from '../constants';
 import { formatDisplayDate } from '../core/utils/datetimeUtils';
 import { useHandleMutate } from '../utils';
+import { useDebounce } from '../core/hooks/debounce-hook';
 import { ResourceRepresentation } from '../core/api/api';
 import { useStockOperationPages } from './stock-operations-table.resource';
 import EditStockOperationActionMenu from './edit-stock-operation/edit-stock-operation-action-menu.component';
@@ -61,6 +62,10 @@ const StockOperations: React.FC<StockOperationsTableProps> = () => {
   const [selectedSources, setSelectedSources] = useState<string[]>([]);
   const [selectedStatus, setSelectedStatus] = useState<string[]>([]);
   const [selectedOperations, setSelectedOperations] = useState<string[]>([]);
+  // The search runs on the server, which pages the operations; DataTable's own search only looked at
+  // the page shown, in cells that hold buttons rather than text, and found nothing (#636)
+  const [searchInput, setSearchInput] = useState('');
+  const [searchText, setSearchText] = useState('');
   // The expanded rows are kept here rather than in DataTable: DataTable keeps a row open across a
   // filter change and, for one render, still lists the old rows against the new page of operations,
   // so the opened row was handed no operation and the page crashed (« Autorisé » filter, #632)
@@ -72,10 +77,23 @@ const StockOperations: React.FC<StockOperationsTableProps> = () => {
     [],
   );
 
+  const debouncedSearch = useDebounce((query: string) => {
+    collapseAllRows();
+    setSearchText(query.trim());
+  }, 300);
+
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement> | string) => {
+    const query = typeof event === 'string' ? event : event?.target?.value ?? '';
+    setSearchInput(query);
+    debouncedSearch(query);
+  };
+
   const { items, tableHeaders, currentPage, pageSizes, totalItems, goTo, currentPageSize, setPageSize, isLoading } =
     useStockOperationPages({
       v: ResourceRepresentation.Full,
       totalCount: true,
+      // The server matches the start of the operation number, or the name of its source or destination
+      q: searchText || undefined,
       operationDateMin: selectedFromDate?.toISOString(),
       operationDateMax: selectedToDate?.toISOString(),
       status: selectedStatus.join(','),
@@ -84,7 +102,12 @@ const StockOperations: React.FC<StockOperationsTableProps> = () => {
     });
 
   const filterApplied =
-    selectedFromDate || selectedToDate || selectedSources.length || selectedStatus.length || selectedOperations.length;
+    searchText ||
+    selectedFromDate ||
+    selectedToDate ||
+    selectedSources.length ||
+    selectedStatus.length ||
+    selectedOperations.length;
 
   const handleOnFilterChange = useCallback(
     (selectedItems, filterType) => {
@@ -181,7 +204,7 @@ const StockOperations: React.FC<StockOperationsTableProps> = () => {
         useZebraStyles
         translateWithId={dataTableTranslateWithId(t)}
       >
-        {({ getExpandedRowProps, getHeaderProps, getRowProps, getTableProps, headers, onInputChange, rows }) => (
+        {({ getExpandedRowProps, getHeaderProps, getRowProps, getTableProps, headers, rows }) => (
           <TableContainer className={styles.stockTableContainer}>
             <TableToolbar
               style={{
@@ -193,9 +216,11 @@ const StockOperations: React.FC<StockOperationsTableProps> = () => {
               <TableToolbarContent className={styles.toolbarContent}>
                 <TableToolbarSearch
                   expanded
-                  labelText={t('searchStockOperations', 'Search stock operations')}
-                  onChange={onInputChange}
-                  placeholder={t('searchStockOperations', 'Search stock operations')}
+                  closeButtonLabelText={t('clearSearch', 'Clear search input')}
+                  labelText={t('searchStockOperationsByNumber', 'Search by operation number or location')}
+                  onChange={handleSearchChange}
+                  placeholder={t('searchStockOperationsByNumber', 'Search by operation number or location')}
+                  value={searchInput}
                 />
                 <div className={styles.container}>
                   <DatePicker

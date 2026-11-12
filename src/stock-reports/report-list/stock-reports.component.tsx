@@ -251,7 +251,11 @@ const StockReports: React.FC = () => {
               }}
             >
               <TableToolbarContent className={styles.toolbarContent}>
-                <TableToolbarSearch persistent onChange={onInputChange} />
+                <TableToolbarSearch
+                  closeButtonLabelText={t('clearSearch', 'Clear search input')}
+                  persistent
+                  onChange={onInputChange}
+                />
                 <TableToolbarMenu iconDescription={t('settings', 'Settings')}>
                   <TableToolbarAction className={styles.toolbarMenuAction} onClick={handleRefresh}>
                     {t('refresh', 'Refresh')}
