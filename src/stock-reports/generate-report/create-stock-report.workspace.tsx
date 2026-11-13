@@ -52,7 +52,7 @@ import { useConcept, useStockTagLocations } from '../../stock-lookups/stock-look
 import { ResourceRepresentation } from '../../core/api/api';
 import { useReportTypes } from '../stock-reports.resource';
 import styles from './create-stock-report.scss';
-import { comboBoxTranslateWithId, datePickerMonthLabels } from '../../core/utils/translations';
+import { comboBoxTranslateWithId, datePickerLocale, datePickerMonthLabels } from '../../core/utils/translations';
 
 interface CreateReportProps {
   model?: ReportModel;
@@ -89,7 +89,7 @@ export interface ReportModel {
 
 const CreateReport: React.FC<Workspace2DefinitionProps<CreateReportProps>> = ({ workspaceProps, closeWorkspace }) => {
   const { model } = workspaceProps ?? {};
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const handleMutate = useHandleMutate();
   const { stockItemCategoryUUID } = useConfig<ConfigObject>();
   const isTablet = useLayoutType() === 'tablet';
@@ -539,7 +539,7 @@ const CreateReport: React.FC<Workspace2DefinitionProps<CreateReportProps>> = ({ 
                   {...datePickerMonthLabels(t)}
                   datePickerType="single"
                   maxDate={formatForDatePicker(today())}
-                  locale="en"
+                  locale={datePickerLocale(i18n.language)}
                   dateFormat={DATE_PICKER_CONTROL_FORMAT}
                   onChange={onChange}
                   value={value}
@@ -564,7 +564,7 @@ const CreateReport: React.FC<Workspace2DefinitionProps<CreateReportProps>> = ({ 
                   {...datePickerMonthLabels(t)}
                   datePickerType="single"
                   maxDate={formatForDatePicker(today())}
-                  locale="en"
+                  locale={datePickerLocale(i18n.language)}
                   dateFormat={DATE_PICKER_CONTROL_FORMAT}
                   onChange={onChange}
                   value={value}
@@ -804,7 +804,7 @@ const CreateReport: React.FC<Workspace2DefinitionProps<CreateReportProps>> = ({ 
                   {...datePickerMonthLabels(t)}
                   datePickerType="single"
                   maxDate={formatForDatePicker(today())}
-                  locale="en"
+                  locale={datePickerLocale(i18n.language)}
                   dateFormat={DATE_PICKER_CONTROL_FORMAT}
                   onChange={onChange}
                   value={value}

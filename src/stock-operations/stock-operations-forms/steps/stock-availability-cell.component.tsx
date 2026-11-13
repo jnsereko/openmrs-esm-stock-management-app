@@ -3,7 +3,7 @@ import { showSnackbar } from '@openmrs/esm-framework';
 import React, { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ResourceRepresentation } from '../../../core/api/api';
-import { LocationStockItem } from '../../../core/api/types/stockItem/StockItem';
+import { LocationStockItem, LocationStockItemBatchNo } from '../../../core/api/types/stockItem/StockItem';
 import { useStockItemInventory } from '../../../stock-items/stock-items.resource';
 import styles from './stock-operation-items-form-step.scc.scss';
 
@@ -11,11 +11,16 @@ import styles from './stock-operation-items-form-step.scc.scss';
  * The quantity of the item at one stock location (party), all batches together. It added up every
  * location (the first 10 batches of them), so Box 1 and the central pharmacy showed the same number.
  * Without a party, the total of all locations.
+ *
+ * Once the line has a batch (a Stock Issue's « N° de Lot »), the quantity of that batch at the location:
+ * the line can't take more than that, and « Disponible : 411 » for the location next to a batch of 16
+ * read as the batch's (#641).
  */
-const StockAvailability: React.FC<{ stockItemUuid: string; partyUuid?: string | null }> = ({
-  stockItemUuid,
-  partyUuid,
-}) => {
+const StockAvailability: React.FC<{
+  stockItemUuid: string;
+  partyUuid?: string | null;
+  stockBatchUuid?: string | null;
+}> = ({ stockItemUuid, partyUuid, stockBatchUuid }) => {
   const {
     items: inventory,
     isLoading,
@@ -24,7 +29,7 @@ const StockAvailability: React.FC<{ stockItemUuid: string; partyUuid?: string | 
     v: ResourceRepresentation.Default,
     stockItemUuid,
     partyUuid,
-    groupBy: LocationStockItem,
+    ...(stockBatchUuid ? { stockBatchUuid, groupBy: LocationStockItemBatchNo } : { groupBy: LocationStockItem }),
   });
   const items = inventory?.results;
   const { t } = useTranslation();

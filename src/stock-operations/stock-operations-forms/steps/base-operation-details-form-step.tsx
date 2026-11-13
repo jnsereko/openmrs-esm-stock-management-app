@@ -25,7 +25,7 @@ import StockOperationReasonSelector from '../input-components/stock-operation-re
 import UsersSelector from '../input-components/users-selector.component';
 import styles from '../stock-operation-form.scss';
 import useTranslatedError from '../hooks/useTranslatedError';
-import { comboBoxTranslateWithId, datePickerMonthLabels } from '../../../core/utils/translations';
+import { comboBoxTranslateWithId, datePickerLocale, datePickerMonthLabels } from '../../../core/utils/translations';
 
 type BaseOperationDetailsFormStepProps = {
   stockOperation?: StockOperationDTO;
@@ -41,7 +41,7 @@ const BaseOperationDetailsFormStep: FC<BaseOperationDetailsFormStepProps> = ({
   onNext,
   readOnly = false,
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const translateError = useTranslatedError();
   const operationTypePermision = useOperationTypePermisions(stockOperationType);
   const {
@@ -123,7 +123,7 @@ const BaseOperationDetailsFormStep: FC<BaseOperationDetailsFormStepProps> = ({
               {...datePickerMonthLabels(t)}
               readOnly={readOnly || field.disabled}
               datePickerType="single"
-              locale="en"
+              locale={datePickerLocale(i18n.language)}
               className={styles.datePickerInput}
               {...field}
               value={field.value}

@@ -23,6 +23,7 @@
   "all": "All",
   "approve": "Approve",
   "approveAction": "Approve",
+  "approved": "Approved",
   "atLeastOneStockItem": "You must add at least one stock item",
   "availableQuantity": "Available: {{quantity}} {{unit}}",
   "balance": "Balance",

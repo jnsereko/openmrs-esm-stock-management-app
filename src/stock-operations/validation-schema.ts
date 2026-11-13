@@ -155,9 +155,20 @@ export const getStockOperationItemFormSchema = (operationType: OperationType) =>
             message: 'Quantity cannot be zero.',
           }),
         });
+    case OperationType.STOCK_ISSUE_OPERATION_TYPE:
+      // A Stock Issue made from a requisition keeps what was asked for, shown as « Demandé » (#641)
+      return baseStockOperationItemSchema
+        .omit({
+          batchNo: true,
+          expiration: true,
+          purchasePrice: true,
+        })
+        .extend({
+          quantityRequested: z.number().nullish(),
+          quantityRequestedPackagingUOMUuid: z.string().nullish(),
+        });
     case OperationType.DISPOSED_OPERATION_TYPE:
     case OperationType.RETURN_OPERATION_TYPE:
-    case OperationType.STOCK_ISSUE_OPERATION_TYPE:
     case OperationType.STOCK_TAKE_OPERATION_TYPE:
     case OperationType.TRANSFER_OUT_OPERATION_TYPE:
       return baseStockOperationItemSchema.omit({

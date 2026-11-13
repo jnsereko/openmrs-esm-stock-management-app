@@ -26,6 +26,13 @@
   }
 }
 
+// « Articles reçus » has room for whole words: item names are not hyphenated (« Paraceta-mol Com-primé »);
+// a word longer than its column still wraps, without a hyphen (#641)
+.tableContainer.receivedItems :global(.cds--data-table) td {
+  hyphens: manual;
+  overflow-wrap: break-word;
+}
+
 .availability {
   font-size: 0.875rem;
 

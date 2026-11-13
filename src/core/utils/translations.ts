@@ -117,3 +117,27 @@ export function datePickerMonthLabels(t: TFunction) {
     nextMonthAriaLabel: t('nextMonth', 'Next month'),
   };
 }
+
+/**
+ * The Flatpickr locale of Carbon's DatePicker for the user's language (« fr » for « fr-FR »): the
+ * calendar's month and weekday names follow it. The pickers were set to « en » (#641).
+ */
+export function datePickerLocale(language: string | null | undefined) {
+  return language?.split(/[-_]/)[0]?.toLowerCase() || 'en';
+}
+
+/**
+ * The label of an operation's completedDate in its status line. stockmanagement 2.1.2 writes the
+ * approval there: an approved operation is AUTHORIZED, and a requisition stays so until the Stock Issue
+ * made from it completes it (2.1.2-uvl4), keeping its approval date. A requisition completed without
+ * approval was never submitted (#641).
+ */
+export function completedStatusLabel(
+  t: TFunction,
+  operation: { status?: string | null; operationType?: string | null; submittedDate?: unknown } | null | undefined,
+) {
+  const approved =
+    operation?.status === 'AUTHORIZED' ||
+    (operation?.status === 'COMPLETED' && operation?.operationType === 'requisition' && !!operation?.submittedDate);
+  return approved ? t('approved', 'Approved') : t('completed', 'Completed');
+}

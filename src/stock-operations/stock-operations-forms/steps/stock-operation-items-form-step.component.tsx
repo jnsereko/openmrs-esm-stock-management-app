@@ -143,7 +143,11 @@ const StockOperationItemsFormStep: React.FC<StockOperationItemsFormStepProps> = 
         id: uuid || `${uniqueId}-${index}`,
         item: stockItemUuid ? <StockOperationItemCell stockItemUuid={stockItemUuid} /> : '--',
         itemDetails: stockItemUuid ? (
-          <StockAvailability stockItemUuid={stockItemUuid} partyUuid={availabilityPartyUuid} />
+          <StockAvailability
+            stockItemUuid={stockItemUuid}
+            partyUuid={availabilityPartyUuid}
+            stockBatchUuid={stockBatchUuid}
+          />
         ) : (
           '--'
         ),

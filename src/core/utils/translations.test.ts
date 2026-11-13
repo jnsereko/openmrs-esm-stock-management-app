@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import i18next from 'i18next';
-import { datePickerMonthLabels, paginationTexts } from './translations';
+import { completedStatusLabel, datePickerLocale, datePickerMonthLabels, paginationTexts } from './translations';
 
 describe('paginationTexts', () => {
   // « 1–1 sur 1 éléments »: the range was translated without a count, so never singular (#638)
@@ -34,5 +34,42 @@ describe('datePickerMonthLabels', () => {
       prevMonthAriaLabel: 'previousMonth:Previous month',
       nextMonthAriaLabel: 'nextMonth:Next month',
     });
+  });
+});
+
+describe('datePickerLocale', () => {
+  // The calendar read « November », « S M T W » on a French screen: the pickers were set to « en » (#641)
+  it("gives the calendar the user's language", () => {
+    expect(datePickerLocale('fr')).toBe('fr');
+    expect(datePickerLocale('fr-FR')).toBe('fr');
+    expect(datePickerLocale('en_GB')).toBe('en');
+    expect(datePickerLocale(undefined)).toBe('en');
+  });
+});
+
+describe('completedStatusLabel', () => {
+  const t = ((key: string, defaultValue: string) => defaultValue) as unknown as Parameters<
+    typeof completedStatusLabel
+  >[0];
+
+  // An approved requisition's status line read « Complété » (#641)
+  it('names an approval « Approved »', () => {
+    expect(
+      completedStatusLabel(t, { status: 'AUTHORIZED', operationType: 'requisition', submittedDate: '2026-11-13' }),
+    ).toBe('Approved');
+    expect(
+      completedStatusLabel(t, { status: 'AUTHORIZED', operationType: 'adjustment', submittedDate: '2026-11-13' }),
+    ).toBe('Approved');
+    // completed by its Stock Issue, the date is still the approval's
+    expect(
+      completedStatusLabel(t, { status: 'COMPLETED', operationType: 'requisition', submittedDate: '2026-11-13' }),
+    ).toBe('Approved');
+  });
+
+  it('names a completion « Completed »', () => {
+    expect(
+      completedStatusLabel(t, { status: 'COMPLETED', operationType: 'stockissue', submittedDate: '2026-11-13' }),
+    ).toBe('Completed');
+    expect(completedStatusLabel(t, { status: 'COMPLETED', operationType: 'requisition' })).toBe('Completed');
   });
 });

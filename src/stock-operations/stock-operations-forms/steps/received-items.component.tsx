@@ -59,7 +59,7 @@ const ReceivedItems: React.FC<ReceivedItemsProps> = ({ stockOperation, onPreviou
 
   return (
     <div style={{ margin: '10px' }}>
-      <div className={styles.tableContainer}>
+      <div className={`${styles.tableContainer} ${styles.receivedItems}`}>
         <div className={styles.heading}>
           <h4>{headerTitle}</h4>
         </div>

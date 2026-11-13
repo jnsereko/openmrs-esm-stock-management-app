@@ -13,7 +13,7 @@ import {
 import classNames from 'classnames';
 import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import { datePickerMonthLabels } from '../../../core/utils/translations';
+import { datePickerLocale, datePickerMonthLabels } from '../../../core/utils/translations';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useConfig, useLayoutType } from '@openmrs/esm-framework';
 import { type z } from 'zod';
@@ -63,7 +63,7 @@ const StockItemForm: React.FC<StockItemFormProps> = ({
     defaultValues: stockOperationItem,
     mode: 'all',
   });
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { item } = useStockItem(form.getValues('stockItemUuid'));
   const commonName = useMemo(() => {
     if (!useItemCommonNameAsDisplay) return;
@@ -139,7 +139,7 @@ const StockItemForm: React.FC<StockItemFormProps> = ({
                       {...datePickerMonthLabels(t)}
                       datePickerType="single"
                       minDate={formatForDatePicker(today())}
-                      locale="en"
+                      locale={datePickerLocale(i18n.language)}
                       className={styles.datePickerInput}
                       dateFormat={DATE_PICKER_CONTROL_FORMAT}
                       value={(value as unknown as Date) || null}

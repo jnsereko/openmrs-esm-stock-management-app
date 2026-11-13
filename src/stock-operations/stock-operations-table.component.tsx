@@ -40,6 +40,7 @@ import StockOperationExpandedRow from './add-stock-operation/stock-operations-ex
 import styles from './stock-operations-table.scss';
 import {
   dataTableTranslateWithId,
+  datePickerLocale,
   datePickerMonthLabels,
   paginationTexts,
   tableHeaderTranslateWithId,
@@ -51,7 +52,7 @@ interface StockOperationsTableProps {
 }
 
 const StockOperations: React.FC<StockOperationsTableProps> = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const handleMutate = useHandleMutate();
 
   const handleRefresh = () => {
@@ -229,6 +230,7 @@ const StockOperations: React.FC<StockOperationsTableProps> = () => {
                     className={styles.datePicker}
                     datePickerType="range"
                     dateFormat={DATE_PICKER_CONTROL_FORMAT}
+                    locale={datePickerLocale(i18n.language)}
                     {...datePickerMonthLabels(t)}
                     onChange={([startDate, endDate]) => handleDateFilterChange([startDate, endDate])}
                     value={[selectedFromDate, selectedToDate]}

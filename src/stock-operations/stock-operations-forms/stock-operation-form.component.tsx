@@ -35,7 +35,7 @@ import StockOperationItemsFormStep from './steps/stock-operation-items-form-step
 import StockOperationSubmissionFormStep from './steps/stock-operation-submission-form-step.component';
 import StockItemForm, { type StockItemFormProps } from './stock-item-form/stock-item-form.workspace';
 import StockOperationStepper from './stock-operation-stepper/stock-operation-stepper.component';
-import { getOperationStockPartyUuid } from './stock-operations-form-utils';
+import { getOperationStockPartyUuid, requisitionItemsToIssueItems } from './stock-operations-form-utils';
 import { useStockOperationAndItems } from '../stock-operations.resource';
 import { isStockOperationEditable } from '../stock-operation.utils';
 
@@ -112,18 +112,16 @@ const StockOperationForm: React.FC<Workspace2DefinitionProps<StockOperationFormP
           sourceUuid: _stockOperation?.destinationUuid,
           destinationUuid: _stockOperation?.sourceUuid,
           operationTypeUuid: stockOperationType?.uuid,
-          stockOperationItems: (_stockOperation?.stockOperationItems && _stockOperation.stockOperationItems.length > 0
-            ? _stockOperation.stockOperationItems.map((item) =>
-                pick(
-                  { ...item, expiration: item?.expiration ? parseDate(String(item.expiration)) : undefined },
-                  stockOperationItemFormSchema.keyof().options,
-                ),
-              )
-            : []) as [BaseStockOperationItemFormData, ...BaseStockOperationItemFormData[]],
+          stockOperationItems: requisitionItemsToIssueItems(
+            _stockOperation?.stockOperationItems,
+            stockOperationItemFormSchema.keyof().options as Array<string>,
+            (value) => parseDate(String(value)),
+          ) as [BaseStockOperationItemFormData, ...BaseStockOperationItemFormData[]],
           requisitionStockOperationUuid: stockRequisitionUuid,
           responsiblePersonUuid: _stockOperation?.responsiblePersonUuid,
           responsiblePersonOther: _stockOperation?.responsiblePersonOther,
-          operationDate: _stockOperation?.operationDate ? parseDate(String(_stockOperation.operationDate)) : today(),
+          // Issued today, not on the requisition's date
+          operationDate: today(),
         }
       : undefined,
     resolver: zodResolver(formschema),

@@ -8,6 +8,7 @@ import StockOperationLinks from '../../stock-operation-links.component';
 import StockItemsTable from './stock-items-table';
 import styles from './stock-operation-expanded-row.scss';
 import StockOpertationStatus from './stock-operations-status';
+import { completedStatusLabel } from '../../../core/utils/translations';
 
 interface StockOperationExpandedRowProps {
   model: StockOperationDTO;
@@ -64,7 +65,7 @@ const StockOperationExpandedRow: React.FC<StockOperationExpandedRowProps> = (pro
           )}
           {props.model?.completedDate && (
             <StockOpertationStatus
-              status={t('completed', 'Completed')}
+              status={completedStatusLabel(t, props.model)}
               statusFilledDate={props.model?.completedDate.toString()}
               statusFillerFamilyName={props.model?.completedByFamilyName}
               statusFillerGivenName={props.model?.completedByGivenName}

@@ -56,7 +56,7 @@ import { useHandleMutate } from '../../utils';
 import useSearchUser from '../../stock-operations/stock-operations-forms/hooks/useSearchUser';
 import { useDebounce } from '../../core/hooks/debounce-hook';
 import styles from './add-stock-user-role-scope.scss';
-import { comboBoxTranslateWithId, datePickerMonthLabels } from '../../core/utils/translations';
+import { comboBoxTranslateWithId, datePickerLocale, datePickerMonthLabels } from '../../core/utils/translations';
 
 const MinDate: Date = today();
 
@@ -70,7 +70,7 @@ const AddStockUserRoleScope: React.FC<Workspace2DefinitionProps<AddStockUserRole
   closeWorkspace,
 }) => {
   const { model, editMode } = workspaceProps ?? {};
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const handleMutate = useHandleMutate();
   const title = model
     ? t('editUserRoleScope', 'Edit user role scope')
@@ -343,7 +343,7 @@ const AddStockUserRoleScope: React.FC<Workspace2DefinitionProps<AddStockUserRole
                 dateFormat={DATE_PICKER_CONTROL_FORMAT}
                 datePickerType="range"
                 light
-                locale="en"
+                locale={datePickerLocale(i18n.language)}
                 minDate={formatForDatePicker(MinDate)}
                 onChange={onActiveDatesChange}
               >

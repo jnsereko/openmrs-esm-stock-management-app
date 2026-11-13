@@ -4,6 +4,7 @@ import styles from './stock-operation-status.scss';
 import StockOpertationStatus from './stock-operation-status';
 import { useTranslation } from 'react-i18next';
 import { Row } from '@carbon/react';
+import { completedStatusLabel } from '../../core/utils/translations';
 type Props = {
   stockOperation: StockOperationDTO;
 };
@@ -46,7 +47,7 @@ const StockOperationStatusRow: React.FC<Props> = ({ stockOperation }) => {
       )}
       {stockOperation.completedDate && (
         <StockOpertationStatus
-          status={t('completed', 'Completed')}
+          status={completedStatusLabel(t, stockOperation)}
           statusFilledDate={stockOperation.completedDate.toString()}
           statusFillerFamilyName={stockOperation.completedByFamilyName}
           statusFillerGivenName={stockOperation.completedByGivenName}

@@ -31,10 +31,8 @@ const StockOpertationStatus: React.FC<Props> = ({
         </span>{' '}
         {/* Spaces in the text too: the margins alone read « 00:22ParKWIZERA » to screen readers and copy (#638) */}
         <span className={styles.text}>{t('by', 'By')}</span>{' '}
-        <span className={styles.text}>
-          {statusFillerFamilyName} &nbsp;
-          {statusFillerGivenName}
-        </span>
+        {/* One space between the names: « KWIZERA  Alika Flory » had a space and a &nbsp; (#641) */}
+        <span className={styles.text}>{[statusFillerFamilyName, statusFillerGivenName].filter(Boolean).join(' ')}</span>
         {extraStatusinfo}
       </div>
     </div>
