@@ -19,6 +19,8 @@ interface StockOperationsModalProps {
   closeModal: () => void;
 }
 
+const REASON_MAX_LENGTH = 500;
+
 const StockOperationsModal: React.FC<StockOperationsModalProps> = ({ title, requireReason, operation, closeModal }) => {
   const confirmType = title.toLocaleLowerCase().trim();
   const { t } = useTranslation();
@@ -31,7 +33,7 @@ const StockOperationsModal: React.FC<StockOperationsModalProps> = ({ title, requ
     dispatch: t('dispatchAction', 'Dispatch'),
     complete: t('completeAction', 'Complete'),
     'complete dispatch': t('completeDispatchAction', 'Complete dispatch'),
-    cancel: t('cancelAction', 'Cancel'),
+    cancel: t('cancelOperationAction', 'Cancel operation'),
     reject: t('rejectAction', 'Reject'),
     return: t('returnAction', 'Return'),
     approve: t('approveAction', 'Approve'),
@@ -139,8 +141,12 @@ const StockOperationsModal: React.FC<StockOperationsModalProps> = ({ title, requ
                   id="nextNotes"
                   name="nextNotes"
                   invalidText={t('required', 'Required')}
-                  maxCount={500}
-                  enableCounter
+                  // Carbon's own counter describes itself as « Character limit 500 », in English only (#641)
+                  maxLength={REASON_MAX_LENGTH}
+                  helperText={t('characterCount', '{{count}} / {{max}} characters', {
+                    count: notes.length,
+                    max: REASON_MAX_LENGTH,
+                  })}
                   onChange={(e) => setNotes(e.target.value)}
                 />
               </section>
@@ -149,7 +155,8 @@ const StockOperationsModal: React.FC<StockOperationsModalProps> = ({ title, requ
         </ModalBody>
         <ModalFooter>
           <Button kind="secondary" onClick={closeModal}>
-            {getCoreTranslation('cancel')}
+            {/* Cancelling an operation offered two « Annuler » buttons: this one only closes the dialog (#641) */}
+            {confirmType === 'cancel' ? t('back', 'Back') : getCoreTranslation('cancel')}
           </Button>
           {isApproving ? <InlineLoading /> : <Button type="submit">{actionLabel}</Button>}
         </ModalFooter>

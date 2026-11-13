@@ -82,7 +82,11 @@ const StockOperationForm: React.FC<Workspace2DefinitionProps<StockOperationFormP
     user: { uuid: defaultLoggedUserUuid },
   } = useSession();
   const { autoPopulateResponsiblePerson } = useConfig<ConfigObject>();
-  const { error, items: _stockOperation, isLoading } = useStockOperationAndItems(stockRequisitionUuid);
+  // The requisition prefills a NEW Stock Issue only. A saved one is reopened with its requisition's uuid
+  // too, and rebuilding its lines from the requisition lost their batch and sent the requisition's line
+  // uuids on save (« Item … not found », #641)
+  const prefillRequisitionUuid = stockOperation ? undefined : stockRequisitionUuid;
+  const { error, items: _stockOperation, isLoading } = useStockOperationAndItems(prefillRequisitionUuid);
 
   const form = useForm<StockOperationItemDtoSchema>({
     defaultValues: {
@@ -107,7 +111,7 @@ const StockOperationForm: React.FC<Workspace2DefinitionProps<StockOperationFormP
       destinationUuid: stockOperation?.destinationUuid ?? '',
     },
     mode: 'all',
-    values: stockRequisitionUuid
+    values: prefillRequisitionUuid
       ? {
           sourceUuid: _stockOperation?.destinationUuid,
           destinationUuid: _stockOperation?.sourceUuid,
@@ -117,7 +121,7 @@ const StockOperationForm: React.FC<Workspace2DefinitionProps<StockOperationFormP
             stockOperationItemFormSchema.keyof().options as Array<string>,
             (value) => parseDate(String(value)),
           ) as [BaseStockOperationItemFormData, ...BaseStockOperationItemFormData[]],
-          requisitionStockOperationUuid: stockRequisitionUuid,
+          requisitionStockOperationUuid: prefillRequisitionUuid,
           responsiblePersonUuid: _stockOperation?.responsiblePersonUuid,
           responsiblePersonOther: _stockOperation?.responsiblePersonOther,
           // Issued today, not on the requisition's date

@@ -2,15 +2,16 @@ import React from 'react';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import userEvent from '@testing-library/user-event';
 import { render, screen } from '@testing-library/react';
-import { useFormContext, type UseFormReturn } from 'react-hook-form';
+import { useForm, useFormContext, type UseFormReturn } from 'react-hook-form';
 import { useConfig, useSession } from '@openmrs/esm-framework';
 import { formatExpiryDate } from '../../core/utils/datetimeUtils';
-import { mockWorkspace2Props, receiptOperationTypeMock } from '@mocks';
+import { mockWorkspace2Props, receiptOperationTypeMock, stockIssueOperationtypeMock } from '@mocks';
+import { type StockOperationDTO } from '../../core/api/types/stockOperation/StockOperationDTO';
 import { type BaseStockOperationItemFormData } from '../validation-schema';
 import { type StockItemDTO } from '../../core/api/types/stockItem/StockItem';
 import { useFilterableStockItems } from './hooks/useFilterableStockItems';
 import { useStockItem } from '../../stock-items/stock-items.resource';
-import { useStockOperations } from '../stock-operations.resource';
+import { useStockOperationAndItems, useStockOperations } from '../stock-operations.resource';
 import { useStockOperationTypes } from '../../stock-lookups/stock-lookups.resource';
 import useParties from './hooks/useParties';
 import StockOperationForm from './stock-operation-form.component';
@@ -332,5 +333,64 @@ describe('Stock Operation step 2 (stock operation items details)', () => {
     // -------------------------------
     expect(screen.getByText(mockQuantity.toLocaleString())).toBeInTheDocument(); //Find by quentity
     expect(screen.getByText(formatExpiryDate(mockExpiration))).toBeInTheDocument(); //Find by quentity
+  });
+
+  // A saved Stock Issue made from a requisition reopened with the requisition's lines: lot « -- », and
+  // the requisition's line uuids sent on save (« Item … not found », #641)
+  it('reopens a saved Stock Issue made from a requisition with its own lines, lot and requested quantity', () => {
+    const savedIssue = {
+      uuid: 'issue-uuid',
+      operationType: 'stockissue',
+      status: 'NEW',
+      requisitionStockOperationUuid: 'requisition-uuid',
+      stockOperationItems: [
+        {
+          uuid: 'issue-line-uuid',
+          stockItemUuid: 'paracetamol',
+          stockItemPackagingUOMUuid: 'tablet',
+          stockBatchUuid: 'batch-b9',
+          quantity: 9,
+          quantityRequested: 9,
+          quantityRequestedPackagingUOMUuid: 'tablet',
+        },
+      ],
+    } as unknown as StockOperationDTO;
+
+    render(
+      <StockOperationForm
+        {...mockWorkspace2Props({
+          stockOperationType: stockIssueOperationtypeMock as any,
+          stockOperation: savedIssue,
+          stockRequisitionUuid: 'requisition-uuid',
+        })}
+      />,
+    );
+
+    expect(vi.mocked(useStockOperationAndItems)).toHaveBeenLastCalledWith(undefined);
+    const formOptions = vi.mocked(useForm).mock.lastCall[0];
+    expect(formOptions.values).toBeUndefined();
+    expect((formOptions.defaultValues as Record<string, unknown>).stockOperationItems).toEqual([
+      expect.objectContaining({
+        uuid: 'issue-line-uuid',
+        stockBatchUuid: 'batch-b9',
+        quantityRequested: 9,
+      }),
+    ]);
+  });
+
+  it('prefills a new Stock Issue from its requisition', () => {
+    render(
+      <StockOperationForm
+        {...mockWorkspace2Props({
+          stockOperationType: stockIssueOperationtypeMock as any,
+          stockRequisitionUuid: 'requisition-uuid',
+        })}
+      />,
+    );
+
+    expect(vi.mocked(useStockOperationAndItems)).toHaveBeenLastCalledWith('requisition-uuid');
+    expect(vi.mocked(useForm).mock.lastCall[0].values).toEqual(
+      expect.objectContaining({ requisitionStockOperationUuid: 'requisition-uuid' }),
+    );
   });
 });

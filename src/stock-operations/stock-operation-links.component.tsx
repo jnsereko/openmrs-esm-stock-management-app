@@ -1,4 +1,6 @@
 import React, { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+import { translateOperationStatus } from '../core/utils/translations';
 import { type StockOperationDTO } from '../core/api/types/stockOperation/StockOperationDTO';
 import { OperationType, type StockOperationType } from '../core/api/types/stockOperation/StockOperationType';
 import useStockOperationLinks from './stock-operations-forms/hooks/useStockOperationLinks';
@@ -11,6 +13,7 @@ type Props = {
 };
 
 const StockOperationLinks: React.FC<Props> = ({ stockOperation, stockOperationType }) => {
+  const { t } = useTranslation();
   const requisitionOperationUuid = useMemo(() => {
     if (
       stockOperationType?.operationType === OperationType.REQUISITION_OPERATION_TYPE ||
@@ -29,11 +32,12 @@ const StockOperationLinks: React.FC<Props> = ({ stockOperation, stockOperationTy
       {' '}
       {operationLinks && operationLinks.length > 0 && (
         <div>
-          <h6 className={styles.relatedTransactionHeader}>Related Transactions:</h6>
+          <h6 className={styles.relatedTransactionHeader}>{t('relatedTransactions', 'Related Transactions:')}</h6>
           {operationLinks.map(
             (item) =>
               (stockOperation.uuid === item?.parentUuid || stockOperationType?.uuid === item?.parentUuid) && (
-                <React.Fragment key={item.uuid}>
+                // One linked operation per line, its status translated: « [CANCELLED]Stock Issue » (#641)
+                <div key={item.uuid}>
                   <span>{item?.childOperationTypeName}</span>
                   <span className={item?.childVoided ? 'voided' : ''}>
                     {' '}
@@ -47,15 +51,14 @@ const StockOperationLinks: React.FC<Props> = ({ stockOperation, stockOperationTy
                       </span>
                     )}
                   </span>{' '}
-                  <span>[{item?.childStatus}]</span>
-                </React.Fragment>
+                  <span>[{translateOperationStatus(t, item?.childStatus)}]</span>
+                </div>
               ),
           )}
-          <span> </span>
           {operationLinks.map(
             (item) =>
               (stockOperation.uuid === item?.childUuid || stockOperationType.uuid === item?.childUuid) && (
-                <React.Fragment key={item.uuid}>
+                <div key={item.uuid}>
                   <span>{item?.parentOperationTypeName}</span>
                   <span className={item?.parentVoided ? 'voided' : ''}>
                     {' '}
@@ -69,8 +72,8 @@ const StockOperationLinks: React.FC<Props> = ({ stockOperation, stockOperationTy
                       </span>
                     )}
                   </span>{' '}
-                  <span>[{item?.parentStatus}]</span>
-                </React.Fragment>
+                  <span>[{translateOperationStatus(t, item?.parentStatus)}]</span>
+                </div>
               ),
           )}
         </div>

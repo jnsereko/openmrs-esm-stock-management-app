@@ -32,4 +32,24 @@ describe('StockOperationsModal', () => {
     expect(executeStockOperationAction).toHaveBeenCalledWith(expect.objectContaining({ name: 'COMPLETE' }));
     expect(closeModal).toHaveBeenCalled();
   });
+
+  // Cancelling showed two « Annuler » buttons, and Carbon's counter read « Character limit 500 » (#641)
+  it('tells closing the dialog from cancelling the operation, and counts the reason in the translated text', async () => {
+    render(
+      <StockOperationsModal
+        title="Cancel"
+        requireReason
+        operation={{ uuid: 'operation-uuid' } as StockOperationDTO}
+        closeModal={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByRole('button', { name: 'Back' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Cancel operation' })).toBeInTheDocument();
+    expect(screen.queryByText(/Character limit/)).not.toBeInTheDocument();
+
+    await userEvent.type(screen.getByRole('textbox'), 'Erreur');
+    expect(screen.getByText('6 / 500 characters')).toBeInTheDocument();
+    expect(screen.getByRole('textbox')).toHaveAttribute('maxlength', '500');
+  });
 });
