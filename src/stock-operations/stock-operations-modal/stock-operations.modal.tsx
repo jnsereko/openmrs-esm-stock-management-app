@@ -39,6 +39,9 @@ const StockOperationsModal: React.FC<StockOperationsModalProps> = ({ title, requ
     approve: t('approveAction', 'Approve'),
   };
   const actionLabel = actionLabels[confirmType] ?? title;
+  // i18next HTML-escapes interpolated values by default and React escapes again, so the
+  // apostrophe of « Annuler l'opération » showed as `&#39;` (#644)
+  const interpolation = { escapeValue: false };
 
   const handleClick = async (event) => {
     event.preventDefault();
@@ -95,6 +98,7 @@ const StockOperationsModal: React.FC<StockOperationsModalProps> = ({ title, requ
         showSnackbar({
           title: t('operationSuccessful', 'You have successfully {{title}} operation', {
             title: actionLabel,
+            interpolation,
           }),
           kind: 'success',
           isLowContrast: true,
@@ -110,6 +114,7 @@ const StockOperationsModal: React.FC<StockOperationsModalProps> = ({ title, requ
           title: t('stockOperationErrorTitle', 'Error on saving form'),
           subtitle: t('stockOperationErrorDescription', 'Details: {{message}}', {
             message,
+            interpolation,
           }),
           kind: 'error',
         });
@@ -124,13 +129,16 @@ const StockOperationsModal: React.FC<StockOperationsModalProps> = ({ title, requ
         <ModalHeader
           iconDescription={t('close', 'Close')}
           closeModal={closeModal}
-          title={t('operationModalTitle', '{{title}} Operation', { title: actionLabel })}
+          title={t('operationModalTitle', '{{title}} Operation', { title: actionLabel, interpolation })}
         />
         <ModalBody>
           <div className={styles.modalBody}>
             <section className={styles.section}>
               <h5 className={styles.section}>
-                {t('confirmOperation', 'Would you really like to {{title}} the operation?', { title: actionLabel })}
+                {t('confirmOperation', 'Would you really like to {{title}} the operation?', {
+                  title: actionLabel,
+                  interpolation,
+                })}
               </h5>
             </section>
             <br />

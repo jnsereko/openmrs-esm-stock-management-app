@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { paginationTexts } from '../core/utils/translations';
+import { paginationTexts, translateOperationTypeName } from '../core/utils/translations';
 import {
   DataTable,
   DataTableSkeleton,
@@ -133,7 +133,7 @@ function StockUserRoleScopesItems() {
         }),
         stockOperations: userRoleScope?.operationTypes
           ?.map((operation) => {
-            return operation?.operationTypeName;
+            return translateOperationTypeName(t, operation?.operationTypeName);
           })
           ?.join(', '),
         permanent: userRoleScope?.permanent ? t('yes', 'Yes') : t('no', 'No'),

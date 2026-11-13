@@ -38,6 +38,7 @@ import StockOperationStepper from './stock-operation-stepper/stock-operation-ste
 import { getOperationStockPartyUuid, requisitionItemsToIssueItems } from './stock-operations-form-utils';
 import { useStockOperationAndItems } from '../stock-operations.resource';
 import { isStockOperationEditable } from '../stock-operation.utils';
+import { translateOperationTypeName } from '../../core/utils/translations';
 
 /**
  * Props interface for the StockOperationForm component
@@ -170,7 +171,10 @@ const StockOperationForm: React.FC<Workspace2DefinitionProps<StockOperationFormP
   const steps: TabItem[] = useMemo(() => {
     return [
       {
-        name: t('operationTypeDetails', '{{operationType}} Details', { operationType: stockOperationType?.name }),
+        name: t('operationTypeDetails', '{{operationType}} Details', {
+          operationType: translateOperationTypeName(t, stockOperationType?.name),
+          interpolation: { escapeValue: false },
+        }),
         component: (
           <BaseOperationDetailsFormStep
             stockOperation={stockOperation}
@@ -281,9 +285,18 @@ const StockOperationForm: React.FC<Workspace2DefinitionProps<StockOperationFormP
       title={
         stockOperation
           ? isEditable
-            ? t('editOperationTitle', 'Edit {{operationType}}', { operationType: stockOperation.operationTypeName })
-            : t('viewOperationTitle', 'View {{operationType}}', { operationType: stockOperation.operationTypeName })
-          : t('newOperationTitle', 'New: {{operationName}}', { operationName: stockOperationType?.name })
+            ? t('editOperationTitle', 'Edit {{operationType}}', {
+                operationType: translateOperationTypeName(t, stockOperation.operationTypeName),
+                interpolation: { escapeValue: false },
+              })
+            : t('viewOperationTitle', 'View {{operationType}}', {
+                operationType: translateOperationTypeName(t, stockOperation.operationTypeName),
+                interpolation: { escapeValue: false },
+              })
+          : t('newOperationTitle', 'New: {{operationName}}', {
+              operationName: translateOperationTypeName(t, stockOperationType?.name),
+              interpolation: { escapeValue: false },
+            })
       }
     >
       <FormProvider {...form}>

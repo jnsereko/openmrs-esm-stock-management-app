@@ -25,7 +25,12 @@ import StockOperationReasonSelector from '../input-components/stock-operation-re
 import UsersSelector from '../input-components/users-selector.component';
 import styles from '../stock-operation-form.scss';
 import useTranslatedError from '../hooks/useTranslatedError';
-import { comboBoxTranslateWithId, datePickerLocale, datePickerMonthLabels } from '../../../core/utils/translations';
+import {
+  comboBoxTranslateWithId,
+  datePickerLocale,
+  datePickerMonthLabels,
+  translateOperationTypeName,
+} from '../../../core/utils/translations';
 
 type BaseOperationDetailsFormStepProps = {
   stockOperation?: StockOperationDTO;
@@ -112,7 +117,12 @@ const BaseOperationDetailsFormStep: FC<BaseOperationDetailsFormStepProps> = ({
   return (
     <Stack gap={4} className={`${styles.grid} ${readOnly ? styles.readOnlyDetails : ''}`}>
       <div className={styles.heading}>
-        <h4>{t('operationTypeDetails', '{{operationType}} Details', { operationType: stockOperationType.name })}</h4>
+        <h4>
+          {t('operationTypeDetails', '{{operationType}} Details', {
+            operationType: translateOperationTypeName(t, stockOperationType.name),
+            interpolation: { escapeValue: false },
+          })}
+        </h4>
       </div>
       <Column>
         <Controller

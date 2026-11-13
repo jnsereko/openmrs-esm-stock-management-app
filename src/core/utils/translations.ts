@@ -141,3 +141,43 @@ export function completedStatusLabel(
     (operation?.status === 'COMPLETED' && operation?.operationType === 'requisition' && !!operation?.submittedDate);
   return approved ? t('approved', 'Approved') : t('completed', 'Completed');
 }
+
+/**
+ * The label of a stock operation type. Its name is server data (« Requisition », « Stock Issue »), the
+ * same in every language; the types stockmanagement seeds get a translation key here. A type the
+ * site added or renamed keeps its own name (#644).
+ */
+export function translateOperationTypeName(t: TFunction, name: string | null | undefined) {
+  switch (name) {
+    case 'Adjustment':
+      return t('operationTypeAdjustment', 'Adjustment');
+    case 'Disposal':
+      return t('operationTypeDisposal', 'Disposal');
+    case 'Transfer Out':
+      return t('operationTypeTransferOut', 'Transfer Out');
+    case 'Receipt':
+      return t('operationTypeReceipt', 'Receipt');
+    case 'Return':
+      return t('operationTypeReturn', 'Return');
+    case 'Stock Issue':
+      return t('operationTypeStockIssue', 'Stock Issue');
+    case 'Requisition':
+      return t('operationTypeRequisition', 'Requisition');
+    case 'Stock Take':
+      return t('operationTypeStockTake', 'Stock Take');
+    case 'Opening Stock':
+      return t('operationTypeOpeningStock', 'Opening Stock');
+    case 'External Requisition':
+      return t('operationTypeExternalRequisition', 'External Requisition');
+    case 'Loss':
+      return t('operationTypeLoss', 'Loss');
+    case 'Recall':
+      return t('operationTypeRecall', 'Recall');
+    case 'External Return':
+      return t('operationTypeExternalReturn', 'External Return');
+    case 'External Recall':
+      return t('operationTypeExternalRecall', 'External Recall');
+    default:
+      return name ?? '';
+  }
+}

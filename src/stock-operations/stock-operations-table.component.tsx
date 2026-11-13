@@ -45,6 +45,7 @@ import {
   paginationTexts,
   tableHeaderTranslateWithId,
   translateOperationStatus,
+  translateOperationTypeName,
 } from '../core/utils/translations';
 
 interface StockOperationsTableProps {
@@ -156,7 +157,7 @@ const StockOperations: React.FC<StockOperationsTableProps> = () => {
           ...stockOperation,
           id: stockOperation?.uuid,
           key: `key-${stockOperation?.uuid}`,
-          operationTypeName: `${stockOperation?.operationTypeName}`,
+          operationTypeName: translateOperationTypeName(t, stockOperation?.operationTypeName),
           operationNumber: (
             <EditStockOperationActionMenu stockOperation={stockOperation} showIcon={false} showprops={true} />
           ),

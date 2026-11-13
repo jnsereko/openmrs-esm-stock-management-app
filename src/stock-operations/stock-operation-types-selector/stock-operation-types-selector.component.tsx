@@ -6,6 +6,7 @@ import { showSnackbar } from '@openmrs/esm-framework';
 import { OperationType, type StockOperationType } from '../../core/api/types/stockOperation/StockOperationType';
 import { launchStockoperationAddOrEditWorkSpace } from '../stock-operation.utils';
 import useFilteredOperationTypesByRoles from '../stock-operations-forms/hooks/useFilteredOperationTypesByRoles';
+import { translateOperationTypeName } from '../../core/utils/translations';
 
 const StockOperationTypesSelector = () => {
   const { t } = useTranslation();
@@ -56,11 +57,12 @@ const StockOperationTypesSelector = () => {
       }}
     >
       {operationTypes
-        .sort((a, b) => a.name.localeCompare(b.name))
-        .map((operation) => (
+        .map((operation) => ({ operation, label: translateOperationTypeName(t, operation.name) }))
+        .sort((a, b) => a.label.localeCompare(b.label))
+        .map(({ operation, label }) => (
           <OverflowMenuItem
             key={operation.uuid}
-            itemText={operation.name}
+            itemText={label}
             onClick={() => {
               handleSelect(operation);
             }}

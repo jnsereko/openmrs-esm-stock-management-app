@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import i18next from 'i18next';
-import { completedStatusLabel, datePickerLocale, datePickerMonthLabels, paginationTexts } from './translations';
+import {
+  completedStatusLabel,
+  datePickerLocale,
+  datePickerMonthLabels,
+  paginationTexts,
+  translateOperationTypeName,
+} from './translations';
 
 describe('paginationTexts', () => {
   // « 1–1 sur 1 éléments »: the range was translated without a count, so never singular (#638)
@@ -71,5 +77,29 @@ describe('completedStatusLabel', () => {
       completedStatusLabel(t, { status: 'COMPLETED', operationType: 'stockissue', submittedDate: '2026-11-13' }),
     ).toBe('Completed');
     expect(completedStatusLabel(t, { status: 'COMPLETED', operationType: 'requisition' })).toBe('Completed');
+  });
+});
+
+describe('translateOperationTypeName', () => {
+  // « Requisition » and « Stock Issue » are the server's names, shown in English in French (#644)
+  it("translates the types stockmanagement seeds, and keeps a site's own type name", async () => {
+    const i18n = i18next.createInstance();
+    await i18n.init({
+      lng: 'fr',
+      resources: {
+        fr: {
+          translation: {
+            operationTypeRequisition: 'Réquisition',
+            operationTypeStockIssue: 'Sortie de stock',
+          },
+        },
+      },
+    });
+
+    expect(translateOperationTypeName(i18n.t, 'Requisition')).toBe('Réquisition');
+    expect(translateOperationTypeName(i18n.t, 'Stock Issue')).toBe('Sortie de stock');
+    expect(translateOperationTypeName(i18n.t, 'Receipt')).toBe('Receipt');
+    expect(translateOperationTypeName(i18n.t, 'Don reçu')).toBe('Don reçu');
+    expect(translateOperationTypeName(i18n.t, undefined)).toBe('');
   });
 });

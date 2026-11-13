@@ -220,13 +220,15 @@ const StockOperationItemsFormStep: React.FC<StockOperationItemsFormStepProps> = 
     if (valid) {
       onNext();
     } else {
+      // Translated, and closes by itself: error snackbars otherwise stay until dismissed (#644)
       showSnackbar({
         kind: 'error',
-        title: 'Validation error',
+        title: t('validationError', 'Validation error'),
         subtitle:
           observableOperationItems && observableOperationItems.length > 0
-            ? 'You must update batch infomation for items'
-            : 'You must add atleast one item',
+            ? t('updateBatchInformationForItems', 'You must update batch information for items')
+            : t('atLeastOneItem', 'You must add at least one item'),
+        autoClose: true,
       });
     }
   };

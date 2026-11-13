@@ -3,7 +3,7 @@ import { showSnackbar } from '@openmrs/esm-framework';
 import React, { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ResourceRepresentation } from '../../../core/api/api';
-import { LocationStockItem, LocationStockItemBatchNo } from '../../../core/api/types/stockItem/StockItem';
+import { LocationStockItemBatchNo } from '../../../core/api/types/stockItem/StockItem';
 import { useStockItemInventory } from '../../../stock-items/stock-items.resource';
 import styles from './stock-operation-items-form-step.scc.scss';
 
@@ -15,6 +15,10 @@ import styles from './stock-operation-items-form-step.scc.scss';
  * Once the line has a batch (a Stock Issue's « N° de Lot »), the quantity of that batch at the location:
  * the line can't take more than that, and « Disponible : 411 » for the location next to a batch of 16
  * read as the batch's (#641).
+ *
+ * Before a batch is chosen, the sum of the batches the « N° de Lot » list offers (same request): those
+ * with stock left and a known batch. The location total counted a batch with a negative balance against
+ * the others, and a voided batch the list doesn't show (#644).
  */
 const StockAvailability: React.FC<{
   stockItemUuid: string;
@@ -29,17 +33,26 @@ const StockAvailability: React.FC<{
     v: ResourceRepresentation.Default,
     stockItemUuid,
     partyUuid,
-    ...(stockBatchUuid ? { stockBatchUuid, groupBy: LocationStockItemBatchNo } : { groupBy: LocationStockItem }),
+    groupBy: LocationStockItemBatchNo,
+    ...(stockBatchUuid ? { stockBatchUuid } : { includeBatchNo: true }),
   });
   const items = inventory?.results;
   const { t } = useTranslation();
 
   const totalQuantity = useMemo(() => {
     if (!items?.length) return 0;
-    return items.reduce((total, row) => {
-      return total + (Number(row.quantity) || 0);
-    }, 0);
-  }, [items]);
+    if (stockBatchUuid) {
+      return items.reduce((total, row) => total + (Number(row.quantity) || 0), 0);
+    }
+    const batchTotals = new Map<string, number>();
+    for (const row of items) {
+      if (!row.stockBatchUuid) continue;
+      batchTotals.set(row.stockBatchUuid, (batchTotals.get(row.stockBatchUuid) ?? 0) + (Number(row.quantity) || 0));
+    }
+    return [...batchTotals.values()]
+      .filter((quantity) => quantity > 0)
+      .reduce((total, quantity) => total + quantity, 0);
+  }, [items, stockBatchUuid]);
   const commonUOM = useMemo(() => {
     if (!items?.length) return '';
     return items[0]?.quantityUoM || '';

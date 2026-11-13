@@ -5,7 +5,11 @@ import { getStockOperationTypes, useConcept } from '../stock-lookups/stock-looku
 import { StockFilters } from '../constants';
 import { StockOperationStatusTypes } from '../core/api/types/stockOperation/StockOperationStatus';
 import styles from '../stock-items/stock-items-table.scss';
-import { translateOperationStatus, comboBoxTranslateWithId } from '../core/utils/translations';
+import {
+  translateOperationStatus,
+  translateOperationTypeName,
+  comboBoxTranslateWithId,
+} from '../core/utils/translations';
 
 interface StockOperationFiltersProps {
   conceptUuid?: string;
@@ -44,7 +48,7 @@ const StockOperationsFilters: React.FC<StockOperationFiltersProps> = ({ conceptU
             setDataItems(
               response.data.results.map((result) => ({
                 uuid: result.uuid,
-                display: result.name,
+                display: translateOperationTypeName(t, result.name),
               })),
             );
           }
@@ -53,7 +57,7 @@ const StockOperationsFilters: React.FC<StockOperationFiltersProps> = ({ conceptU
         });
     }
     setIsDataLoading(false);
-  }, [filterName, isLoading, items.answers]);
+  }, [filterName, isLoading, items.answers, t]);
 
   if (isDataLoading) {
     return <DropdownSkeleton />;

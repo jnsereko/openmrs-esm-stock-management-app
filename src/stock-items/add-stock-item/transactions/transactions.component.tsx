@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import DataList from '../../../core/components/table/table.component';
 import { formatExpiryDate, formatListDate } from '../../../core/utils/datetimeUtils';
-import { translateOperationStatus } from '../../../core/utils/translations';
+import { translateOperationStatus, translateOperationTypeName } from '../../../core/utils/translations';
 import { type StockItemInventoryFilter } from '../../stock-items.resource';
 import TransactionsPrintAction from './printout/transactions-print-action.component';
 import TransactionsLocationsFilter from './transaction-filters/transaction-locations-filter.component';
@@ -83,7 +83,7 @@ const Transactions: React.FC<TransactionsProps> = ({ stockItemUuid }) => {
           ),
         transaction: stockItemTransaction?.isPatientTransaction
           ? t('patientDispense', 'Patient Dispense')
-          : stockItemTransaction.stockOperationTypeName,
+          : translateOperationTypeName(t, stockItemTransaction.stockOperationTypeName),
         quantity: `${stockItemTransaction?.quantity?.toLocaleString()} ${stockItemTransaction?.packagingUomName ?? ''}`,
         batch: stockItemTransaction.stockBatchNo
           ? `${stockItemTransaction.stockBatchNo}${

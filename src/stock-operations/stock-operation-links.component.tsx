@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { translateOperationStatus } from '../core/utils/translations';
+import { translateOperationStatus, translateOperationTypeName } from '../core/utils/translations';
 import { type StockOperationDTO } from '../core/api/types/stockOperation/StockOperationDTO';
 import { OperationType, type StockOperationType } from '../core/api/types/stockOperation/StockOperationType';
 import useStockOperationLinks from './stock-operations-forms/hooks/useStockOperationLinks';
@@ -38,7 +38,7 @@ const StockOperationLinks: React.FC<Props> = ({ stockOperation, stockOperationTy
               (stockOperation.uuid === item?.parentUuid || stockOperationType?.uuid === item?.parentUuid) && (
                 // One linked operation per line, its status translated: « [CANCELLED]Stock Issue » (#641)
                 <div key={item.uuid}>
-                  <span>{item?.childOperationTypeName}</span>
+                  <span>{translateOperationTypeName(t, item?.childOperationTypeName)}</span>
                   <span className={item?.childVoided ? 'voided' : ''}>
                     {' '}
                     {item?.childVoided && item?.childOperationNumber}
@@ -59,7 +59,7 @@ const StockOperationLinks: React.FC<Props> = ({ stockOperation, stockOperationTy
             (item) =>
               (stockOperation.uuid === item?.childUuid || stockOperationType.uuid === item?.childUuid) && (
                 <div key={item.uuid}>
-                  <span>{item?.parentOperationTypeName}</span>
+                  <span>{translateOperationTypeName(t, item?.parentOperationTypeName)}</span>
                   <span className={item?.parentVoided ? 'voided' : ''}>
                     {' '}
                     {item?.parentVoided && item?.parentOperationNumber}

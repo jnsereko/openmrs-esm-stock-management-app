@@ -2,7 +2,8 @@ import React from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import userEvent from '@testing-library/user-event';
 import { render, screen, within } from '@testing-library/react';
-import { FormProvider, useForm, type UseFormReturn } from 'react-hook-form';
+import { FormProvider, useForm, type Resolver, type UseFormReturn } from 'react-hook-form';
+import { showSnackbar } from '@openmrs/esm-framework';
 import { receiptOperationTypeMock, requisitionOperationTypeMock, stockIssueOperationtypeMock } from '@mocks';
 import { type StockOperationType } from '../../../core/api/types/stockOperation/StockOperationType';
 import { type StockOperationItemDtoSchema } from '../../validation-schema';
@@ -29,14 +30,26 @@ const items = [
 
 let formRef: UseFormReturn<StockOperationItemDtoSchema>;
 
-const Wrapper: React.FC<{ onLaunchItemsForm: () => void; operationType?: unknown; readOnly?: boolean }> = ({
-  onLaunchItemsForm,
-  operationType = requisitionOperationTypeMock,
-  readOnly,
-}) => {
+// Like the operation's schema: at least one line
+const atLeastOneItemResolver: Resolver<StockOperationItemDtoSchema> = async (values) =>
+  values.stockOperationItems?.length
+    ? { values, errors: {} }
+    : {
+        values: {},
+        errors: { stockOperationItems: { type: 'too_small', message: 'You must add atleast one stock item' } },
+      };
+
+const Wrapper: React.FC<{
+  onLaunchItemsForm: () => void;
+  operationType?: unknown;
+  readOnly?: boolean;
+  initialItems?: typeof items;
+  onNext?: () => void;
+}> = ({ onLaunchItemsForm, operationType = requisitionOperationTypeMock, readOnly, initialItems = items, onNext }) => {
   const form = useForm<StockOperationItemDtoSchema>({
+    resolver: atLeastOneItemResolver,
     defaultValues: {
-      stockOperationItems: items,
+      stockOperationItems: initialItems,
       sourceUuid: 'source-party',
       destinationUuid: 'destination-party',
     } as unknown as StockOperationItemDtoSchema,
@@ -48,6 +61,7 @@ const Wrapper: React.FC<{ onLaunchItemsForm: () => void; operationType?: unknown
         stockOperationType={operationType as StockOperationType}
         onLaunchItemsForm={onLaunchItemsForm}
         readOnly={readOnly}
+        onNext={onNext}
       />
     </FormProvider>
   );
@@ -105,5 +119,24 @@ describe('StockOperationItemsFormStep', () => {
     expect(screen.queryByLabelText('Edit')).not.toBeInTheDocument();
     expect(screen.queryByLabelText('Delete')).not.toBeInTheDocument();
     expect(screen.queryByText('Actions')).not.toBeInTheDocument();
+  });
+
+  // #644: « Validation error / You must add atleast one item » was English, with a typo, and never closed
+  it('shows a translated validation error that closes by itself when there is no line', async () => {
+    const user = userEvent.setup();
+    const onNext = vi.fn();
+    render(<Wrapper onLaunchItemsForm={vi.fn()} initialItems={[]} onNext={onNext} />);
+
+    await user.click(screen.getByRole('button', { name: 'Next' }));
+
+    expect(onNext).not.toHaveBeenCalled();
+    expect(showSnackbar).toHaveBeenCalledWith(
+      expect.objectContaining({
+        kind: 'error',
+        title: 'Validation error',
+        subtitle: 'You must add at least one item',
+        autoClose: true,
+      }),
+    );
   });
 });
