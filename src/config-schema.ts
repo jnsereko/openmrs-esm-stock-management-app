@@ -32,6 +32,13 @@ export const configSchema = {
       _description: 'The organization name displayed when image is absent',
     },
   },
+  hiddenOperationTypes: {
+    _type: Type.Array,
+    _elements: { _type: Type.String },
+    _default: [],
+    _description:
+      'Codes of the operation types (e.g. "requisition") that are not offered in « Start New » and in the Operations « Operation » filter. Existing operations of these types stay listed and open; the user scopes are not changed',
+  },
   packingUnitsUUID: {
     _type: Type.ConceptUuid,
     _description: 'UUID for the packaging unit',
@@ -90,6 +97,7 @@ export type ConfigObject = {
     alt: string;
     name: string;
   };
+  hiddenOperationTypes: Array<string>;
   packingUnitsUUID: string;
   printBalanceOnHand: boolean;
   printItemCost: boolean;
