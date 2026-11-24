@@ -1,8 +1,10 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { ButtonSkeleton, OverflowMenu, OverflowMenuItem } from '@carbon/react';
 import { OverflowMenuVertical } from '@carbon/react/icons';
 import { useTranslation } from 'react-i18next';
-import { showSnackbar } from '@openmrs/esm-framework';
+import { showSnackbar, useConfig } from '@openmrs/esm-framework';
+import { type ConfigObject } from '../../config-schema';
+import { withoutHiddenOperationTypes } from '../hidden-operation-types';
 import { OperationType, type StockOperationType } from '../../core/api/types/stockOperation/StockOperationType';
 import { launchStockoperationAddOrEditWorkSpace } from '../stock-operation.utils';
 import useFilteredOperationTypesByRoles from '../stock-operations-forms/hooks/useFilteredOperationTypesByRoles';
@@ -10,7 +12,12 @@ import { translateOperationTypeName } from '../../core/utils/translations';
 
 const StockOperationTypesSelector = () => {
   const { t } = useTranslation();
-  const { error, isLoading, operationTypes } = useFilteredOperationTypesByRoles();
+  const { hiddenOperationTypes } = useConfig<ConfigObject>();
+  const { error, isLoading, operationTypes: scopedOperationTypes } = useFilteredOperationTypesByRoles();
+  const operationTypes = useMemo(
+    () => withoutHiddenOperationTypes(scopedOperationTypes, hiddenOperationTypes),
+    [scopedOperationTypes, hiddenOperationTypes],
+  );
 
   const handleSelect = useCallback((stockOperationType: StockOperationType) => {
     const isStockIssueOperation = stockOperationType.operationType === OperationType.STOCK_ISSUE_OPERATION_TYPE;

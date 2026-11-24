@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DropdownSkeleton, MultiSelect } from '@carbon/react';
+import { useConfig } from '@openmrs/esm-framework';
+import { type ConfigObject } from '../config-schema';
+import { withoutHiddenOperationTypes } from './hidden-operation-types';
 import { getStockOperationTypes, useConcept } from '../stock-lookups/stock-lookups.resource';
 import { StockFilters } from '../constants';
 import { StockOperationStatusTypes } from '../core/api/types/stockOperation/StockOperationStatus';
@@ -19,6 +22,7 @@ interface StockOperationFiltersProps {
 
 const StockOperationsFilters: React.FC<StockOperationFiltersProps> = ({ conceptUuid, onFilterChange, filterName }) => {
   const { t } = useTranslation();
+  const { hiddenOperationTypes } = useConfig<ConfigObject>();
   const { items, isLoading } = useConcept(conceptUuid);
   const [isDataLoading, setIsDataLoading] = useState(false);
   const [dataItems, setDataItems] = useState([]);
@@ -46,7 +50,7 @@ const StockOperationsFilters: React.FC<StockOperationFiltersProps> = ({ conceptU
           setIsDataLoading(true);
           if (response.data?.results.length) {
             setDataItems(
-              response.data.results.map((result) => ({
+              withoutHiddenOperationTypes(response.data.results, hiddenOperationTypes).map((result) => ({
                 uuid: result.uuid,
                 display: translateOperationTypeName(t, result.name),
               })),
@@ -57,7 +61,7 @@ const StockOperationsFilters: React.FC<StockOperationFiltersProps> = ({ conceptU
         });
     }
     setIsDataLoading(false);
-  }, [filterName, isLoading, items.answers, t]);
+  }, [filterName, isLoading, items.answers, t, hiddenOperationTypes]);
 
   if (isDataLoading) {
     return <DropdownSkeleton />;
