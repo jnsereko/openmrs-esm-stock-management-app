@@ -1,11 +1,22 @@
 import { ResourceRepresentation } from '../../../core/api/api';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import dayjs from 'dayjs';
 import {
   type StockItemInventoryFilter,
   useStockItemInventory,
   useStockItemTransactions,
 } from '../../stock-items.resource';
+
+/**
+ * The server bounds of a period picked as calendar days: local midnight to the last millisecond of the
+ * end day, as ISO instants, so choosing 24/11 to 24/11 covers that local day whatever the server's timezone.
+ * The server compares `dateCreated >= dateMin` and `dateCreated <= dateMax`.
+ */
+export const toTransactionPeriod = (from?: Date | null, to?: Date | null) => ({
+  dateMin: from ? dayjs(from).startOf('day').toISOString() : null,
+  dateMax: to ? dayjs(to).endOf('day').toISOString() : null,
+});
 
 export function useStockItemsTransactions(filter?: StockItemInventoryFilter) {
   const { t } = useTranslation();
@@ -27,6 +38,20 @@ export function useStockItemsTransactions(filter?: StockItemInventoryFilter) {
   const [partyUuid, setPartyUuid] = useState<string | null>(filter?.partyUuid);
   const [locationUuid, setLocationUuid] = useState<string | null>(filter?.locationUuid);
   const [stockBatchUuid, setStockBatchUuid] = useState<string | null>(filter?.stockBatchUuid);
+  const [dateMin, setDateMin] = useState<string | null>(null);
+  const [dateMax, setDateMax] = useState<string | null>(null);
+
+  // A new filter shows its first page
+  const setLocationFilter = useCallback((uuid: string | null) => {
+    setLocationUuid(uuid);
+    setCurrentPage(1);
+  }, []);
+  const setPeriod = useCallback((from?: Date | null, to?: Date | null) => {
+    const period = toTransactionPeriod(from, to);
+    setDateMin(period.dateMin);
+    setDateMax(period.dateMax);
+    setCurrentPage(1);
+  }, []);
 
   useEffect(() => {
     setStockItemFilter({
@@ -39,11 +64,25 @@ export function useStockItemsTransactions(filter?: StockItemInventoryFilter) {
       partyUuid: partyUuid,
       locationUuid: locationUuid,
       stockBatchUuid: stockBatchUuid,
+      dateMin,
+      dateMax,
     });
-  }, [searchString, currentPage, currentPageSize, stockItemUuid, partyUuid, locationUuid, stockBatchUuid]);
+  }, [
+    searchString,
+    currentPage,
+    currentPageSize,
+    stockItemUuid,
+    partyUuid,
+    locationUuid,
+    stockBatchUuid,
+    dateMin,
+    dateMax,
+  ]);
 
   const { items, isLoading, error } = useStockItemTransactions(stockItemFilter);
-  const { items: inventory } = useStockItemInventory(stockItemFilter);
+  // The balance is the item's stock now: the period does not apply to it
+  const inventoryFilter = useMemo(() => ({ ...stockItemFilter, dateMin: null, dateMax: null }), [stockItemFilter]);
+  const { items: inventory } = useStockItemInventory(inventoryFilter);
 
   const tableHeaders = useMemo(
     () => [
@@ -138,7 +177,10 @@ export function useStockItemsTransactions(filter?: StockItemInventoryFilter) {
     setSearchString,
     tableHeaders,
     setStockItemUuid,
-    setLocationUuid,
+    setLocationUuid: setLocationFilter,
+    setPeriod,
+    dateMin,
+    dateMax,
     setPartyUuid,
     setStockBatchUuid,
     binCardHeaders,

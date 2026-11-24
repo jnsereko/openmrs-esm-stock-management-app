@@ -1,15 +1,25 @@
-import { DataTableSkeleton } from '@carbon/react';
+import { Button, DataTableSkeleton, DatePicker, DatePickerInput } from '@carbon/react';
 import { ArrowLeft } from '@carbon/react/icons';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import DataList from '../../../core/components/table/table.component';
-import { formatExpiryDate, formatListDate } from '../../../core/utils/datetimeUtils';
-import { translateOperationStatus, translateOperationTypeName } from '../../../core/utils/translations';
+import {
+  DATE_PICKER_CONTROL_FORMAT,
+  DATE_PICKER_FORMAT,
+  formatExpiryDate,
+  formatListDate,
+} from '../../../core/utils/datetimeUtils';
+import {
+  datePickerLocale,
+  datePickerMonthLabels,
+  translateOperationStatus,
+  translateOperationTypeName,
+} from '../../../core/utils/translations';
 import { type StockItemInventoryFilter } from '../../stock-items.resource';
 import TransactionsPrintAction from './printout/transactions-print-action.component';
 import TransactionsLocationsFilter from './transaction-filters/transaction-locations-filter.component';
-import { useStockItemsTransactions } from './transactions.resource';
+import { toTransactionPeriod, useStockItemsTransactions } from './transactions.resource';
 import StockOperationReference from '../../../stock-operations/stock-operation-reference.component';
 
 interface TransactionsProps {
@@ -18,7 +28,9 @@ interface TransactionsProps {
 }
 
 const Transactions: React.FC<TransactionsProps> = ({ stockItemUuid }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const [fromDate, setFromDate] = useState<Date | null>(null);
+  const [toDate, setToDate] = useState<Date | null>(null);
 
   const [stockItemFilter, setStockItemFilter] = useState<StockItemInventoryFilter>();
   const {
@@ -29,6 +41,7 @@ const Transactions: React.FC<TransactionsProps> = ({ stockItemUuid }) => {
     setCurrentPage,
     setStockItemUuid,
     setLocationUuid,
+    setPeriod,
     binCardHeaders,
     inventory,
   } = useStockItemsTransactions(stockItemFilter);
@@ -128,6 +141,14 @@ const Transactions: React.FC<TransactionsProps> = ({ stockItemUuid }) => {
     });
   }, [items, inventory, t]);
 
+  const changePeriod = (from: Date | null, to: Date | null) => {
+    setFromDate(from);
+    setToDate(to);
+    setPeriod(from, to);
+    // The bin card prints what is shown: the same period
+    setStockItemFilter((previous) => ({ ...previous, ...toTransactionPeriod(from, to) }));
+  };
+
   if (isLoading) {
     return <DataTableSkeleton role="progressbar" />;
   }
@@ -145,13 +166,37 @@ const Transactions: React.FC<TransactionsProps> = ({ stockItemUuid }) => {
           <TransactionsLocationsFilter
             onLocationIdChange={(q) => {
               setLocationUuid(q);
-              setStockItemFilter({ ...stockItemFilter, locationUuid: q });
+              setStockItemFilter((previous) => ({ ...previous, locationUuid: q }));
             }}
             name={'TransactionLocationUuid'}
             placeholder={t('filterByLocation', 'Filter by Location')}
             control={control}
             controllerName="TransactionLocationUuid"
           />
+          <DatePicker
+            datePickerType="range"
+            dateFormat={DATE_PICKER_CONTROL_FORMAT}
+            locale={datePickerLocale(i18n.language)}
+            {...datePickerMonthLabels(t)}
+            onChange={(dates: Date[]) => changePeriod(dates?.[0] ?? null, dates?.[1] ?? null)}
+            value={[fromDate, toDate]}
+          >
+            <DatePickerInput
+              id="transactions-start-date"
+              labelText={t('startDate', 'Start date')}
+              placeholder={DATE_PICKER_FORMAT}
+            />
+            <DatePickerInput
+              id="transactions-end-date"
+              labelText={t('endDate', 'End date')}
+              placeholder={DATE_PICKER_FORMAT}
+            />
+          </DatePicker>
+          {(fromDate || toDate) && (
+            <Button kind="ghost" size="md" onClick={() => changePeriod(null, null)}>
+              {t('clearDates', 'Clear dates')}
+            </Button>
+          )}
         </>
       )}
       columns={tableHeaders}
