@@ -263,8 +263,8 @@
   "previousButton": "Previous",
   "previousPage": "Previous page",
   "print": "Imprimer",
-  "printBinCard": "Imprimer la fiche produit",
-  "printStockCard": "Imprimer la fiche produit",
+  "printBinCard": "Imprimer la fiche de stock",
+  "printStockCard": "Imprimer la fiche de dispensation patient",
   "purchasePrice": "Purchase Price",
   "purchasePricePackagingUnit": "Prix d'achat de l'unité d'emballage:",
   "purchasePriceUoMRequired": "Purchase price packaging unit is required when purchase price is set",
@@ -409,5 +409,6 @@
   "useScopes": "User role scopes",
   "viewAll": "View All",
   "whoIsThePreferredVendor": "Quel est le fournisseur préféré?",
-  "yes": "Oui"
+  "yes": "Oui",
+  "printTruncated": "Seuls les {{count}} premiers mouvements sont listés : réduisez la période ou l'emplacement."
 }

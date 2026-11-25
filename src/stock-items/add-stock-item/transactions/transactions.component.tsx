@@ -1,6 +1,6 @@
 import { Button, DataTableSkeleton, DatePicker, DatePickerInput } from '@carbon/react';
 import { ArrowLeft } from '@carbon/react/icons';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import DataList from '../../../core/components/table/table.component';
 import {
@@ -15,10 +15,16 @@ import {
   translateOperationStatus,
   translateOperationTypeName,
 } from '../../../core/utils/translations';
+import { ResourceRepresentation } from '../../../core/api/api';
 import { type StockItemInventoryFilter } from '../../stock-items.resource';
 import TransactionsPrintAction from './printout/transactions-print-action.component';
 import TransactionsLocationsFilter from './transaction-filters/transaction-locations-filter.component';
-import { toTransactionPeriod, useStockItemsTransactions } from './transactions.resource';
+import {
+  fetchPrintTransactions,
+  parseTypedDate,
+  toTransactionPeriod,
+  useStockItemsTransactions,
+} from './transactions.resource';
 import styles from './transactions.scss';
 import StockOperationReference from '../../../stock-operations/stock-operation-reference.component';
 
@@ -31,6 +37,9 @@ const Transactions: React.FC<TransactionsProps> = ({ stockItemUuid }) => {
   const { t, i18n } = useTranslation();
   const [fromDate, setFromDate] = useState<Date | null>(null);
   const [toDate, setToDate] = useState<Date | null>(null);
+
+  // Kept here: the list below remounts the filters while it reloads, which used to blank the location box
+  const [locationId, setLocationId] = useState<string | null>(null);
 
   const [stockItemFilter, setStockItemFilter] = useState<StockItemInventoryFilter>();
   const {
@@ -47,14 +56,15 @@ const Transactions: React.FC<TransactionsProps> = ({ stockItemUuid }) => {
     setPageSize,
     binCardHeaders,
     inventory,
+    transactionFilter,
   } = useStockItemsTransactions(stockItemFilter);
 
   useEffect(() => {
     setStockItemUuid(stockItemUuid);
   }, [stockItemUuid, setStockItemUuid]);
 
-  const tableRows = useMemo(() => {
-    return items?.map((stockItemTransaction) => {
+  const toRow = useCallback(
+    (stockItemTransaction) => {
       const balance = inventory?.total ?? '';
 
       return {
@@ -139,8 +149,23 @@ const Transactions: React.FC<TransactionsProps> = ({ stockItemUuid }) => {
             : '',
         balance: `${balance} ${stockItemTransaction?.packagingUomName ?? ''}`,
       };
-    });
-  }, [items, inventory, t]);
+    },
+    [inventory, t],
+  );
+
+  const tableRows = useMemo(() => items?.map(toRow), [items, toRow]);
+
+  // The bin card prints every movement of the filtered list, not only the page shown
+  const getPrintRows = useCallback(async () => {
+    const { rows, truncated } = await fetchPrintTransactions(transactionFilter);
+    return { rows: rows.map(toRow), truncated };
+  }, [transactionFilter, toRow]);
+
+  // The stock card lists the patient dispenses of this item, in the same location and period
+  const getStockCardRows = useCallback(
+    () => fetchPrintTransactions({ ...transactionFilter, isPatientTransaction: 'true', v: ResourceRepresentation.Full }),
+    [transactionFilter],
+  );
 
   const changePeriod = (from: Date | null, to: Date | null) => {
     setFromDate(from);
@@ -148,6 +173,16 @@ const Transactions: React.FC<TransactionsProps> = ({ stockItemUuid }) => {
     setPeriod(from, to);
     // The bin card prints what is shown: the same period
     setStockItemFilter((previous) => ({ ...previous, ...toTransactionPeriod(from, to) }));
+  };
+
+  // A day typed in a box does not always reach the picker's onChange: read both boxes when one is left
+  const syncTypedPeriod = () => {
+    const from = parseTypedDate((document.getElementById('transactions-start-date') as HTMLInputElement)?.value);
+    const to = parseTypedDate((document.getElementById('transactions-end-date') as HTMLInputElement)?.value);
+    const day = (date: Date | null) => (date ? date.getTime() : null);
+    if (day(from) !== day(fromDate) || day(to) !== day(toDate)) {
+      changePeriod(from, to);
+    }
   };
 
   if (isLoading) {
@@ -164,9 +199,13 @@ const Transactions: React.FC<TransactionsProps> = ({ stockItemUuid }) => {
               data={tableRows}
               itemUuid={stockItemUuid}
               filter={stockItemFilter}
+              getPrintRows={getPrintRows}
+              getStockCardRows={getStockCardRows}
             />
             <TransactionsLocationsFilter
+              value={locationId}
               onLocationIdChange={(q) => {
+                setLocationId(q);
                 setLocationUuid(q);
                 setStockItemFilter((previous) => ({ ...previous, locationUuid: q }));
               }}
@@ -179,15 +218,18 @@ const Transactions: React.FC<TransactionsProps> = ({ stockItemUuid }) => {
               locale={datePickerLocale(i18n.language)}
               {...datePickerMonthLabels(t)}
               onChange={(dates: Date[]) => changePeriod(dates?.[0] ?? null, dates?.[1] ?? null)}
+              onClose={syncTypedPeriod}
               value={[fromDate, toDate]}
             >
               <DatePickerInput
                 id="transactions-start-date"
+                onBlur={syncTypedPeriod}
                 labelText={t('startDate', 'Start date')}
                 placeholder={DATE_PICKER_FORMAT}
               />
               <DatePickerInput
                 id="transactions-end-date"
+                onBlur={syncTypedPeriod}
                 labelText={t('endDate', 'End date')}
                 placeholder={DATE_PICKER_FORMAT}
               />

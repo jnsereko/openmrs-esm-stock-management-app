@@ -30,4 +30,40 @@ describe('Transactions location filter', () => {
     await user.click(screen.getByText('All locations'));
     expect(onChange).toHaveBeenLastCalledWith('');
   });
+
+  it('shows the chosen location, and « All locations » after clearing, even when the box is remounted', async () => {
+    const user = userEvent.setup();
+    const Parent = () => {
+      const [value, setValue] = React.useState<string | null>(null);
+      const [mounted, setMounted] = React.useState(true);
+      return (
+        <>
+          <button onClick={() => setMounted((previous) => !previous)}>remount</button>
+          {mounted && (
+            <TransactionsLocationsFilter
+              name="loc"
+              placeholder="Filter by Location"
+              value={value}
+              onLocationIdChange={setValue}
+            />
+          )}
+        </>
+      );
+    };
+    render(<Parent />);
+    expect(screen.getByRole('combobox')).toHaveValue('');
+
+    await user.click(screen.getByRole('combobox'));
+    await user.click(screen.getByText('Dispensary'));
+    expect(screen.getByRole('combobox')).toHaveValue('Dispensary');
+
+    // The list below reloads and unmounts the box: the choice stays shown
+    await user.click(screen.getByText('remount'));
+    await user.click(screen.getByText('remount'));
+    expect(screen.getByRole('combobox')).toHaveValue('Dispensary');
+
+    await user.click(screen.getByRole('combobox'));
+    await user.click(screen.getByText('All locations'));
+    expect(screen.getByRole('combobox')).toHaveValue('All locations');
+  });
 });

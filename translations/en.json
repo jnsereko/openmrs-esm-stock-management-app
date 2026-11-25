@@ -324,8 +324,8 @@
   "previousMonth": "Previous month",
   "previousPage": "Previous page",
   "print": "Print",
-  "printBinCard": "Print Bin Card",
-  "printStockCard": "Print Stock Card",
+  "printBinCard": "Print stock card (bin card)",
+  "printStockCard": "Print patient dispensing card",
   "purchasePrice": "Purchase Price",
   "purchasePricePackagingUnit": "Purchase price packaging unit",
   "purchasePriceUoMRequired": "Purchase price packaging unit is required when purchase price is set",
@@ -495,5 +495,6 @@
   "viewAll": "View All",
   "viewOperationTitle": "View {{operationType}}",
   "whoIsThePreferredVendor": "Who is the preferred vendor?",
-  "yes": "Yes"
+  "yes": "Yes",
+  "printTruncated": "Only the first {{count}} movements are listed: narrow the period or the location."
 }
