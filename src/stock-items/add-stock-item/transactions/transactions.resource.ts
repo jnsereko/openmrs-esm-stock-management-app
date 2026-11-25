@@ -2,6 +2,8 @@ import { ResourceRepresentation } from '../../../core/api/api';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import dayjs from 'dayjs';
+import { useParties } from '../../../stock-lookups/stock-lookups.resource';
+import { type Party } from '../../../core/api/types/Party';
 import {
   type StockItemInventoryFilter,
   useStockItemInventory,
@@ -18,6 +20,15 @@ export const toTransactionPeriod = (from?: Date | null, to?: Date | null) => ({
   dateMax: to ? dayjs(to).endOf('day').toISOString() : null,
 });
 
+/**
+ * The transactions endpoint filters on `partyUuid` only: it ignores `locationUuid` (the inventory endpoint
+ * resolves a location itself, this one does not). A stock location's party is the one carrying its uuid.
+ * A location with no party matches nothing, so its own uuid is sent: the server finds no such party and
+ * answers with an empty list rather than the unfiltered one.
+ */
+export const partyUuidForLocation = (parties: Array<Party> | undefined, locationUuid: string) =>
+  parties?.find((party) => party.locationUuid === locationUuid)?.uuid ?? locationUuid;
+
 export function useStockItemsTransactions(filter?: StockItemInventoryFilter) {
   const { t } = useTranslation();
   const [stockItemFilter, setStockItemFilter] = useState<StockItemInventoryFilter>({
@@ -33,6 +44,7 @@ export function useStockItemsTransactions(filter?: StockItemInventoryFilter) {
   const [searchString, setSearchString] = useState(null);
 
   const [currentPage, setCurrentPage] = useState(1);
+  const { items: parties } = useParties();
 
   const [stockItemUuid, setStockItemUuid] = useState<string | null>(filter?.stockItemUuid);
   const [partyUuid, setPartyUuid] = useState<string | null>(filter?.partyUuid);
@@ -44,6 +56,11 @@ export function useStockItemsTransactions(filter?: StockItemInventoryFilter) {
   // A new filter shows its first page
   const setLocationFilter = useCallback((uuid: string | null) => {
     setLocationUuid(uuid);
+    setCurrentPage(1);
+  }, []);
+  // A new page size shows its first page, refetched with the new limit
+  const changePageSize = useCallback((size: number) => {
+    setPageSize(size);
     setCurrentPage(1);
   }, []);
   const setPeriod = useCallback((from?: Date | null, to?: Date | null) => {
@@ -79,7 +96,11 @@ export function useStockItemsTransactions(filter?: StockItemInventoryFilter) {
     dateMax,
   ]);
 
-  const { items, isLoading, error } = useStockItemTransactions(stockItemFilter);
+  const transactionFilter = useMemo(() => {
+    const { locationUuid: location, ...rest } = stockItemFilter;
+    return location ? { ...rest, partyUuid: partyUuidForLocation(parties?.results, location) } : rest;
+  }, [stockItemFilter, parties]);
+  const { items, isLoading, error } = useStockItemTransactions(transactionFilter);
   // The balance is the item's stock now: the period does not apply to it
   const inventoryFilter = useMemo(() => ({ ...stockItemFilter, dateMin: null, dateMax: null }), [stockItemFilter]);
   const { items: inventory } = useStockItemInventory(inventoryFilter);
@@ -170,7 +191,7 @@ export function useStockItemsTransactions(filter?: StockItemInventoryFilter) {
     currentPage,
     currentPageSize,
     setCurrentPage,
-    setPageSize,
+    setPageSize: changePageSize,
     pageSizes,
     isLoading,
     error,

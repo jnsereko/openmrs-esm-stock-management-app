@@ -1,51 +1,53 @@
-import React, { type ReactNode } from 'react';
+import React, { useMemo, useState } from 'react';
 import { ComboBox } from '@carbon/react';
-import { type Control, Controller, type FieldValues } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { useStockTagLocations } from '../../../../stock-lookups/stock-lookups.resource';
 import { comboBoxTranslateWithId } from '../../../../core/utils/translations';
 
-interface TransactionsLocationsFilterProps<T> {
+interface TransactionsLocationsFilterProps {
+  /** The chosen location's uuid, or '' when all locations are wanted */
   onLocationIdChange?: (location: string) => void;
   title?: string;
   placeholder?: string;
-  invalid?: boolean;
-  invalidText?: ReactNode;
-
-  // Control
-  controllerName: string;
   name: string;
-  control: Control<FieldValues, T>;
 }
 
-const TransactionsLocationsFilter = <T,>(props: TransactionsLocationsFilterProps<T>) => {
+interface LocationOption {
+  id: string;
+  name: string;
+}
+
+export const ALL_LOCATIONS_ID = '';
+
+const TransactionsLocationsFilter: React.FC<TransactionsLocationsFilterProps> = (props) => {
   const { t } = useTranslation();
   const { stockLocations } = useStockTagLocations();
+  const [selected, setSelected] = useState<LocationOption | null>(null);
+
+  // « All locations » is the way back to the unfiltered list, as in the Operations filters
+  const items = useMemo<Array<LocationOption>>(
+    () => [{ id: ALL_LOCATIONS_ID, name: t('allLocations', 'All locations') }, ...(stockLocations ?? [])],
+    [stockLocations, t],
+  );
+
   return (
-    <Controller
-      name={props.controllerName}
-      control={props.control}
-      render={({ field: { onChange, value, ref } }) => (
-        <ComboBox
-          translateWithId={comboBoxTranslateWithId(t)}
-          titleText={props.title}
-          id={props.name}
-          size={'md'}
-          items={stockLocations ?? []}
-          onChange={(data: { selectedItem }) => {
-            props.onLocationIdChange?.(data?.selectedItem?.id ?? '');
-            onChange(data?.selectedItem?.name || '');
-          }}
-          initialSelectedItem={`${stockLocations[0]?.name}`}
-          itemToString={(item) => (item ? item.name : '')}
-          shouldFilterItem={() => true}
-          placeholder={props.placeholder}
-          ref={ref}
-          value={value}
-          invalid={props.invalid}
-          invalidText={props.invalidText}
-        />
-      )}
+    <ComboBox
+      translateWithId={comboBoxTranslateWithId(t)}
+      titleText={props.title}
+      id={props.name}
+      size={'md'}
+      items={items}
+      selectedItem={selected}
+      onChange={({ selectedItem }: { selectedItem?: LocationOption | null }) => {
+        const location = selectedItem?.id ? selectedItem : null;
+        setSelected(location);
+        props.onLocationIdChange?.(location?.id ?? ALL_LOCATIONS_ID);
+      }}
+      itemToString={(item: LocationOption | null) => (item ? item.name : '')}
+      shouldFilterItem={({ item, inputValue }) =>
+        !inputValue || item.id === ALL_LOCATIONS_ID || item.name?.toLowerCase().includes(inputValue.toLowerCase())
+      }
+      placeholder={props.placeholder}
     />
   );
 };

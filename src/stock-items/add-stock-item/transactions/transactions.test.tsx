@@ -6,7 +6,8 @@ import {
   useStockItemInventory,
   useStockItemTransactions,
 } from '../../stock-items.resource';
-import { toTransactionPeriod, useStockItemsTransactions } from './transactions.resource';
+import { partyUuidForLocation, toTransactionPeriod, useStockItemsTransactions } from './transactions.resource';
+import { useParties } from '../../../stock-lookups/stock-lookups.resource';
 import Transactions from './transactions.component';
 
 // Every text goes through t: shown as « t:key », an English literal shows as itself (#638)
@@ -25,6 +26,10 @@ vi.mock('react-i18next', () => ({
 vi.mock('../../stock-items.resource', () => ({
   useStockItemTransactions: vi.fn(),
   useStockItemInventory: vi.fn(),
+}));
+vi.mock('../../../stock-lookups/stock-lookups.resource', () => ({
+  useParties: vi.fn(),
+  useStockTagLocations: () => ({ stockLocations: [] }),
 }));
 vi.mock('../../../core/components/table/table.component', () => ({
   default: ({ columns, data }) => (
@@ -62,7 +67,17 @@ const transaction = {
   isPatientTransaction: false,
 };
 
+const parties = [
+  { uuid: 'party-a', locationUuid: 'loc-a', name: 'Pharmacy' },
+  { uuid: 'party-b', locationUuid: 'loc-b', name: 'Store' },
+];
+
 const mockResources = (transactions = [transaction]) => {
+  vi.mocked(useParties).mockReturnValue({
+    items: { results: parties },
+    isLoading: false,
+    error: null,
+  } as unknown as ReturnType<typeof useParties>);
   vi.mocked(useStockItemTransactions).mockReturnValue({
     items: { results: transactions, totalCount: transactions.length },
     isLoading: false,
@@ -119,13 +134,53 @@ describe('Stock item transactions', () => {
     expect(inventoryFilter.dateMin).toBeNull();
 
     act(() => result.current.setCurrentPage(2));
-    act(() => result.current.setLocationUuid('loc-1'));
+    act(() => result.current.setLocationUuid('loc-a'));
     expect(lastFilter().startIndex).toBe(0);
-    expect(lastFilter().locationUuid).toBe('loc-1');
+    expect(lastFilter().partyUuid).toBe('party-a');
     expect(lastFilter().dateMin).not.toBeNull();
 
     act(() => result.current.setPeriod(null, null));
     expect(lastFilter().dateMin).toBeNull();
     expect(lastFilter().dateMax).toBeNull();
+  });
+
+  it('filters by the location party: the transactions endpoint ignores locationUuid', () => {
+    expect(partyUuidForLocation(parties as never, 'loc-b')).toBe('party-b');
+    // No party for the location: nothing matches, never the unfiltered list
+    expect(partyUuidForLocation(parties as never, 'loc-x')).toBe('loc-x');
+
+    mockResources();
+    const { result } = renderHook(() => useStockItemsTransactions({ stockItemUuid: 'item-uuid' }));
+    const lastFilter = () => vi.mocked(useStockItemTransactions).mock.calls.at(-1)[0] as StockItemInventoryFilter;
+
+    act(() => result.current.setLocationUuid('loc-b'));
+    expect(lastFilter().partyUuid).toBe('party-b');
+    expect(lastFilter().locationUuid).toBeUndefined();
+    // The balance endpoint resolves the location itself
+    const inventoryFilter = vi.mocked(useStockItemInventory).mock.calls.at(-1)[0] as StockItemInventoryFilter;
+    expect(inventoryFilter.locationUuid).toBe('loc-b');
+
+    // « All locations » removes the filter
+    act(() => result.current.setLocationUuid(''));
+    expect(lastFilter().partyUuid).toBeUndefined();
+    expect(lastFilter().locationUuid).toBeUndefined();
+  });
+
+  it('refetches with the new page size, from page 1, keeping location and period', () => {
+    mockResources();
+    const { result } = renderHook(() => useStockItemsTransactions({ stockItemUuid: 'item-uuid' }));
+    const lastFilter = () => vi.mocked(useStockItemTransactions).mock.calls.at(-1)[0] as StockItemInventoryFilter;
+
+    act(() => result.current.setLocationUuid('loc-a'));
+    act(() => result.current.setPeriod(new Date(2026, 10, 24), null));
+    act(() => result.current.setCurrentPage(3));
+    act(() => result.current.setPageSize(50));
+
+    expect(result.current.currentPage).toBe(1);
+    expect(result.current.currentPageSize).toBe(50);
+    expect(lastFilter().limit).toBe(50);
+    expect(lastFilter().startIndex).toBe(0);
+    expect(lastFilter().partyUuid).toBe('party-a');
+    expect(lastFilter().dateMin).not.toBeNull();
   });
 });
