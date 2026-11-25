@@ -32,6 +32,8 @@ type FilterProps = {
   getCellId: (row, key) => string;
 };
 
+const NO_ROWS: Array<never> = [];
+
 interface ListProps {
   columns: any;
   data: any;
@@ -39,17 +41,35 @@ interface ListProps {
   totalItems?: number;
   goToPage?: (page: number) => void;
   hasToolbar?: boolean;
+  /** Server-paged list: the page and page size belong to the caller, `data` is the current page as is */
+  page?: number;
+  pageSize?: number;
+  onPageSizeChange?: (pageSize: number) => void;
 }
 
-const DataList: React.FC<ListProps> = ({ columns, data, children, totalItems, goToPage, hasToolbar = true }) => {
+const DataList: React.FC<ListProps> = ({
+  columns,
+  data,
+  children,
+  totalItems,
+  goToPage,
+  hasToolbar = true,
+  page: controlledPage,
+  pageSize: controlledPageSize,
+  onPageSizeChange,
+}) => {
   const { t } = useTranslation();
   const layout = useLayoutType();
   const [allRows, setAllRows] = useState([]);
   const isTablet = useLayoutType() === 'tablet';
   const [list] = useState(data);
   const pageSizes = [10, 20, 30, 40, 50];
-  const [currentPageSize, setPageSize] = useState(10);
-  const { goTo, results: paginatedList, currentPage } = usePagination(list, currentPageSize);
+  const serverPaged = controlledPage !== undefined;
+  const [localPageSize, setPageSize] = useState(10);
+  const currentPageSize = controlledPageSize ?? localPageSize;
+  const { goTo, results: localPage, currentPage: localCurrentPage } = usePagination(list, currentPageSize);
+  const paginatedList = serverPaged ? data ?? NO_ROWS : localPage;
+  const currentPage = serverPaged ? controlledPage : localCurrentPage;
 
   useEffect(() => {
     const rows: Array<Record<string, string>> = [];
@@ -58,7 +78,7 @@ const DataList: React.FC<ListProps> = ({ columns, data, children, totalItems, go
       return rows.push({ ...item, id: index++ });
     });
     setAllRows(rows);
-  }, [paginatedList, allRows]);
+  }, [paginatedList]);
 
   const handleFilter = ({ rowIds, headers, cellsById, inputValue, getCellId }: FilterProps): Array<string> => {
     return rowIds.filter((rowId) =>
@@ -193,6 +213,11 @@ const DataList: React.FC<ListProps> = ({ columns, data, children, totalItems, go
                 className={styles.pagination}
                 onChange={({ pageSize, page }) => {
                   if (pageSize !== currentPageSize) {
+                    // A server-paged list refetches with the new limit, from its first page
+                    if (onPageSizeChange) {
+                      onPageSizeChange(pageSize);
+                      return;
+                    }
                     setPageSize(pageSize);
                   }
                   if (page !== currentPage) {

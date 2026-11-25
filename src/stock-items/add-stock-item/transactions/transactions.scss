@@ -1,0 +1,16 @@
+// The toolbar has a fixed height: at a narrow width the filters wrap onto further lines inside it
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.5rem;
+  width: 100%;
+  min-width: 0;
+}
+
+// The toolbar and its content keep a 3rem height otherwise: the wrapped lines would overlap the table header
+:global(.cds--table-toolbar):has(.filters),
+:global(.cds--table-toolbar):has(.filters) :global(.cds--toolbar-content) {
+  height: auto !important;
+  min-height: 3rem;
+}
