@@ -31,15 +31,52 @@ export const toTransactionPeriod = (from?: Date | null, to?: Date | null) => ({
 export const partyUuidForLocation = (parties: Array<Party> | undefined, locationUuid: string) =>
   parties?.find((party) => party.locationUuid === locationUuid)?.uuid ?? locationUuid;
 
-/** The most movements one print asks for: the server caps a page at its own absolute maximum anyway */
-export const PRINT_LIMIT = 1000;
+/**
+ * The server answers at most `webservices.rest.maxResultsAbsolute` rows (100 by default) and fails with
+ * HTTP 500 above it, so a print asks for pages of at most this size
+ */
+export const PRINT_PAGE_SIZE = 100;
 
-/** Every movement of the filtered list (not one page), for the bin card */
+/** The most movements one print collects; a longer list is cut and the print says so */
+export const PRINT_MAX_ROWS = 2000;
+
+/**
+ * Every movement of the filtered list (not one page), for the printed cards: pages of `PRINT_PAGE_SIZE`
+ * (the transactions endpoint takes `startIndex` as a page number) until the server's total, a short page
+ * or `PRINT_MAX_ROWS`. `truncated` is true when more rows exist than were collected.
+ */
 export async function fetchPrintTransactions(filter: StockItemInventoryFilter) {
-  const query = toQueryParams({ ...filter, startIndex: 0, limit: PRINT_LIMIT, totalCount: false });
-  const response = await openmrsFetch(`${restBaseUrl}/stockmanagement/stockitemtransaction${query}`);
-  return (response?.data?.results ?? []) as Array<StockItemTransactionDTO>;
+  const rows: Array<StockItemTransactionDTO> = [];
+  let total: number | null = null;
+  for (let page = 0; ; page++) {
+    // The total is asked once, with the first page
+    const query = toQueryParams({ ...filter, startIndex: page, limit: PRINT_PAGE_SIZE, totalCount: page === 0 });
+    const response = await openmrsFetch(`${restBaseUrl}/stockmanagement/stockitemtransaction${query}`);
+    const results = (response?.data?.results ?? []) as Array<StockItemTransactionDTO>;
+    if (page === 0 && typeof response?.data?.totalCount === 'number') {
+      total = response.data.totalCount;
+    }
+    rows.push(...results);
+    const exhausted = results.length < PRINT_PAGE_SIZE || (total !== null && rows.length >= total);
+    if (exhausted) {
+      return { rows, truncated: false };
+    }
+    if (rows.length >= PRINT_MAX_ROWS) {
+      return { rows: rows.slice(0, PRINT_MAX_ROWS), truncated: true };
+    }
+  }
 }
+
+/** A day typed in a date picker box as DD/MM/YYYY; null when empty or not a real date */
+export const parseTypedDate = (value?: string | null): Date | null => {
+  const match = /^\s*(\d{1,2})\/(\d{1,2})\/(\d{4})\s*$/.exec(value ?? '');
+  if (!match) {
+    return null;
+  }
+  const [day, month, year] = [Number(match[1]), Number(match[2]), Number(match[3])];
+  const date = new Date(year, month - 1, day);
+  return date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day ? date : null;
+};
 
 export function useStockItemsTransactions(filter?: StockItemInventoryFilter) {
   const { t } = useTranslation();

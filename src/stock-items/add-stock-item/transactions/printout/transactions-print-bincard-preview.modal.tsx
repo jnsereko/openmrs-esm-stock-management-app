@@ -3,6 +3,7 @@ import { ModalBody, ModalHeader, ModalFooter, Button } from '@carbon/react';
 import { useTranslation } from 'react-i18next';
 import { useReactToPrint } from 'react-to-print';
 import { getCoreTranslation } from '@openmrs/esm-framework';
+import { PRINT_MAX_ROWS } from '../transactions.resource';
 import TransactionsBincardPrintout from './transactions-bincard-printout.component';
 
 type TransactionsBincardPrintPreviewModalProps = {
@@ -10,6 +11,8 @@ type TransactionsBincardPrintPreviewModalProps = {
   title?: string;
   columns: any;
   data: any;
+  /** More rows exist than the print collects */
+  truncated?: boolean;
   binOrStockCard: number;
 };
 
@@ -18,6 +21,7 @@ const TransactionsBincardPrintPreviewModal: React.FC<TransactionsBincardPrintPre
   title,
   columns,
   data,
+  truncated,
   binOrStockCard,
 }) => {
   const { t } = useTranslation();
@@ -35,6 +39,13 @@ const TransactionsBincardPrintPreviewModal: React.FC<TransactionsBincardPrintPre
       />
       <ModalBody>
         <div ref={ref}>
+          {truncated && (
+            <p>
+              {t('printTruncated', 'Only the first {{count}} movements are listed: narrow the period or the location.', {
+                count: PRINT_MAX_ROWS,
+              })}
+            </p>
+          )}
           <TransactionsBincardPrintout title={title} columns={columns} data={data} />
         </div>
       </ModalBody>

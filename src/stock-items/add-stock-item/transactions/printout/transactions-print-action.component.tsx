@@ -1,10 +1,10 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { ComboButton, MenuItem } from '@carbon/react';
 import { Printer } from '@carbon/react/icons';
 import { useTranslation } from 'react-i18next';
 import { useStockItem, useStockItemInventory } from '../../../stock-items.resource';
 import { showModal, useConfig } from '@openmrs/esm-framework';
-import { type StockItemInventoryFilter, useStockItemTransactions } from '../../../stock-items.resource';
+import { type StockItemInventoryFilter } from '../../../stock-items.resource';
 import { ResourceRepresentation } from '../../../../core/api/api';
 import { type ConfigObject } from '../../../../config-schema';
 
@@ -14,81 +14,31 @@ type Props = {
   data: any;
   filter?: StockItemInventoryFilter;
   /** Every row of the filtered list for the bin card; the current page (`data`) when absent or when it fails */
-  getPrintRows?: () => Promise<Array<any>>;
+  getPrintRows?: () => Promise<{ rows: Array<any>; truncated?: boolean }>;
+  /** Every patient dispense of the item in the filtered location and period, for the stock card */
+  getStockCardRows?: () => Promise<{ rows: Array<any>; truncated?: boolean }>;
 };
 
-const TransactionsPrintAction: React.FC<Props> = ({ columns, data, itemUuid, filter, getPrintRows }) => {
+const TransactionsPrintAction: React.FC<Props> = ({ columns, data, itemUuid, filter, getPrintRows, getStockCardRows }) => {
   const { t } = useTranslation();
 
   const { enablePrintButton } = useConfig<ConfigObject>();
 
-  const [stockCardItemFilter, setStockCardItemFilter] = useState<StockItemInventoryFilter>({
-    startIndex: 0,
-    totalCount: true,
-    v: ResourceRepresentation.Full,
-    isPatientTransaction: 'true',
-  });
-
-  const [stockItemFilter, setStockItemFilter] = useState<StockItemInventoryFilter>({
+  const [stockItemFilter] = useState<StockItemInventoryFilter>({
     startIndex: 0,
     v: filter?.v || ResourceRepresentation.Default,
     limit: 10,
     q: filter?.q,
     totalCount: true,
+    stockItemUuid: itemUuid,
   });
 
   const { item: stockItem, isLoading: isStockItemLoading } = useStockItem(itemUuid);
-  const { items: stockCardData, isLoading: isStockCardLoading, error } = useStockItemTransactions(stockCardItemFilter);
   const { items: inventoryBalance } = useStockItemInventory(stockItemFilter);
 
-  const [balances, setBalances] = useState<Record<string, { quantity: number; itemName: string }>>({});
-  const [currentIndex, setCurrentIndex] = useState(0);
-
-  useEffect(() => {
-    if (stockCardData?.results?.length) {
-      setCurrentIndex(0);
-      setBalances({});
-    }
-  }, [stockCardData?.results]);
-
-  useEffect(() => {
-    const currentItem = stockCardData?.results?.[currentIndex];
-    if (currentItem?.stockItemUuid) {
-      setStockItemFilter((prev) => ({
-        ...prev,
-        stockItemUuid: currentItem.stockItemUuid,
-      }));
-    }
-  }, [currentIndex, stockCardData]);
-
-  useEffect(() => {
-    const currentItem = stockCardData?.results?.[currentIndex];
-    const stockItemUuid = currentItem?.stockItemUuid;
-
-    if (inventoryBalance?.total && stockItemUuid) {
-      setBalances((prev) => ({
-        ...prev,
-        [stockItemUuid]: {
-          quantity: Number(inventoryBalance.total),
-          itemName: currentItem.packagingUomName ?? '',
-        },
-      }));
-
-      setCurrentIndex((prev) => prev + 1);
-    }
-  }, [inventoryBalance, currentIndex, stockCardData]);
-
-  const stockCardWithBalance = useMemo(() => {
-    return (
-      stockCardData?.results?.map((transaction) => {
-        const balance = balances[transaction.stockItemUuid];
-        return {
-          ...transaction,
-          balance: `${balance?.quantity ?? ''} ${balance?.itemName ?? ''}`,
-        };
-      }) ?? []
-    );
-  }, [stockCardData?.results, balances]);
+  // The stock card is of one item: its stock now, in its own unit
+  const stockCardBalance = (row: { packagingUomName?: string }) =>
+    `${inventoryBalance?.total ?? ''} ${row?.packagingUomName ?? ''}`.trim();
 
   const stockCardHeaders = useMemo(
     () => [
@@ -132,32 +82,49 @@ const TransactionsPrintAction: React.FC<Props> = ({ columns, data, itemUuid, fil
     [],
   );
 
-  const [isPreparingBincard, setIsPreparingBincard] = useState(false);
+  const [isPreparing, setIsPreparing] = useState(false);
 
   const handleBincardClick = async () => {
-    setIsPreparingBincard(true);
+    setIsPreparing(true);
     let rows = data;
+    let truncated = false;
     try {
-      rows = (await getPrintRows?.()) ?? data;
+      const printed = await getPrintRows?.();
+      rows = printed?.rows ?? data;
+      truncated = !!printed?.truncated;
     } catch {
       rows = data;
     } finally {
-      setIsPreparingBincard(false);
+      setIsPreparing(false);
     }
     const dispose = showModal('transactions-print-bincard-preview-modal', {
       onClose: () => dispose(),
       title: stockItem?.drugName || stockItem?.conceptName || '',
       columns,
       data: rows,
+      truncated,
     });
   };
 
-  const handleStockcardClick = () => {
+  const handleStockcardClick = async () => {
+    setIsPreparing(true);
+    let rows = [];
+    let truncated = false;
+    try {
+      const printed = await getStockCardRows?.();
+      rows = printed?.rows ?? [];
+      truncated = !!printed?.truncated;
+    } catch {
+      rows = [];
+    } finally {
+      setIsPreparing(false);
+    }
     const dispose = showModal('transactions-print-stockcard-preview-modal', {
       onClose: () => dispose(),
-      title: stockItem.drugName || stockItem.conceptName || '',
+      title: stockItem?.drugName || stockItem?.conceptName || '',
       columns: stockCardHeaders,
-      data: stockCardWithBalance,
+      data: rows.map((transaction) => ({ ...transaction, balance: stockCardBalance(transaction) })),
+      truncated,
     });
   };
 
@@ -169,13 +136,13 @@ const TransactionsPrintAction: React.FC<Props> = ({ columns, data, itemUuid, fil
             label={t('printStockCard', 'Print Stock Card')}
             renderIcon={(props) => <Printer size={24} {...props} />}
             onClick={handleStockcardClick}
-            disabled={isStockItemLoading || isStockCardLoading}
+            disabled={isStockItemLoading || isPreparing}
           />
           <MenuItem
             label={t('printBinCard', 'Print Bin Card')}
             renderIcon={(props) => <Printer size={24} {...props} />}
             onClick={handleBincardClick}
-            disabled={isStockItemLoading || isPreparingBincard}
+            disabled={isStockItemLoading || isPreparing}
           />
         </ComboButton>
       )}

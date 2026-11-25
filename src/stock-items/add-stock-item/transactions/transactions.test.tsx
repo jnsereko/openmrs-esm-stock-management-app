@@ -9,11 +9,14 @@ import {
 import {
   fetchPrintTransactions,
   partyUuidForLocation,
-  PRINT_LIMIT,
+  PRINT_MAX_ROWS,
+  PRINT_PAGE_SIZE,
+  parseTypedDate,
   toTransactionPeriod,
   useStockItemsTransactions,
 } from './transactions.resource';
 import { openmrsFetch } from '@openmrs/esm-framework';
+import { toQueryParams } from '../../../core/api/api';
 import { useParties } from '../../../stock-lookups/stock-lookups.resource';
 import Transactions from './transactions.component';
 
@@ -191,23 +194,71 @@ describe('Stock item transactions', () => {
     expect(lastFilter().dateMin).not.toBeNull();
   });
 
-  it('fetches every movement of the filter for printing: first page, large limit, same period and location', async () => {
-    vi.mocked(openmrsFetch).mockResolvedValue({ data: { results: [transaction, transaction] } } as never);
+  it('prints with the stock item, location and both ends of the period, in pages of at most 100', async () => {
+    const pageOf = (n: number) => Array.from({ length: n }, () => transaction);
+    vi.mocked(openmrsFetch)
+      .mockResolvedValueOnce({ data: { results: pageOf(100), totalCount: 230 } } as never)
+      .mockResolvedValueOnce({ data: { results: pageOf(100) } } as never)
+      .mockResolvedValueOnce({ data: { results: pageOf(30) } } as never);
     mockResources();
     const { result } = renderHook(() => useStockItemsTransactions({ stockItemUuid: 'item-uuid' }));
     act(() => result.current.setLocationUuid('loc-b'));
-    act(() => result.current.setPeriod(new Date(2026, 10, 24), null));
+    act(() => result.current.setPeriod(new Date(2026, 10, 24), new Date(2026, 10, 25)));
     act(() => result.current.setCurrentPage(3));
 
-    const rows = await fetchPrintTransactions(result.current.transactionFilter);
-    expect(rows).toHaveLength(2);
-    const url = vi.mocked(openmrsFetch).mock.calls.at(-1)[0] as string;
-    expect(url).toContain(`limit=${PRINT_LIMIT}`);
-    // startIndex 0 is left out of the query: the server starts at the first page
-    expect(url).not.toMatch(/startIndex=/);
-    expect(url).toContain('partyUuid=party-b');
-    expect(url).toContain('stockItemUuid=item-uuid');
-    expect(url).toContain('dateMin=');
-    expect(url).not.toContain('dateMax');
+    const { rows, truncated } = await fetchPrintTransactions(result.current.transactionFilter);
+    expect(rows).toHaveLength(230);
+    expect(truncated).toBe(false);
+    const urls = vi.mocked(openmrsFetch).mock.calls.slice(-3).map((call) => call[0] as string);
+    expect(urls).toHaveLength(3);
+    urls.forEach((url) => {
+      expect(url).toContain(`limit=${PRINT_PAGE_SIZE}`);
+      expect(url).toContain('partyUuid=party-b');
+      expect(url).toContain('stockItemUuid=item-uuid');
+      expect(url).toContain('dateMin=');
+      expect(url).toContain('dateMax=');
+    });
+    // The first page has no startIndex (0 is left out) and asks the total; the next pages are 1 and 2
+    expect(urls[0]).not.toMatch(/startIndex=/);
+    expect(urls[0]).toContain('totalCount=true');
+    expect(urls[1]).toContain('startIndex=1');
+    expect(urls[2]).toContain('startIndex=2');
+    expect(urls[1]).toContain('totalCount=false');
+  });
+
+  it('stops at a short page, and cuts a very long list at the cap', async () => {
+    vi.mocked(openmrsFetch).mockReset();
+    vi.mocked(openmrsFetch).mockResolvedValueOnce({ data: { results: [transaction, transaction] } } as never);
+    expect((await fetchPrintTransactions({})).rows).toHaveLength(2);
+    expect(openmrsFetch).toHaveBeenCalledTimes(1);
+
+    vi.mocked(openmrsFetch).mockReset();
+    vi.mocked(openmrsFetch).mockResolvedValue({
+      data: { results: Array.from({ length: PRINT_PAGE_SIZE }, () => transaction), totalCount: 99999 },
+    } as never);
+    const capped = await fetchPrintTransactions({});
+    expect(capped.rows).toHaveLength(PRINT_MAX_ROWS);
+    expect(capped.truncated).toBe(true);
+    expect(openmrsFetch).toHaveBeenCalledTimes(PRINT_MAX_ROWS / PRINT_PAGE_SIZE);
+    vi.mocked(openmrsFetch).mock.calls.forEach((call) => expect(call[0]).not.toMatch(/limit=(?!100(&|$))/));
+  });
+
+  it('sends dateMax with dateMin when both days are set, and drops each when cleared', () => {
+    mockResources();
+    const { result } = renderHook(() => useStockItemsTransactions({ stockItemUuid: 'item-uuid' }));
+    const lastFilter = () => vi.mocked(useStockItemTransactions).mock.calls.at(-1)[0] as StockItemInventoryFilter;
+    act(() => result.current.setPeriod(new Date(2026, 10, 24), new Date(2026, 10, 24)));
+    expect(toQueryParams(lastFilter())).toMatch(/dateMin=.*dateMax=/);
+    act(() => result.current.setPeriod(null, new Date(2026, 10, 24)));
+    expect(lastFilter().dateMin).toBeNull();
+    expect(lastFilter().dateMax).not.toBeNull();
+  });
+
+  it('reads a typed day as DD/MM/YYYY', () => {
+    expect(parseTypedDate('24/11/2026')).toEqual(new Date(2026, 10, 24));
+    expect(parseTypedDate(' 4/1/2026 ')).toEqual(new Date(2026, 0, 4));
+    expect(parseTypedDate('')).toBeNull();
+    expect(parseTypedDate('31/02/2026')).toBeNull();
+    expect(parseTypedDate('24/11')).toBeNull();
   });
 });
