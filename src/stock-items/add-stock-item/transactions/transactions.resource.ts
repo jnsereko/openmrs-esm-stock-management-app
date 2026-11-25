@@ -1,8 +1,10 @@
-import { ResourceRepresentation } from '../../../core/api/api';
+import { openmrsFetch, restBaseUrl } from '@openmrs/esm-framework';
+import { ResourceRepresentation, toQueryParams } from '../../../core/api/api';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import dayjs from 'dayjs';
 import { useParties } from '../../../stock-lookups/stock-lookups.resource';
+import { type StockItemTransactionDTO } from '../../../core/api/types/stockItem/StockItemTransaction';
 import { type Party } from '../../../core/api/types/Party';
 import {
   type StockItemInventoryFilter,
@@ -28,6 +30,16 @@ export const toTransactionPeriod = (from?: Date | null, to?: Date | null) => ({
  */
 export const partyUuidForLocation = (parties: Array<Party> | undefined, locationUuid: string) =>
   parties?.find((party) => party.locationUuid === locationUuid)?.uuid ?? locationUuid;
+
+/** The most movements one print asks for: the server caps a page at its own absolute maximum anyway */
+export const PRINT_LIMIT = 1000;
+
+/** Every movement of the filtered list (not one page), for the bin card */
+export async function fetchPrintTransactions(filter: StockItemInventoryFilter) {
+  const query = toQueryParams({ ...filter, startIndex: 0, limit: PRINT_LIMIT, totalCount: false });
+  const response = await openmrsFetch(`${restBaseUrl}/stockmanagement/stockitemtransaction${query}`);
+  return (response?.data?.results ?? []) as Array<StockItemTransactionDTO>;
+}
 
 export function useStockItemsTransactions(filter?: StockItemInventoryFilter) {
   const { t } = useTranslation();
@@ -206,5 +218,6 @@ export function useStockItemsTransactions(filter?: StockItemInventoryFilter) {
     setStockBatchUuid,
     binCardHeaders,
     inventory: inventory,
+    transactionFilter,
   };
 }

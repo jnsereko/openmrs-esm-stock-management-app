@@ -6,7 +6,14 @@ import {
   useStockItemInventory,
   useStockItemTransactions,
 } from '../../stock-items.resource';
-import { partyUuidForLocation, toTransactionPeriod, useStockItemsTransactions } from './transactions.resource';
+import {
+  fetchPrintTransactions,
+  partyUuidForLocation,
+  PRINT_LIMIT,
+  toTransactionPeriod,
+  useStockItemsTransactions,
+} from './transactions.resource';
+import { openmrsFetch } from '@openmrs/esm-framework';
 import { useParties } from '../../../stock-lookups/stock-lookups.resource';
 import Transactions from './transactions.component';
 
@@ -182,5 +189,25 @@ describe('Stock item transactions', () => {
     expect(lastFilter().startIndex).toBe(0);
     expect(lastFilter().partyUuid).toBe('party-a');
     expect(lastFilter().dateMin).not.toBeNull();
+  });
+
+  it('fetches every movement of the filter for printing: first page, large limit, same period and location', async () => {
+    vi.mocked(openmrsFetch).mockResolvedValue({ data: { results: [transaction, transaction] } } as never);
+    mockResources();
+    const { result } = renderHook(() => useStockItemsTransactions({ stockItemUuid: 'item-uuid' }));
+    act(() => result.current.setLocationUuid('loc-b'));
+    act(() => result.current.setPeriod(new Date(2026, 10, 24), null));
+    act(() => result.current.setCurrentPage(3));
+
+    const rows = await fetchPrintTransactions(result.current.transactionFilter);
+    expect(rows).toHaveLength(2);
+    const url = vi.mocked(openmrsFetch).mock.calls.at(-1)[0] as string;
+    expect(url).toContain(`limit=${PRINT_LIMIT}`);
+    // startIndex 0 is left out of the query: the server starts at the first page
+    expect(url).not.toMatch(/startIndex=/);
+    expect(url).toContain('partyUuid=party-b');
+    expect(url).toContain('stockItemUuid=item-uuid');
+    expect(url).toContain('dateMin=');
+    expect(url).not.toContain('dateMax');
   });
 });

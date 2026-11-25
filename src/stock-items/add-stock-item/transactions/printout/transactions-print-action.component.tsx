@@ -13,9 +13,11 @@ type Props = {
   columns: any;
   data: any;
   filter?: StockItemInventoryFilter;
+  /** Every row of the filtered list for the bin card; the current page (`data`) when absent or when it fails */
+  getPrintRows?: () => Promise<Array<any>>;
 };
 
-const TransactionsPrintAction: React.FC<Props> = ({ columns, data, itemUuid, filter }) => {
+const TransactionsPrintAction: React.FC<Props> = ({ columns, data, itemUuid, filter, getPrintRows }) => {
   const { t } = useTranslation();
 
   const { enablePrintButton } = useConfig<ConfigObject>();
@@ -130,12 +132,23 @@ const TransactionsPrintAction: React.FC<Props> = ({ columns, data, itemUuid, fil
     [],
   );
 
-  const handleBincardClick = () => {
+  const [isPreparingBincard, setIsPreparingBincard] = useState(false);
+
+  const handleBincardClick = async () => {
+    setIsPreparingBincard(true);
+    let rows = data;
+    try {
+      rows = (await getPrintRows?.()) ?? data;
+    } catch {
+      rows = data;
+    } finally {
+      setIsPreparingBincard(false);
+    }
     const dispose = showModal('transactions-print-bincard-preview-modal', {
       onClose: () => dispose(),
-      title: stockItem.drugName || stockItem.conceptName || '',
+      title: stockItem?.drugName || stockItem?.conceptName || '',
       columns,
-      data,
+      data: rows,
     });
   };
 
@@ -162,7 +175,7 @@ const TransactionsPrintAction: React.FC<Props> = ({ columns, data, itemUuid, fil
             label={t('printBinCard', 'Print Bin Card')}
             renderIcon={(props) => <Printer size={24} {...props} />}
             onClick={handleBincardClick}
-            disabled={isStockItemLoading}
+            disabled={isStockItemLoading || isPreparingBincard}
           />
         </ComboButton>
       )}
