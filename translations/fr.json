@@ -410,5 +410,11 @@
   "viewAll": "View All",
   "whoIsThePreferredVendor": "Quel est le fournisseur préféré?",
   "yes": "Oui",
-  "printTruncated": "Seuls les {{count}} premiers mouvements sont listés : réduisez la période ou l'emplacement."
+  "printTruncated": "Seuls les {{count}} premiers mouvements sont listés : réduisez la période ou l'emplacement.",
+  "backToReports": "Retour aux rapports",
+  "itemMovementChooseItem": "Choisissez un article pour voir ses mouvements.",
+  "itemMovementReport": "Mouvement d'un article",
+  "itemMovementReportDescription": "Les mouvements d'un article sur une période, à l'écran, avec la fiche de stock à imprimer si besoin.",
+  "itemMovementReportHelp": "Recherchez un article, puis choisissez la période et l'emplacement : ses mouvements s'affichent ici et peuvent être imprimés.",
+  "itemMovementReportOpen": "Ouvrir"
 }

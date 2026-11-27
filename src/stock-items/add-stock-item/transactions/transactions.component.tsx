@@ -31,17 +31,23 @@ import StockOperationReference from '../../../stock-operations/stock-operation-r
 interface TransactionsProps {
   onSubmit?: () => void;
   stockItemUuid: string;
+  /** The period shown first (the Rapports view opens on the current month); none on the item's tab */
+  defaultPeriod?: { from: Date | null; to: Date | null };
+  /** The location box's first value: '' shows « All locations »; null (the item's tab) shows the placeholder */
+  defaultLocationId?: string | null;
 }
 
-const Transactions: React.FC<TransactionsProps> = ({ stockItemUuid }) => {
+const Transactions: React.FC<TransactionsProps> = ({ stockItemUuid, defaultPeriod, defaultLocationId = null }) => {
   const { t, i18n } = useTranslation();
-  const [fromDate, setFromDate] = useState<Date | null>(null);
-  const [toDate, setToDate] = useState<Date | null>(null);
+  const [fromDate, setFromDate] = useState<Date | null>(defaultPeriod?.from ?? null);
+  const [toDate, setToDate] = useState<Date | null>(defaultPeriod?.to ?? null);
 
   // Kept here: the list below remounts the filters while it reloads, which used to blank the location box
-  const [locationId, setLocationId] = useState<string | null>(null);
+  const [locationId, setLocationId] = useState<string | null>(defaultLocationId);
 
-  const [stockItemFilter, setStockItemFilter] = useState<StockItemInventoryFilter>();
+  const [stockItemFilter, setStockItemFilter] = useState<StockItemInventoryFilter>(() =>
+    defaultPeriod ? { stockItemUuid, ...toTransactionPeriod(defaultPeriod.from, defaultPeriod.to) } : undefined,
+  );
   const {
     isLoading,
     items,
@@ -163,7 +169,8 @@ const Transactions: React.FC<TransactionsProps> = ({ stockItemUuid }) => {
 
   // The stock card lists the patient dispenses of this item, in the same location and period
   const getStockCardRows = useCallback(
-    () => fetchPrintTransactions({ ...transactionFilter, isPatientTransaction: 'true', v: ResourceRepresentation.Full }),
+    () =>
+      fetchPrintTransactions({ ...transactionFilter, isPatientTransaction: 'true', v: ResourceRepresentation.Full }),
     [transactionFilter],
   );
 

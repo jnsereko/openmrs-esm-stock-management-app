@@ -80,12 +80,16 @@ export const parseTypedDate = (value?: string | null): Date | null => {
 
 export function useStockItemsTransactions(filter?: StockItemInventoryFilter) {
   const { t } = useTranslation();
+  // The first request already carries the item and period it is opened with (the Rapports view opens on a month)
   const [stockItemFilter, setStockItemFilter] = useState<StockItemInventoryFilter>({
     startIndex: 0,
     v: filter?.v || ResourceRepresentation.Default,
     limit: 10,
     q: filter?.q,
     totalCount: true,
+    stockItemUuid: filter?.stockItemUuid,
+    dateMin: filter?.dateMin ?? null,
+    dateMax: filter?.dateMax ?? null,
   });
 
   const pageSizes = [10, 20, 30, 40, 50];
@@ -99,8 +103,8 @@ export function useStockItemsTransactions(filter?: StockItemInventoryFilter) {
   const [partyUuid, setPartyUuid] = useState<string | null>(filter?.partyUuid);
   const [locationUuid, setLocationUuid] = useState<string | null>(filter?.locationUuid);
   const [stockBatchUuid, setStockBatchUuid] = useState<string | null>(filter?.stockBatchUuid);
-  const [dateMin, setDateMin] = useState<string | null>(null);
-  const [dateMax, setDateMax] = useState<string | null>(null);
+  const [dateMin, setDateMin] = useState<string | null>(filter?.dateMin ?? null);
+  const [dateMax, setDateMax] = useState<string | null>(filter?.dateMax ?? null);
 
   // A new filter shows its first page
   const setLocationFilter = useCallback((uuid: string | null) => {

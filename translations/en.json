@@ -29,6 +29,7 @@
   "atLeastOneStockItem": "You must add at least one stock item",
   "availableQuantity": "Available: {{quantity}} {{unit}}",
   "back": "Back",
+  "backToReports": "Back to reports",
   "balance": "Balance",
   "batch": "Batch No",
   "batchInformation": "Batch Information",
@@ -201,6 +202,11 @@
   "item": "Item",
   "itemAlreadyExists": "Item already exists",
   "itemDetails": "Item Details",
+  "itemMovementChooseItem": "Choose a stock item to see its movements.",
+  "itemMovementReport": "Item movement",
+  "itemMovementReportDescription": "The movements of one stock item over a period, on screen, with the stock card to print when needed.",
+  "itemMovementReportHelp": "Search for a stock item, then choose the period and the location: its movements are shown here and can be printed.",
+  "itemMovementReportOpen": "Open",
   "itemName": "Item name",
   "items": "Items",
   "itemSelected_one": "{{count}} item selected",
@@ -326,6 +332,8 @@
   "print": "Print",
   "printBinCard": "Print stock card (bin card)",
   "printStockCard": "Print patient dispensing card",
+  "printTruncated_one": "Only the first {{count}} movements are listed: narrow the period or the location.",
+  "printTruncated_other": "Only the first {{count}} movements are listed: narrow the period or the location.",
   "purchasePrice": "Purchase Price",
   "purchasePricePackagingUnit": "Purchase price packaging unit",
   "purchasePriceUoMRequired": "Purchase price packaging unit is required when purchase price is set",
@@ -495,6 +503,5 @@
   "viewAll": "View All",
   "viewOperationTitle": "View {{operationType}}",
   "whoIsThePreferredVendor": "Who is the preferred vendor?",
-  "yes": "Yes",
-  "printTruncated": "Only the first {{count}} movements are listed: narrow the period or the location."
+  "yes": "Yes"
 }
