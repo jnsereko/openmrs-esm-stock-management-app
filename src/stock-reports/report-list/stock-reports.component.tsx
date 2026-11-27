@@ -56,6 +56,8 @@ import StockReportStatus from './stock-report-status.component';
 import StockReportParameters from './stock-report-parameters.component';
 import { isPendingReportStale } from './stock-report-status.utils';
 import { downloadReport } from './download-report';
+import ItemMovementReport from '../item-movement/item-movement-report.component';
+import ItemMovementReportLink from '../item-movement/item-movement-report-link.component';
 import styles from './stock-reports.scss';
 
 const StockReports: React.FC = () => {
@@ -71,6 +73,8 @@ const StockReports: React.FC = () => {
   const { reports, isLoading, currentPage, pageSizes, totalItems, goTo, currentPageSize, setPageSize } =
     useGetReports(canViewReports);
   const [now, setNow] = useState(() => Date.now());
+  // The on-screen movement of one item opens in place of the list, which comes back unchanged
+  const [showItemMovement, setShowItemMovement] = useState(false);
 
   useEffect(() => {
     if (!canViewReports) {
@@ -235,12 +239,17 @@ const StockReports: React.FC = () => {
     });
   }, [reports, onDownloadReportClick, t, now]);
 
+  if (showItemMovement) {
+    return <ItemMovementReport onClose={() => setShowItemMovement(false)} />;
+  }
+
   if (isLoading) {
     return <DataTableSkeleton role="progressbar" />;
   }
 
   return (
     <div className={styles.container}>
+      <ItemMovementReportLink onOpen={() => setShowItemMovement(true)} />
       <h2 className={styles.tableHeader}>{t('stockReportsTableHeader', 'List of reports requested by users.')}</h2>
       <DataTable rows={tableRows} headers={tableHeaders} isSortable useZebraStyles>
         {({ rows, headers, getHeaderProps, getTableProps, getRowProps, onInputChange }) => (
